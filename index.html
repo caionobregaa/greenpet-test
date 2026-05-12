@@ -1,0 +1,2995 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GreenPET – Sistema de Gestão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --green-50:#e8f5e9;--green-100:#c8e6c9;--green-200:#a5d6a7;--green-400:#66bb6a;--green-600:#388e3c;--green-700:#2e7d32;--green-800:#1b5e20;
+    --teal-50:#e0f2f1;--teal-200:#80cbc4;--teal-600:#00897b;--teal-800:#004d40;
+    --amber-50:#fff8e1;--amber-400:#ffca28;--amber-600:#f9a825;--amber-800:#e65100;
+    --red-50:#ffebee;--red-400:#ef5350;--red-600:#c62828;
+    --gray-50:#fafafa;--gray-100:#f5f5f5;--gray-200:#eeeeee;--gray-300:#e0e0e0;--gray-400:#bdbdbd;--gray-600:#757575;--gray-700:#616161;--gray-800:#424242;--gray-900:#212121;
+    --bg:#f0f7f0;--surface:#ffffff;--surface2:#f7fbf7;
+    --text:#1a2e1a;--text2:#4a6a4a;--text3:#7a9a7a;
+    --accent:#2e7d32;--accent-light:#43a047;--accent-glow:#e8f5e9;
+    --border:#d0e8d0;--border-strong:#a0c8a0;
+    --radius:12px;--radius-sm:8px;--radius-lg:16px;--radius-xl:24px;
+    --shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 12px rgba(46,125,50,0.06);
+    --shadow-md:0 4px 16px rgba(0,0,0,0.1),0 8px 24px rgba(46,125,50,0.08);
+    --font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
+  }
+  html,body{height:100%;overflow:hidden}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;height:100vh}
+
+  /* SIDEBAR */
+  #sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:width 0.25s;overflow:hidden}
+  #sidebar.collapsed{width:64px;min-width:64px}
+  .logo{padding:20px 16px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+  .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--green-600),var(--teal-600));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .logo-text{font-size:17px;font-weight:700;color:var(--accent);white-space:nowrap;overflow:hidden}
+  .logo-sub{font-size:10px;color:var(--text3);font-weight:400;letter-spacing:0.05em;white-space:nowrap}
+  .nav{flex:1;padding:12px 8px;overflow-y:auto}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.15s;white-space:nowrap;overflow:hidden;margin-bottom:2px;color:var(--text2);font-size:13.5px;font-weight:500}
+  .nav-item:hover{background:var(--accent-glow);color:var(--accent)}
+  .nav-item.active{background:var(--accent);color:#fff}
+  .nav-item .ni{font-size:17px;flex-shrink:0;width:20px;text-align:center}
+  .nav-label{white-space:nowrap;overflow:hidden}
+  .sidebar-toggle{padding:12px 8px;border-top:1px solid var(--border)}
+  .toggle-btn{width:100%;padding:8px 10px;border:none;background:none;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--text3);font-size:13px;border-radius:var(--radius-sm);transition:background 0.15s;font-family:var(--font)}
+  .toggle-btn:hover{background:var(--gray-100)}
+
+  /* MAIN */
+  #main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  #topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px}
+  .topbar-title{font-size:15px;font-weight:600;color:var(--text)}
+  .topbar-subtitle{font-size:12px;color:var(--text3)}
+  .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .badge-green{background:var(--green-50);color:var(--green-800);padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:600;border:1px solid var(--green-200)}
+  #content{flex:1;overflow-y:auto;padding:24px}
+
+  /* CARDS */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+  .card-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .card-title .ct-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;background:var(--accent-glow);color:var(--accent)}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+  .stat-label{font-size:11.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+  .stat-val{font-size:26px;font-weight:700;color:var(--accent);line-height:1}
+  .stat-sub{font-size:12px;color:var(--text3);margin-top:4px}
+
+  /* TABLE */
+  .table-wrap{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--border)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{background:var(--surface2);padding:10px 14px;text-align:left;font-weight:600;color:var(--text2);font-size:12px;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);white-space:nowrap}
+  td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--accent-glow)}
+  .pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600}
+  .pill-green{background:var(--green-50);color:var(--green-800);border:1px solid var(--green-200)}
+  .pill-amber{background:var(--amber-50);color:var(--amber-800);border:1px solid var(--amber-400)}
+  .pill-red{background:var(--red-50);color:var(--red-600);border:1px solid var(--red-400)}
+  .pill-teal{background:var(--teal-50);color:var(--teal-800);border:1px solid var(--teal-200)}
+  .pill-gray{background:var(--gray-100);color:var(--gray-700);border:1px solid var(--gray-300)}
+
+  /* FORMS */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form-full{grid-column:1/-1}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field label{font-size:12.5px;font-weight:600;color:var(--text2)}
+  .field input,.field select,.field textarea{padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:13.5px;color:var(--text);background:var(--surface);transition:border-color 0.15s,box-shadow 0.15s;outline:none}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent-light);box-shadow:0 0 0 3px rgba(67,160,71,0.12)}
+  .field textarea{resize:vertical;min-height:70px}
+  .btn{padding:9px 18px;border-radius:var(--radius-sm);border:none;font-family:var(--font);font-size:13.5px;font-weight:600;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:7px}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:var(--green-800);transform:translateY(-1px)}
+  .btn-secondary{background:var(--surface);color:var(--text2);border:1.5px solid var(--border)}
+  .btn-secondary:hover{background:var(--accent-glow);color:var(--accent);border-color:var(--accent-light)}
+  .btn-danger{background:var(--red-50);color:var(--red-600);border:1.5px solid var(--red-400)}
+  .btn-sm{padding:5px 12px;font-size:12px;border-radius:6px}
+  .actions{display:flex;gap:8px;align-items:center}
+
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+  .modal{background:var(--surface);border-radius:var(--radius-lg);padding:28px;width:90%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-md);border:1px solid var(--border)}
+  .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .modal-title{font-size:16px;font-weight:700;color:var(--text)}
+  .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);padding:2px 6px;border-radius:6px;transition:background 0.15s}
+  .modal-close:hover{background:var(--gray-100)}
+  .modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:16px;border-top:1px solid var(--border)}
+
+  /* SEARCH BAR */
+  .search-bar{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .search-input{flex:1;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius);font-family:var(--font);font-size:13.5px;color:var(--text);background:var(--surface);outline:none;transition:border-color 0.15s}
+  .search-input:focus{border-color:var(--accent-light);box-shadow:0 0 0 3px rgba(67,160,71,0.1)}
+
+  /* SEMÁFORO */
+  .sem-verde{color:#2e7d32;font-size:18px}
+  .sem-amarelo{color:#f9a825;font-size:18px}
+  .sem-laranja{color:#e65100;font-size:18px}
+  .sem-vermelho{color:#c62828;font-size:18px}
+
+  /* DASHBOARD CHART */
+  .chart-bar-wrap{display:flex;flex-direction:column;gap:8px}
+  .chart-bar-row{display:flex;align-items:center;gap:10px;font-size:12px}
+  .chart-bar-label{width:100px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+  .chart-bar-track{flex:1;background:var(--gray-200);border-radius:4px;height:18px;overflow:hidden;position:relative}
+  .chart-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--green-600),var(--teal-600));transition:width 0.6s}
+  .chart-bar-val{min-width:60px;color:var(--text);font-weight:600;font-family:var(--mono);font-size:12px}
+
+  /* KPI gauge */
+  .kpi-ring{position:relative;width:90px;height:90px;flex-shrink:0}
+  .kpi-ring svg{transform:rotate(-90deg)}
+  .kpi-ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--accent)}
+  .kpi-ring-sub{font-size:9px;font-weight:400;color:var(--text3)}
+
+  /* DOSAGE CALC */
+  .calc-result{background:linear-gradient(135deg,var(--green-50),var(--teal-50));border:1px solid var(--green-200);border-radius:var(--radius);padding:18px;margin-top:16px}
+  .calc-result-title{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+  .calc-result-val{font-size:32px;font-weight:700;color:var(--accent);font-family:var(--mono)}
+  .calc-result-unit{font-size:14px;color:var(--text2)}
+
+  /* PAGE HEADER */
+  .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px}
+  .page-title{font-size:20px;font-weight:700;color:var(--text)}
+  .page-sub{font-size:13px;color:var(--text3);margin-top:3px}
+
+  /* SECTION DIVIDER */
+  .section-gap{height:18px}
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
+
+  /* RESPONSIVE */
+  @media(max-width:700px){
+    #sidebar{width:0;min-width:0;position:fixed;z-index:100;height:100%}
+    #sidebar.mobile-open{width:220px;min-width:220px}
+    .grid-4{grid-template-columns:1fr 1fr}
+    .grid-3{grid-template-columns:1fr 1fr}
+    .form-grid{grid-template-columns:1fr}
+    #content{padding:16px}
+  }
+
+  .empty-state{text-align:center;padding:48px 24px;color:var(--text3)}
+  .empty-icon{font-size:40px;margin-bottom:12px}
+  .empty-title{font-size:15px;font-weight:600;color:var(--text2);margin-bottom:6px}
+  .empty-sub{font-size:13px}
+
+  .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;background:var(--green-50);color:var(--green-800);border:1px solid var(--green-200);margin:1px}
+
+  .divider{height:1px;background:var(--border);margin:20px 0}
+  .info-row{display:flex;align-items:center;gap:8px;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)}
+  .info-row:last-child{border-bottom:none}
+  .info-label{font-weight:600;color:var(--text2);min-width:130px}
+  .info-val{color:var(--text)}
+
+  /* TOAST */
+  #toast{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
+  .toast-item{background:var(--accent);color:#fff;padding:12px 18px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:500;box-shadow:var(--shadow-md);animation:slideIn 0.3s ease;display:flex;align-items:center;gap:8px}
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+  @keyframes fadeOut{from{opacity:1}to{opacity:0}}
+  .toast-out{animation:fadeOut 0.3s ease forwards}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🌿</div>
+    <div>
+      <div class="logo-text">GreenPET</div>
+      <div class="logo-sub">Gestão Pet Shop</div>
+    </div>
+  </div>
+  <div class="nav">
+    <div class="nav-item" onclick="goTo('nova-venda')" style="background:var(--accent);color:#fff;font-weight:700">
+      <span class="ni">🛒</span><span class="nav-label">Nova Venda</span>
+    </div>
+    <div style="height:6px"></div>
+    <div class="nav-item active" onclick="goTo('dashboard')">
+      <span class="ni">📊</span><span class="nav-label">Dashboard</span>
+    </div>
+    <div class="nav-item" onclick="goTo('clientes')">
+      <span class="ni">👥</span><span class="nav-label">Clientes</span>
+    </div>
+    <div class="nav-item" onclick="goTo('animais')">
+      <span class="ni">🐾</span><span class="nav-label">Animais</span>
+    </div>
+    <div class="nav-item" onclick="goTo('produtos')">
+      <span class="ni">📦</span><span class="nav-label">Produtos</span>
+    </div>
+    <div class="nav-item" onclick="goTo('vendas')">
+      <span class="ni">📋</span><span class="nav-label">Histórico de Vendas</span>
+    </div>
+    <div class="nav-item" onclick="goTo('recompra')">
+      <span class="ni">🔄</span><span class="nav-label">Controle Recompra</span>
+    </div>
+    <div class="nav-item" onclick="goTo('dosagem')">
+      <span class="ni">⚖️</span><span class="nav-label">Calc. Dosagem</span>
+    </div>
+  </div>
+  <div class="sidebar-toggle">
+    <button class="toggle-btn" onclick="toggleSidebar()">
+      <span style="font-size:16px">◀</span><span class="nav-label">Recolher</span>
+    </button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <button onclick="toggleSidebar()" style="background:none;border:none;font-size:18px;cursor:pointer;padding:4px 6px;border-radius:6px;color:var(--text2)">☰</button>
+    <div>
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-subtitle" id="topbar-sub">Visão geral do sistema</div>
+    </div>
+    <div class="topbar-right">
+      <span class="badge-green">🟢 Sistema Online</span>
+      <span style="font-size:12px;color:var(--text3)" id="topbar-date"></span>
+    </div>
+  </div>
+  <div id="content"></div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" class="modal-overlay" style="display:none" onclick="closeModal(event)">
+  <div class="modal" id="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title"></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── DATA STORE ───────────────────────────────────────────────
+const DB = {
+  clientes: [],
+  animais: [],
+  vendas: [],
+  produtos: [
+    // ── ROYAL CANIN CÃES – ADULTO ──────────────────────────────
+    {id:'PRD001',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Adulto',especie:'Cão',
+     nome:'Royal Canin X-Small Adult 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:107.70,valorVenda:170.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração adulta para cães de raças muito pequenas (até 4kg). Croquete extra pequeno adaptado ao focinho minúsculo.'},
+    {id:'PRD002',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Adulto',especie:'Cão',
+     nome:'Royal Canin Mini Adult 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:88.38,valorVenda:140.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração adulta para cães de raças pequenas (até 10kg). Suporte renal e controle do peso.'},
+    {id:'PRD003',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Adulto',especie:'Cão',
+     nome:'Royal Canin Mini Adult 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:192.23,valorVenda:304.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração adulta para cães de raças pequenas (até 10kg). Embalagem econômica 7,5kg.'},
+    {id:'PRD004',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Adulto',especie:'Cão',
+     nome:'Royal Canin Mini Indoor Adult 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:96.84,valorVenda:153.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração para cães pequenos que vivem em apartamento. Controla odor das fezes e pelo.'},
+    {id:'PRD005',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Adulto',especie:'Cão',
+     nome:'Royal Canin Mini Indoor Adult 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:211.46,valorVenda:334.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração para cães pequenos indoor. Embalagem econômica 7,5kg.'},
+    {id:'PRD006',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Adulto',especie:'Cão',
+     nome:'Royal Canin Medium Adult 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:80.69,valorVenda:128.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração adulta para cães de porte médio (11 a 25kg).'},
+    {id:'PRD007',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Adulto',especie:'Cão',
+     nome:'Royal Canin Medium Adult 12kg',categoria:'Ração',
+     pesoEmbalagem:12,qtdEmbalagem:1,
+     valorCusto:217.62,valorVenda:344.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração adulta para cães de porte médio. Embalagem econômica 12kg.'},
+    {id:'PRD008',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Adulto',especie:'Cão',
+     nome:'Royal Canin Maxi Adult 12kg',categoria:'Ração',
+     pesoEmbalagem:12,qtdEmbalagem:1,
+     valorCusto:265.08,valorVenda:419.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração adulta para cães de porte grande (26 a 44kg). Suporte articular e musculatura.'},
+    // ── ROYAL CANIN CÃES – FILHOTE ─────────────────────────────
+    {id:'PRD009',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Filhote',especie:'Cão',
+     nome:'Royal Canin Mini Puppy 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:84.54,valorVenda:134.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração filhote para raças pequenas até 10 meses. Suporte imunológico e digestivo.'},
+    {id:'PRD010',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Filhote',especie:'Cão',
+     nome:'Royal Canin Mini Puppy 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:192.23,valorVenda:304.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração filhote para raças pequenas. Embalagem econômica 7,5kg.'},
+    {id:'PRD011',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Filhote',especie:'Cão',
+     nome:'Royal Canin Maxi Puppy 4kg',categoria:'Ração',
+     pesoEmbalagem:4,qtdEmbalagem:1,
+     valorCusto:143.18,valorVenda:226.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração filhote para raças grandes até 15 meses. Suporte ao desenvolvimento ósseo.'},
+    {id:'PRD012',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Filhote',especie:'Cão',
+     nome:'Royal Canin Maxi Puppy 12kg',categoria:'Ração',
+     pesoEmbalagem:12,qtdEmbalagem:1,
+     valorCusto:285.11,valorVenda:451.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração filhote para raças grandes. Embalagem econômica 12kg.'},
+    {id:'PRD013',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Filhote',especie:'Cão',
+     nome:'Royal Canin Medium Puppy 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:76.85,valorVenda:121.49,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração filhote para raças médias (11 a 25kg adulto) até 12 meses.'},
+    {id:'PRD014',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Filhote',especie:'Cão',
+     nome:'Royal Canin Medium Puppy 12kg',categoria:'Ração',
+     pesoEmbalagem:12,qtdEmbalagem:1,
+     valorCusto:207.62,valorVenda:328.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração filhote para raças médias. Embalagem econômica 12kg.'},
+    // ── ROYAL CANIN CÃES – RAÇAS ESPECÍFICAS ──────────────────
+    {id:'PRD015',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Raça Específica',especie:'Cão',
+     nome:'Royal Canin Yorkshire Adult 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:102.23,valorVenda:162.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração exclusiva para Yorkshire Terrier adulto. Pelagem, articulações e saúde dental.'},
+    {id:'PRD016',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Raça Específica',especie:'Cão',
+     nome:'Royal Canin Yorkshire Adult 8+ 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:105.46,valorVenda:167.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração para Yorkshire Terrier sênior (acima de 8 anos). Suporte renal e articular.'},
+    {id:'PRD017',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Raça Específica',especie:'Cão',
+     nome:'Royal Canin Shih Tzu Adult 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:102.23,valorVenda:162.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração exclusiva para Shih Tzu adulto. Cuidado com pelo longo e pele sensível.'},
+    {id:'PRD018',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Raça Específica',especie:'Cão',
+     nome:'Royal Canin Maltês Adult 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:102.23,valorVenda:162.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração exclusiva para Maltês adulto. Enriquecida para pelo branco e pele delicada.'},
+    {id:'PRD019',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Raça Específica',especie:'Cão',
+     nome:'Royal Canin Pomeranian Adult 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:102.23,valorVenda:162.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração exclusiva para Lulu da Pomerânia adulto. Saúde dental e pelagem densa.'},
+    // ── ROYAL CANIN CÃES – MEDICAMENTOSAS ─────────────────────
+    {id:'PRD020',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Medicamentosa',especie:'Cão',
+     nome:'Royal Canin Light 3kg',categoria:'Ração',
+     pesoEmbalagem:3,qtdEmbalagem:1,
+     valorCusto:226.31,valorVenda:358.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração de controle de peso para cães adultos com tendência à obesidade. Baixo teor calórico.'},
+    {id:'PRD021',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Medicamentosa',especie:'Cão',
+     nome:'Royal Canin Hipoalergênica Cães Pequenos Adultos 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:386.26,valorVenda:611.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração veterinária para cães pequenos com alergias alimentares. Proteína hidrolisada de soja.'},
+    {id:'PRD022',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Medicamentosa',especie:'Cão',
+     nome:'Royal Canin Hipoalergênica Cães Adultos 10,1kg',categoria:'Ração',
+     pesoEmbalagem:10.1,qtdEmbalagem:1,
+     valorCusto:452.85,valorVenda:716.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração veterinária para cães adultos com alergias alimentares graves. Proteína altamente hidrolisada.'},
+    {id:'PRD023',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Medicamentosa',especie:'Cão',
+     nome:'Royal Canin Urinary (cão)',categoria:'Ração',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:121.86,valorVenda:193.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração veterinária para suporte ao trato urinário. Reduz saturação da urina e dissolve cálculos de estruvita.'},
+    {id:'PRD024',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Medicamentosa',especie:'Cão',
+     nome:'Royal Canin Ração Úmida Urinary (cão)',categoria:'Ração',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:34.34,valorVenda:54.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração úmida veterinária para suporte urinário em cães. Estimula ingestão de água.'},
+    // ── ROYAL CANIN GATOS – ADULTO / CASTRADO ─────────────────
+    {id:'PRD025',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Adulto',especie:'Gato',
+     nome:'Royal Canin Cat Adult Castrado 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:103.30,valorVenda:163.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Super Premium para gatos adultos castrados. Controle de peso e saúde urinária.'},
+    {id:'PRD026',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Adulto',especie:'Gato',
+     nome:'Royal Canin Cat Adult Castrado 10,1kg',categoria:'Ração',
+     pesoEmbalagem:10.1,qtdEmbalagem:1,
+     valorCusto:239.21,valorVenda:378.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Super Premium para gatos adultos castrados. Embalagem econômica 10,1kg.'},
+    {id:'PRD027',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Adulto',especie:'Gato',
+     nome:'Royal Canin Fit 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:90.44,valorVenda:143.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração para gatos adultos sem raça definida com acesso ao exterior. Manutenção da condição física ideal.'},
+    {id:'PRD028',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Adulto',especie:'Gato',
+     nome:'Royal Canin Fit 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:321.53,valorVenda:508.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração para gatos adultos com acesso ao exterior. Embalagem econômica 7,5kg.'},
+    // ── ROYAL CANIN GATOS – FILHOTE ───────────────────────────
+    {id:'PRD029',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Filhote',especie:'Gato',
+     nome:'Royal Canin Mother & Baby Cat 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:103.56,valorVenda:164.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração para gatas gestantes/lactantes e filhotes até 4 meses. Croquete ultra macio.'},
+    {id:'PRD030',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Filhote',especie:'Gato',
+     nome:'Royal Canin Mother & Baby Cat 4kg',categoria:'Ração',
+     pesoEmbalagem:4,qtdEmbalagem:1,
+     valorCusto:250.28,valorVenda:396.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração para gatas gestantes/lactantes e filhotes até 4 meses. Embalagem 4kg.'},
+    // ── ROYAL CANIN GATOS – RAÇAS ESPECÍFICAS ─────────────────
+    {id:'PRD031',marca:'Royal Canin',fornecedor:'Basso Pancotte',contato:'',
+     subCategoria:'Raça Específica',especie:'Gato',
+     nome:'Royal Canin Maine Coon 4kg',categoria:'Ração',
+     pesoEmbalagem:4,qtdEmbalagem:1,
+     valorCusto:278.41,valorVenda:440.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58,margem:0,
+     descricao:'Ração exclusiva para Maine Coon adulto. Croquete grande, suporte articular e pelagem densa.'},
+    // ── SIMPARIC – Central Pec ─────────────────────────────────
+    {id:'PRD032',marca:'Simparic',fornecedor:'Central Pec',contato:'',
+     subCategoria:'Antipulgas / Carrapaticida',especie:'Cão',
+     nome:'Simparic 1 comp 5mg (1,3 a 2,5kg)',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:61.18,valorVenda:88.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Comprimido mastigável antipulgas e carrapaticida. Para cães de 1,3 a 2,5kg. Proteção mensal.'},
+    {id:'PRD033',marca:'Simparic',fornecedor:'Central Pec',contato:'',
+     subCategoria:'Antipulgas / Carrapaticida',especie:'Cão',
+     nome:'Simparic 1 comp 10mg (2,6 a 5kg)',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:68.02,valorVenda:97.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Comprimido mastigável antipulgas e carrapaticida. Para cães de 2,6 a 5kg. Proteção mensal.'},
+    {id:'PRD034',marca:'Simparic',fornecedor:'Central Pec',contato:'',
+     subCategoria:'Antipulgas / Carrapaticida',especie:'Cão',
+     nome:'Simparic 1 comp 20mg (5,1 a 10kg)',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:71.50,valorVenda:102.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Comprimido mastigável antipulgas e carrapaticida. Para cães de 5,1 a 10kg. Proteção mensal.'},
+    // ── ND ANCESTRAL GRAIN – Distribuidora Prime ───────────────
+    {id:'PRD035',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ancestral Grain',especie:'Cão',
+     nome:'ND Ancestral Grain Frango & Romã Mini Filhote 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:158.70,valorVenda:206.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Ração super premium para filhotes de raças mini com grãos ancestrais. Frango e Romã.'},
+    {id:'PRD036',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ancestral Grain',especie:'Cão',
+     nome:'ND Ancestral Grain Frango & Romã Mini 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:142.83,valorVenda:186.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Ração super premium para cães adultos raças mini com grãos ancestrais. Frango e Romã.'},
+    {id:'PRD037',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ancestral Grain',especie:'Cão',
+     nome:'ND Ancestral Grain Frango & Romã Mini 10,1kg',categoria:'Ração',
+     pesoEmbalagem:10.1,qtdEmbalagem:1,
+     valorCusto:292.60,valorVenda:381.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Ração super premium adulto raças mini grãos ancestrais. Frango e Romã. Emb. 10,1kg.'},
+    {id:'PRD038',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ancestral Grain',especie:'Cão',
+     nome:'ND Ancestral Grain Cordeiro & Blueberry Mini 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:165.30,valorVenda:215.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Ração super premium raças mini grãos ancestrais. Cordeiro e Blueberry. 2,5kg.'},
+    {id:'PRD039',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ancestral Grain',especie:'Cão',
+     nome:'ND Ancestral Grain Cordeiro & Blueberry Mini 10,1kg',categoria:'Ração',
+     pesoEmbalagem:10.1,qtdEmbalagem:1,
+     valorCusto:335.50,valorVenda:436.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Ração super premium raças mini grãos ancestrais. Cordeiro e Blueberry. 10,1kg.'},
+    // ── ND PRIME CANINE ────────────────────────────────────────
+    {id:'PRD040',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Prime Canine',especie:'Cão',
+     nome:'ND Prime Canine Frango & Romã Mini 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:171.93,valorVenda:224.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Prime Canine para raças mini adultas. Frango e Romã. Sem grãos.'},
+    {id:'PRD041',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Prime Canine',especie:'Cão',
+     nome:'ND Prime Canine Cordeiro Mini Puppy Filhote 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:214.25,valorVenda:279.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Prime Canine filhote raças mini. Cordeiro. Sem grãos.'},
+    {id:'PRD042',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Prime Canine',especie:'Cão',
+     nome:'ND Prime Canine Cordeiro & Blueberry Mini 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:198.38,valorVenda:258.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Prime Canine adulto raças mini. Cordeiro e Blueberry. 2,5kg.'},
+    {id:'PRD043',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Prime Canine',especie:'Cão',
+     nome:'ND Prime Canine Cordeiro & Blueberry Mini 10,1kg',categoria:'Ração',
+     pesoEmbalagem:10.1,qtdEmbalagem:1,
+     valorCusto:401.50,valorVenda:522.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Prime Canine adulto raças mini. Cordeiro e Blueberry. 10,1kg.'},
+    // ── ND OCEAN CANINE ────────────────────────────────────────
+    {id:'PRD044',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ocean Canine',especie:'Cão',
+     nome:'ND Ocean Canine Salmão & Melão Mini 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:182.51,valorVenda:237.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Ocean com Salmão e Melão para raças mini. Rico em Ômega-3.'},
+    // ── ND QUINOA CANINE ───────────────────────────────────────
+    {id:'PRD045',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Quinoa Canine',especie:'Cão',
+     nome:'ND Quinoa Canine Pato 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:191.76,valorVenda:249.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Quinoa com Pato para cães mini. Proteína alternativa com quinoa.'},
+    {id:'PRD046',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Quinoa Canine',especie:'Cão',
+     nome:'ND Quinoa Canine Pato 7kg',categoria:'Ração',
+     pesoEmbalagem:7,qtdEmbalagem:1,
+     valorCusto:280.80,valorVenda:365.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Quinoa com Pato. Proteína alternativa com quinoa. Emb. 7kg.'},
+    // ── ND SPIRULINA CANINE ────────────────────────────────────
+    {id:'PRD047',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Spirulina Canine',especie:'Cão',
+     nome:'ND Spirulina Cordeiro / Spirulina / Goji Mini 2,0kg',categoria:'Ração',
+     pesoEmbalagem:2,qtdEmbalagem:1,
+     valorCusto:188.84,valorVenda:246.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Spirulina com Cordeiro, Spirulina e Goji Berry para raças mini. 2kg.'},
+    {id:'PRD048',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Spirulina Canine',especie:'Cão',
+     nome:'ND Spirulina Cordeiro / Spirulina / Goji Mini 7,0kg',categoria:'Ração',
+     pesoEmbalagem:7,qtdEmbalagem:1,
+     valorCusto:345.00,valorVenda:449.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Spirulina com Cordeiro, Spirulina e Goji Berry para raças mini. 7kg.'},
+    {id:'PRD049',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Spirulina Canine',especie:'Cão',
+     nome:'ND Spirulina Suíno / Spirulina / Goji Mini 2,0kg',categoria:'Ração',
+     pesoEmbalagem:2,qtdEmbalagem:1,
+     valorCusto:208.30,valorVenda:271.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Spirulina com Suíno, Spirulina e Goji Berry para raças mini. 2kg.'},
+    {id:'PRD050',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Spirulina Canine',especie:'Cão',
+     nome:'ND Spirulina Suíno / Spirulina / Goji Mini 7,0kg',categoria:'Ração',
+     pesoEmbalagem:7,qtdEmbalagem:1,
+     valorCusto:379.50,valorVenda:494.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Spirulina com Suíno, Spirulina e Goji Berry para raças mini. 7kg.'},
+    // ── ND TROPICAL SELECTION CANINE ──────────────────────────
+    {id:'PRD051',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Tropical Selection',especie:'Cão',
+     nome:'ND Tropical Selection Suíno Filhote Mini 2kg',categoria:'Ração',
+     pesoEmbalagem:2,qtdEmbalagem:1,
+     valorCusto:103.82,valorVenda:135.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Tropical Selection para filhotes mini. Suíno com ingredientes tropicais.'},
+    {id:'PRD052',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Tropical Selection',especie:'Cão',
+     nome:'ND Tropical Selection Cordeiro Adult Mini 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:108.45,valorVenda:141.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Tropical Selection adulto mini. Cordeiro com ingredientes tropicais.'},
+    {id:'PRD053',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Tropical Selection',especie:'Cão',
+     nome:'ND Tropical Selection Cordeiro Medium & Maxi 10,1kg',categoria:'Ração',
+     pesoEmbalagem:10.1,qtdEmbalagem:1,
+     valorCusto:259.00,valorVenda:337.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Tropical Selection adulto porte médio e grande. Cordeiro. 10,1kg.'},
+    // ── ND WHITE CANINE ────────────────────────────────────────
+    {id:'PRD054',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'White',especie:'Cão',
+     nome:'ND White Merluza / Spirulina / Erva-Doce Filhotes Mini 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:148.93,valorVenda:194.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha White para filhotes de raças mini e pequenas. Merluza, Spirulina e Erva-Doce.'},
+    {id:'PRD055',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'White',especie:'Cão',
+     nome:'ND White Merluza / Spirulina / Erva-Doce Mini 2kg',categoria:'Ração',
+     pesoEmbalagem:2,qtdEmbalagem:1,
+     valorCusto:188.84,valorVenda:246.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha White adulto raças mini. Merluza, Spirulina e Erva-Doce. 2kg.'},
+    // ── ND VET LIFE CANINE ─────────────────────────────────────
+    {id:'PRD056',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Vet Life',especie:'Cão',
+     nome:'ND Vet Life Hipoalergênica Mini Adulto 2kg',categoria:'Ração',
+     pesoEmbalagem:2,qtdEmbalagem:1,
+     valorCusto:156.06,valorVenda:203.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha veterinária hipoalergênica para cães mini adultos com sensibilidades alimentares.'},
+    {id:'PRD057',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Vet Life',especie:'Cão',
+     nome:'ND Vet Life Hipoalergênica Mini Adulto 10,1kg',categoria:'Ração',
+     pesoEmbalagem:10.1,qtdEmbalagem:1,
+     valorCusto:418.00,valorVenda:544.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha veterinária hipoalergênica para cães mini adultos. Emb. econômica 10,1kg.'},
+    // ── ND ANCESTRAL GRAIN FELINE ──────────────────────────────
+    {id:'PRD058',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ancestral Grain Feline',especie:'Gato',
+     nome:'ND Ancestral Grain Frango & Romã Adult Castrado 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:140.19,valorVenda:182.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Ração super premium para gatos adultos castrados. Frango e Romã com grãos ancestrais. 1,5kg.'},
+    {id:'PRD059',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ancestral Grain Feline',especie:'Gato',
+     nome:'ND Ancestral Grain Frango & Romã Adult Castrado 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:294.40,valorVenda:383.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Ração super premium para gatos adultos castrados. Frango e Romã com grãos ancestrais. 7,5kg.'},
+    {id:'PRD060',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ancestral Grain Feline',especie:'Gato',
+     nome:'ND Ancestral Grain Cordeiro & Blueberry Adult 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:148.12,valorVenda:193.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Ração super premium para gatos adultos. Cordeiro e Blueberry com grãos ancestrais. 1,5kg.'},
+    {id:'PRD061',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ancestral Grain Feline',especie:'Gato',
+     nome:'ND Ancestral Grain Cordeiro & Blueberry Adult 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:310.00,valorVenda:403.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Ração super premium para gatos adultos. Cordeiro e Blueberry com grãos ancestrais. 7,5kg.'},
+    // ── ND PRIME FELINE ────────────────────────────────────────
+    {id:'PRD062',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Prime Feline',especie:'Gato',
+     nome:'ND Prime Feline Frango & Romã 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:165.31,valorVenda:215.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Prime para gatos adultos. Frango e Romã. Sem grãos. 1,5kg.'},
+    {id:'PRD063',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Prime Feline',especie:'Gato',
+     nome:'ND Prime Feline Frango & Romã 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:299.00,valorVenda:389.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Prime para gatos adultos. Frango e Romã. Sem grãos. 7,5kg.'},
+    {id:'PRD064',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Prime Feline',especie:'Gato',
+     nome:'ND Prime Feline Frango & Romã Castrado 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:290.00,valorVenda:377.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Prime para gatos adultos castrados. Frango e Romã. Sem grãos. 7,5kg.'},
+    {id:'PRD065',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Prime Feline',especie:'Gato',
+     nome:'ND Prime Feline Cordeiro & Blueberry 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:148.12,valorVenda:193.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Prime para gatos adultos. Cordeiro e Blueberry. Sem grãos. 1,5kg.'},
+    {id:'PRD066',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Prime Feline',especie:'Gato',
+     nome:'ND Prime Feline Cordeiro & Blueberry 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:319.00,valorVenda:415.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Prime para gatos adultos. Cordeiro e Blueberry. Sem grãos. 7,5kg.'},
+    // ── ND PRIME FELINE FILHOTES ───────────────────────────────
+    {id:'PRD067',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Prime Feline',especie:'Gato',
+     nome:'ND Prime Feline Filhote Frango & Romã 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:165.71,valorVenda:216.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Prime para gatos filhotes. Frango e Romã. Sem grãos. 1,5kg.'},
+    {id:'PRD068',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Prime Feline',especie:'Gato',
+     nome:'ND Prime Feline Filhote Frango & Romã 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:333.50,valorVenda:434.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Prime para gatos filhotes. Frango e Romã. Sem grãos. 7,5kg.'},
+    // ── ND OCEAN FELINE ────────────────────────────────────────
+    {id:'PRD069',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ocean Feline',especie:'Gato',
+     nome:'ND Ocean Feline Salmão & Melão Castrado 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:189.12,valorVenda:246.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Ocean para gatos adultos castrados. Salmão e Melão. Rico em Ômega-3. 1,5kg.'},
+    {id:'PRD070',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ocean Feline',especie:'Gato',
+     nome:'ND Ocean Feline Salmão & Melão Castrado 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:342.70,valorVenda:446.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Ocean para gatos adultos castrados. Salmão e Melão. Rico em Ômega-3. 7,5kg.'},
+    // ── ND QUINOA FELINE ───────────────────────────────────────
+    {id:'PRD071',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Quinoa Feline',especie:'Gato',
+     nome:'ND Quinoa Feline Hairball 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:178.54,valorVenda:232.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Quinoa para controle de bolas de pelo em gatos. 1,5kg.'},
+    {id:'PRD072',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Quinoa Feline',especie:'Gato',
+     nome:'ND Quinoa Feline Controle de Peso 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:201.02,valorVenda:261.51,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Quinoa para controle de peso em gatos. 1,5kg.'},
+    {id:'PRD073',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Quinoa Feline',especie:'Gato',
+     nome:'ND Quinoa Feline Controle de Peso 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:414.00,valorVenda:539.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Quinoa para controle de peso em gatos. 7,5kg.'},
+    // ── ND SPIRULINA FELINE ────────────────────────────────────
+    {id:'PRD074',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Spirulina Feline',especie:'Gato',
+     nome:'ND Spirulina Tilápia / Spirulina / Goji Adult 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:154.73,valorVenda:201.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Spirulina para gatos adultos. Tilápia, Spirulina e Goji Berry. 1,5kg.'},
+    {id:'PRD075',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Spirulina Feline',especie:'Gato',
+     nome:'ND Spirulina Tilápia / Spirulina / Goji Adult 7kg',categoria:'Ração',
+     pesoEmbalagem:7,qtdEmbalagem:1,
+     valorCusto:301.88,valorVenda:393.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Spirulina para gatos adultos. Tilápia, Spirulina e Goji Berry. 7kg.'},
+    {id:'PRD076',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Spirulina Feline',especie:'Gato',
+     nome:'ND Spirulina Suíno / Spirulina / Goji Castrado 7kg',categoria:'Ração',
+     pesoEmbalagem:7,qtdEmbalagem:1,
+     valorCusto:301.88,valorVenda:393.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Spirulina para gatos adultos castrados. Suíno, Spirulina e Goji Berry. 7kg.'},
+    // ── ND TROPICAL SELECTION FELINE ──────────────────────────
+    {id:'PRD077',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Tropical Selection Feline',especie:'Gato',
+     nome:'ND Tropical Selection Cordeiro Adult Castrado 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:108.50,valorVenda:141.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Tropical Selection para gatos adultos castrados. Cordeiro. 1,5kg.'},
+    {id:'PRD078',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Tropical Selection Feline',especie:'Gato',
+     nome:'ND Tropical Selection Cordeiro Adult Castrado 7kg',categoria:'Ração',
+     pesoEmbalagem:7,qtdEmbalagem:1,
+     valorCusto:264.50,valorVenda:344.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Tropical Selection para gatos adultos castrados. Cordeiro. 7kg.'},
+    {id:'PRD079',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Tropical Selection Feline',especie:'Gato',
+     nome:'ND Tropical Selection Frango Adult 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:85.96,valorVenda:112.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Tropical Selection para gatos adultos. Frango. 1,5kg.'},
+    {id:'PRD080',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Tropical Selection Feline',especie:'Gato',
+     nome:'ND Tropical Selection Frango Adult 7kg',categoria:'Ração',
+     pesoEmbalagem:7,qtdEmbalagem:1,
+     valorCusto:218.50,valorVenda:284.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Tropical Selection para gatos adultos. Frango. 7kg.'},
+    {id:'PRD081',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Tropical Selection Feline',especie:'Gato',
+     nome:'ND Tropical Selection Filhote Suíno 1,5kg',categoria:'Ração',
+     pesoEmbalagem:1.5,qtdEmbalagem:1,
+     valorCusto:105.80,valorVenda:138.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Tropical Selection para gatos filhotes. Suíno. 1,5kg.'},
+    {id:'PRD082',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Tropical Selection Feline',especie:'Gato',
+     nome:'ND Tropical Selection Filhote Suíno 7kg',categoria:'Ração',
+     pesoEmbalagem:7,qtdEmbalagem:1,
+     valorCusto:226.00,valorVenda:294.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha Tropical Selection para gatos filhotes. Suíno. 7kg.'},
+    // ── ND VET LIFE FELINE ─────────────────────────────────────
+    {id:'PRD083',marca:'ND',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Vet Life',especie:'Gato',
+     nome:'ND Vet Life Gastrointestinal Gato 2kg',categoria:'Ração',
+     pesoEmbalagem:2,qtdEmbalagem:1,
+     valorCusto:132.83,valorVenda:173.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:17,margemTotal:30.09,margem:0,
+     descricao:'Linha veterinária gastrointestinal para gatos. Auxilia na digestão e na flora intestinal.'},
+    // ── MATISSE RAÇÃO ÚMIDA ────────────────────────────────────
+    {id:'PRD084',marca:'Matisse',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ração Úmida',especie:'Gato',
+     nome:'Matisse Ração Úmida Lata Mousse Salmão 85g',categoria:'Ração',
+     pesoEmbalagem:0.085,qtdEmbalagem:1,
+     valorCusto:11.40,valorVenda:17.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:32,margemTotal:45.09,margem:0,
+     descricao:'Ração úmida em lata para gatos adultos. Mousse de Salmão. 85g.'},
+    {id:'PRD085',marca:'Matisse',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ração Úmida',especie:'Gato',
+     nome:'Matisse Ração Úmida Lata Mousse Sardinha 85g',categoria:'Ração',
+     pesoEmbalagem:0.085,qtdEmbalagem:1,
+     valorCusto:11.04,valorVenda:16.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:32,margemTotal:45.09,margem:0,
+     descricao:'Ração úmida em lata para gatos adultos. Mousse de Sardinha. 85g.'},
+    {id:'PRD086',marca:'Matisse',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ração Úmida',especie:'Gato',
+     nome:'Matisse Ração Úmida Lata Mousse Frango 85g',categoria:'Ração',
+     pesoEmbalagem:0.085,qtdEmbalagem:1,
+     valorCusto:11.04,valorVenda:16.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:32,margemTotal:45.09,margem:0,
+     descricao:'Ração úmida em lata para gatos adultos. Mousse de Frango. 85g.'},
+    {id:'PRD087',marca:'Matisse',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ração Úmida',especie:'Gato',
+     nome:'Matisse Ração Úmida Lata Mousse Cordeiro 85g',categoria:'Ração',
+     pesoEmbalagem:0.085,qtdEmbalagem:1,
+     valorCusto:11.04,valorVenda:16.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:32,margemTotal:45.09,margem:0,
+     descricao:'Ração úmida em lata para gatos adultos. Mousse de Cordeiro. 85g.'},
+    {id:'PRD088',marca:'Matisse',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ração Úmida',especie:'Gato',
+     nome:'Matisse Ração Úmida Lata Mousse Bacalhau 85g',categoria:'Ração',
+     pesoEmbalagem:0.085,qtdEmbalagem:1,
+     valorCusto:11.04,valorVenda:16.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:32,margemTotal:45.09,margem:0,
+     descricao:'Ração úmida em lata para gatos adultos. Mousse de Bacalhau. 85g.'},
+    // ── MATISSE RAÇÃO SECA ─────────────────────────────────────
+    {id:'PRD089',marca:'Matisse',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ração Seca Adulto',especie:'Gato',
+     nome:'Matisse Gatos Adultos Frango e Arroz 2kg',categoria:'Ração',
+     pesoEmbalagem:2,qtdEmbalagem:1,
+     valorCusto:51.45,valorVenda:75.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:32,margemTotal:45.09,margem:0,
+     descricao:'Ração seca para gatos adultos. Sabor Frango e Arroz. 2kg.'},
+    {id:'PRD090',marca:'Matisse',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ração Seca Adulto',especie:'Gato',
+     nome:'Matisse Gatos Adultos Frango e Arroz 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:131.25,valorVenda:190.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:32,margemTotal:45.09,margem:0,
+     descricao:'Ração seca para gatos adultos. Sabor Frango e Arroz. 7,5kg.'},
+    {id:'PRD091',marca:'Matisse',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ração Seca Adulto',especie:'Gato',
+     nome:'Matisse Gatos Adultos Salmão e Arroz 2kg',categoria:'Ração',
+     pesoEmbalagem:2,qtdEmbalagem:1,
+     valorCusto:56.70,valorVenda:82.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:32,margemTotal:45.09,margem:0,
+     descricao:'Ração seca para gatos adultos. Sabor Salmão e Arroz. 2kg.'},
+    {id:'PRD092',marca:'Matisse',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ração Seca Adulto',especie:'Gato',
+     nome:'Matisse Gatos Adultos Salmão e Arroz 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:138.60,valorVenda:201.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:32,margemTotal:45.09,margem:0,
+     descricao:'Ração seca para gatos adultos. Sabor Salmão e Arroz. 7,5kg.'},
+    {id:'PRD093',marca:'Matisse',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ração Seca Filhote',especie:'Gato',
+     nome:'Matisse Gatos Filhotes 2kg',categoria:'Ração',
+     pesoEmbalagem:2,qtdEmbalagem:1,
+     valorCusto:56.70,valorVenda:82.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:32,margemTotal:45.09,margem:0,
+     descricao:'Ração seca para gatos filhotes. Nutrição completa para os primeiros meses. 2kg.'},
+    {id:'PRD094',marca:'Matisse',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ração Seca Filhote',especie:'Gato',
+     nome:'Matisse Gatos Filhotes 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:138.70,valorVenda:201.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:32,margemTotal:45.09,margem:0,
+     descricao:'Ração seca para gatos filhotes. Nutrição completa para os primeiros meses. 7,5kg.'},
+    {id:'PRD095',marca:'Matisse',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ração Seca Castrado',especie:'Gato',
+     nome:'Matisse Gatos Adultos Castrados Frango 2kg',categoria:'Ração',
+     pesoEmbalagem:2,qtdEmbalagem:1,
+     valorCusto:58.80,valorVenda:85.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:32,margemTotal:45.09,margem:0,
+     descricao:'Ração seca para gatos adultos castrados. Sabor Frango. Controle de peso. 2kg.'},
+    {id:'PRD096',marca:'Matisse',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ração Seca Castrado',especie:'Gato',
+     nome:'Matisse Gatos Adultos Castrados Frango 7,5kg',categoria:'Ração',
+     pesoEmbalagem:7.5,qtdEmbalagem:1,
+     valorCusto:149.10,valorVenda:216.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:32,margemTotal:45.09,margem:0,
+     descricao:'Ração seca para gatos adultos castrados. Sabor Frango. Controle de peso. 7,5kg.'},
+    // ── SUPLEMENTOS DISTRIBUIDORA PRIME ───────────────────────
+    {id:'PRD097',marca:'Queranon',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Dermatológico',especie:'Cão/Gato',
+     nome:'Queranon Pequenos 5kg 30 comprimidos',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:65.52,valorVenda:94.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Suplemento para saúde da pele e pelagem para cães pequenos (até 5kg). 30 comprimidos.'},
+    {id:'PRD098',marca:'Queranon',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Dermatológico',especie:'Cão/Gato',
+     nome:'Queranon LB 30 comprimidos',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:133.00,valorVenda:190.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Suplemento para saúde da pele e pelagem. Formulação Large Breed. 30 comprimidos.'},
+    {id:'PRD099',marca:'Queranon',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Dermatológico',especie:'Cão/Gato',
+     nome:'Queranon 15kg 30 comprimidos',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:97.02,valorVenda:139.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Suplemento para saúde da pele e pelagem para cães de 15kg. 30 comprimidos.'},
+    {id:'PRD100',marca:'Babyflora',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Probiótico',especie:'Cão/Gato',
+     nome:'Babyflora para Cães e Gatos 10g',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:10,
+     valorCusto:105.84,valorVenda:151.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Probiótico para filhotes e animais debilitados. Cães e gatos. 10g.'},
+    {id:'PRD101',marca:'Beneflora',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Probiótico',especie:'Cão/Gato',
+     nome:'Beneflora Vet para Cães e Gatos 14g',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:14,
+     valorCusto:66.84,valorVenda:96.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Probiótico veterinário para equilíbrio da flora intestinal. Cães e gatos. 14g.'},
+    {id:'PRD102',marca:'Beneflora',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Probiótico',especie:'Gato',
+     nome:'Beneflora para Gatos 5g',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:5,
+     valorCusto:65.52,valorVenda:94.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Probiótico para equilíbrio da flora intestinal exclusivo para gatos. 5g.'},
+    {id:'PRD103',marca:'Beneflora',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Dermatológico',especie:'Cão/Gato',
+     nome:'Beneflora Derme para Cães e Gatos 30g',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:160.02,valorVenda:229.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Suplemento probiótico dermato para saúde da pele. Cães e gatos. 30g.'},
+    {id:'PRD104',marca:'Beneflora',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Bucal',especie:'Cão/Gato',
+     nome:'Beneflora Oro para Cães e Gatos 30g',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:160.02,valorVenda:229.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Suplemento probiótico para saúde oral (hálito e gengiva). Cães e gatos. 30g.'},
+    {id:'PRD105',marca:'Up Flora',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Probiótico',especie:'Cão/Gato',
+     nome:'Up Flora para Cães e Gatos 8 cápsulas',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:8,
+     valorCusto:110.88,valorVenda:159.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Probiótico de alta potência em cápsulas. Cães e gatos. 8 cápsulas.'},
+    {id:'PRD106',marca:'Macrogard',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Imunidade',especie:'Gato',
+     nome:'Macrogard para Gatos 60g',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:60,
+     valorCusto:93.32,valorVenda:134.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Suplemento imunomodulador (beta-glucana) para gatos. 60g.'},
+    {id:'PRD107',marca:'Macrogard',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Imunidade',especie:'Cão/Gato',
+     nome:'Macrogard Pet Small Size Cães e Gatos 30 comprimidos',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:83.75,valorVenda:120.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Suplemento imunomodulador (beta-glucana) para cães e gatos pequenos. 30 comprimidos.'},
+    {id:'PRD108',marca:'Macrogard',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Imunidade',especie:'Cão/Gato',
+     nome:'Macrogard Pet para Cães e Gatos 30 comprimidos',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:136.76,valorVenda:196.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Suplemento imunomodulador (beta-glucana) para cães e gatos. 30 comprimidos.'},
+    {id:'PRD109',marca:'Foli B',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Vitamínico',especie:'Cão/Gato',
+     nome:'Foli B para Cães e Gatos 30ml',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:81.70,valorVenda:117.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Suplemento vitamínico com ácido fólico e vitaminas B. Cães e gatos. 30ml.'},
+    {id:'PRD110',marca:'Artrotabs',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Articular',especie:'Gato',
+     nome:'Artrotabs Pasta para Gatos 60g',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:60,
+     valorCusto:173.88,valorVenda:249.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Suplemento articular em pasta para gatos. Glucosamina e condroitina. 60g.'},
+    {id:'PRD111',marca:'Artrotabs',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Articular',especie:'Cão/Gato',
+     nome:'Artrotabs para Cães e Gatos 30 comprimidos',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:170.10,valorVenda:243.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Suplemento articular comprimido para cães e gatos. Glucosamina e condroitina. 30 comp.'},
+    {id:'PRD112',marca:'Ograx',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ômega',especie:'Cão/Gato',
+     nome:'Ograx-3 500mg 30 cápsulas Cães e Gatos',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:85.68,valorVenda:123.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Suplemento de Ômega-3 500mg para saúde da pele e pelagem. Cães e gatos. 30 cápsulas.'},
+    {id:'PRD113',marca:'Ograx',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ômega',especie:'Cão/Gato',
+     nome:'Ograx-3 1000mg 30 cápsulas Cães e Gatos',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:120.96,valorVenda:173.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Suplemento de Ômega-3 1000mg para saúde da pele e pelagem. Cães e gatos. 30 cápsulas.'},
+    {id:'PRD114',marca:'Ograx',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Dermatológico',especie:'Cão/Gato',
+     nome:'Ograx Derme 10 para Cães e Gatos 30 cápsulas',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:108.36,valorVenda:155.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Ômega-3 com EPA e DHA para saúde dermatológica. Cães e gatos. 30 cápsulas.'},
+    {id:'PRD115',marca:'Ograx',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Articular',especie:'Cão/Gato',
+     nome:'Ograx Artro 10 para Cães e Gatos 30 cápsulas',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:205.38,valorVenda:294.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Ômega-3 com suporte articular para cães e gatos. 30 cápsulas.'},
+    {id:'PRD116',marca:'Ograx',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Articular',especie:'Cão',
+     nome:'Ograx Artro 20 para Cães 30 cápsulas',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:248.22,valorVenda:355.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Ômega-3 com suporte articular concentrado para cães de porte maior. 30 cápsulas.'},
+    {id:'PRD117',marca:'Ograx',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Sênior',especie:'Cão/Gato',
+     nome:'Ograx Sênior 5 para Cães e Gatos 30 cápsulas',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:82.49,valorVenda:118.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Ômega-3 para animais sênior. Suporte cognitivo e articular. Cães e gatos. 30 cápsulas.'},
+    {id:'PRD118',marca:'Ograx',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ômega',especie:'Cão/Gato',
+     nome:'Ograx Baby para Cães e Gatos 30ml',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:94.50,valorVenda:135.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Ômega-3 líquido para filhotes de cães e gatos. 30ml.'},
+    {id:'PRD119',marca:'Ograx',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Ômega',especie:'Gato',
+     nome:'Ograx 5 para Gatos 30 cápsulas',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:90.72,valorVenda:130.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:30,margemTotal:43.09,margem:0,
+     descricao:'Ômega-3 5mg exclusivo para gatos. Saúde da pele e pelagem. 30 cápsulas.'},
+    // ── PETISCOS DISTRIBUIDORA PRIME ──────────────────────────
+    {id:'PRD120',marca:'LongCare',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Funcional',especie:'Cão',
+     nome:'Snack LongCare Funcional Hipersensível Proteína Hidrolisada',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:10.08,valorVenda:17.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:60,margemTotal:73.09,margem:0,
+     descricao:'Snack funcional para cães adultos hipersensíveis. Proteína hidrolisada.'},
+    {id:'PRD121',marca:'LongCare',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Funcional',especie:'Cão',
+     nome:'Snack LongCare Funcional Zen Maracujá / Valeriana / Camomila',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:10.08,valorVenda:17.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:60,margemTotal:73.09,margem:0,
+     descricao:'Snack funcional calmante para cães adultos. Maracujá, Valeriana e Camomila.'},
+    {id:'PRD122',marca:'LongCare',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Funcional',especie:'Cão',
+     nome:'Snack LongCare Funcional Fit Abóbora / Chia / Ervilha',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:10.08,valorVenda:17.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:60,margemTotal:73.09,margem:0,
+     descricao:'Snack funcional para controle de peso em cães adultos. Abóbora, Chia e Ervilha.'},
+    {id:'PRD123',marca:'LongCare',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Funcional',especie:'Cão',
+     nome:'Snack LongCare Funcional Sensível Sabor Cordeiro',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:10.08,valorVenda:17.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:60,margemTotal:73.09,margem:0,
+     descricao:'Snack funcional para cães adultos com pele sensível. Sabor Cordeiro.'},
+    {id:'PRD124',marca:'Churu',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Petisco Líquido',especie:'Gato',
+     nome:'Churu Atum e Salmão 4 tubes 56g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:19.90,valorVenda:25.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:60,margemTotal:73.09,margem:0,
+     descricao:'Petisco líquido cremoso para gatos. Atum e Salmão. Kit com 4 tubes de 14g.'},
+    {id:'PRD125',marca:'Churu',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Petisco Líquido',especie:'Gato',
+     nome:'Churu Galinha 4 tubes 56g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:19.90,valorVenda:25.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:60,margemTotal:73.09,margem:0,
+     descricao:'Petisco líquido cremoso para gatos. Galinha. Kit com 4 tubes de 14g.'},
+    {id:'PRD126',marca:'Churu',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Petisco Líquido',especie:'Gato',
+     nome:'Churu Atum e Salmão 1 tube',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:4.97,valorVenda:9.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:60,margemTotal:73.09,margem:0,
+     descricao:'Petisco líquido cremoso para gatos. Atum e Salmão. 1 tube unitário.'},
+    {id:'PRD127',marca:'Churu',fornecedor:'Distribuidora Prime',contato:'',
+     subCategoria:'Petisco Líquido',especie:'Gato',
+     nome:'Churu Galinha 1 tube',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:4.97,valorVenda:9.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:60,margemTotal:73.09,margem:0,
+     descricao:'Petisco líquido cremoso para gatos. Galinha. 1 tube unitário.'},
+    // ── FN FRESH MEAT — CÃES (Zoo Center) ─────────────────────
+    {id:'PRD128',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Fresh Meat Canino',especie:'Cão',
+     nome:'FN Fresh Meat Adulto Grande/Gigante 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:77.23,valorVenda:111.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:31,margemTotal:44.09,margem:0,
+     descricao:'Ração super premium Fresh Meat para cães adultos de porte grande e gigante. 2,5kg.'},
+    {id:'PRD129',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Fresh Meat Canino',especie:'Cão',
+     nome:'FN Fresh Meat Adulto Médio 12kg',categoria:'Ração',
+     pesoEmbalagem:12,qtdEmbalagem:1,
+     valorCusto:283.13,valorVenda:408.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:31,margemTotal:44.09,margem:0,
+     descricao:'Ração super premium Fresh Meat para cães adultos de porte médio. 12kg.'},
+    {id:'PRD130',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Fresh Meat Canino',especie:'Cão',
+     nome:'FN Fresh Meat Adulto Mini/Pequeno 10,1kg',categoria:'Ração',
+     pesoEmbalagem:10.1,qtdEmbalagem:1,
+     valorCusto:254.04,valorVenda:366.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:31,margemTotal:44.09,margem:0,
+     descricao:'Ração super premium Fresh Meat para cães adultos de porte mini/pequeno. 10,1kg.'},
+    {id:'PRD131',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Fresh Meat Canino',especie:'Cão',
+     nome:'FN Fresh Meat Adulto Mini/Pequeno 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:77.23,valorVenda:111.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:31,margemTotal:44.09,margem:0,
+     descricao:'Ração super premium Fresh Meat para cães adultos de porte mini/pequeno. 2,5kg.'},
+    {id:'PRD132',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Fresh Meat Canino',especie:'Cão',
+     nome:'FN Fresh Meat Controle de Peso MG 12kg',categoria:'Ração',
+     pesoEmbalagem:12,qtdEmbalagem:1,
+     valorCusto:293.78,valorVenda:423.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:31,margemTotal:44.09,margem:0,
+     descricao:'Ração Fresh Meat para controle de peso em cães de porte médio e grande. 12kg.'},
+    {id:'PRD133',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Fresh Meat Canino',especie:'Cão',
+     nome:'FN Fresh Meat Sensi Adulto MP Cordeiro 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:118.30,valorVenda:170.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:31,margemTotal:44.09,margem:0,
+     descricao:'Ração Fresh Meat para cães adultos sensíveis de porte mini/pequeno. Cordeiro. 2,5kg.'},
+    {id:'PRD134',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Fresh Meat Canino',especie:'Cão',
+     nome:'FN Fresh Meat Sensi Adulto MP Cordeiro 7kg',categoria:'Ração',
+     pesoEmbalagem:7,qtdEmbalagem:1,
+     valorCusto:296.80,valorVenda:428.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:31,margemTotal:44.09,margem:0,
+     descricao:'Ração Fresh Meat para cães adultos sensíveis de porte mini/pequeno. Cordeiro. 7kg.'},
+    // ── FN LIFE — CÃES FILHOTES ────────────────────────────────
+    {id:'PRD135',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'FN Life Canino',especie:'Cão',
+     nome:'FN Life Filhote Mini/Pequeno 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:66.49,valorVenda:96.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:31,margemTotal:44.09,margem:0,
+     descricao:'Ração FN Life para filhotes de porte mini e pequeno. 2,5kg.'},
+    {id:'PRD136',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'FN Life Canino',especie:'Cão',
+     nome:'FN Life Filhote Mini/Pequeno 10,1kg',categoria:'Ração',
+     pesoEmbalagem:10.1,qtdEmbalagem:1,
+     valorCusto:189.49,valorVenda:273.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:31,margemTotal:44.09,margem:0,
+     descricao:'Ração FN Life para filhotes de porte mini e pequeno. 10,1kg.'},
+    // ── FN LIFE — CÃES ADULTOS ─────────────────────────────────
+    {id:'PRD137',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'FN Life Canino',especie:'Cão',
+     nome:'FN Life Adulto Mini/Pequeno 2,5kg',categoria:'Ração',
+     pesoEmbalagem:2.5,qtdEmbalagem:1,
+     valorCusto:65.26,valorVenda:94.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:31,margemTotal:44.09,margem:0,
+     descricao:'Ração FN Life para cães adultos de porte mini e pequeno. 2,5kg.'},
+    {id:'PRD138',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'FN Life Canino',especie:'Cão',
+     nome:'FN Life Adulto Médio/Grande 15kg',categoria:'Ração',
+     pesoEmbalagem:15,qtdEmbalagem:1,
+     valorCusto:180.09,valorVenda:259.49,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:31,margemTotal:44.09,margem:0,
+     descricao:'Ração FN Life para cães adultos de porte médio e grande. 15kg.'},
+    {id:'PRD139',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'FN Life Canino',especie:'Cão',
+     nome:'FN Life Adulto Mini/Pequeno 10,1kg',categoria:'Ração',
+     pesoEmbalagem:10.1,qtdEmbalagem:1,
+     valorCusto:216.36,valorVenda:312.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:31,margemTotal:44.09,margem:0,
+     descricao:'Ração FN Life para cães adultos de porte mini e pequeno. 10,1kg.'},
+    {id:'PRD140',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'FN Life Canino',especie:'Cão',
+     nome:'FN Life Adulto Mini/Pequeno 15kg',categoria:'Ração',
+     pesoEmbalagem:15,qtdEmbalagem:1,
+     valorCusto:222.67,valorVenda:321.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:31,margemTotal:44.09,margem:0,
+     descricao:'Ração FN Life para cães adultos de porte mini e pequeno. 15kg.'},
+    // ── FN LIFE — CÃES SÊNIOR ──────────────────────────────────
+    {id:'PRD141',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'FN Life Canino',especie:'Cão',
+     nome:'FN Life Sênior Mini/Pequeno 7kg',categoria:'Ração',
+     pesoEmbalagem:7,qtdEmbalagem:1,
+     valorCusto:112.82,valorVenda:163.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:31,margemTotal:44.09,margem:0,
+     descricao:'Ração FN Life para cães idosos de porte mini e pequeno. Suporte articular e cognitivo. 7kg.'},
+    // ── FN FRESH MEAT — GATOS (Zoo Center) ────────────────────
+    {id:'PRD142',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Fresh Meat Felino',especie:'Gato',
+     nome:'FN Fresh Meat Felino Adulto Frango 10,1kg',categoria:'Ração',
+     pesoEmbalagem:10.1,qtdEmbalagem:1,
+     valorCusto:285.27,valorVenda:437.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Ração Fresh Meat para gatos adultos. Sabor Frango. 10,1kg.'},
+    {id:'PRD143',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Fresh Meat Felino',especie:'Gato',
+     nome:'FN Fresh Meat Felino Castrado Salmão 10,1kg',categoria:'Ração',
+     pesoEmbalagem:10.1,qtdEmbalagem:1,
+     valorCusto:369.39,valorVenda:565.50,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Ração Fresh Meat para gatos adultos castrados. Sabor Salmão. 10,1kg.'},
+    {id:'PRD144',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Fresh Meat Felino',especie:'Gato',
+     nome:'FN Fresh Meat Felino Filhotes Frango 7kg',categoria:'Ração',
+     pesoEmbalagem:7,qtdEmbalagem:1,
+     valorCusto:217.59,valorVenda:333.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Ração Fresh Meat para gatos filhotes. Sabor Frango. 7kg.'},
+    {id:'PRD145',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Fresh Meat Felino',especie:'Gato',
+     nome:'FN Fresh Meat Felino Filhotes Frango 1kg',categoria:'Ração',
+     pesoEmbalagem:1,qtdEmbalagem:1,
+     valorCusto:46.45,valorVenda:71.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Ração Fresh Meat para gatos filhotes. Sabor Frango. 1kg.'},
+    // ── FN LIFE — GATOS ────────────────────────────────────────
+    {id:'PRD146',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'FN Life Felino',especie:'Gato',
+     nome:'FN Life Felino Adulto Frango e Salmão 7kg',categoria:'Ração',
+     pesoEmbalagem:7,qtdEmbalagem:1,
+     valorCusto:167.81,valorVenda:257.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Ração FN Life para gatos adultos. Frango e Salmão. 7kg.'},
+    {id:'PRD147',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'FN Life Felino',especie:'Gato',
+     nome:'FN Life Felino Castrado 7+ Frango e Salmão 7kg',categoria:'Ração',
+     pesoEmbalagem:7,qtdEmbalagem:1,
+     valorCusto:186.35,valorVenda:285.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Ração FN Life para gatos adultos castrados sênior (7+ anos). Frango e Salmão. 7kg.'},
+    {id:'PRD148',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'FN Life Felino',especie:'Gato',
+     nome:'FN Life Felino Filhote Frango e Salmão 10kg',categoria:'Ração',
+     pesoEmbalagem:10,qtdEmbalagem:1,
+     valorCusto:228.89,valorVenda:350.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Ração FN Life para gatos filhotes. Frango e Salmão. 10kg.'},
+    {id:'PRD149',marca:'Fórmula Natural',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'FN Life Felino',especie:'Gato',
+     nome:'FN Life Felino Filhote Frango e Salmão 1kg',categoria:'Ração',
+     pesoEmbalagem:1,qtdEmbalagem:1,
+     valorCusto:38.71,valorVenda:59.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Ração FN Life para gatos filhotes. Frango e Salmão. 1kg.'},
+    // ── SUPLEMENTOS — ZOO CENTER (Organnact) ──────────────────
+    {id:'PRD150',marca:'Organnact',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Probiótico',especie:'Cão',
+     nome:'Lactobac Dog Plus 13ml',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:13,
+     valorCusto:39.11,valorVenda:62.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58.09,margem:0,
+     descricao:'Probiótico líquido para equilíbrio da flora intestinal em cães. 13ml.'},
+    {id:'PRD151',marca:'Organnact',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Probiótico',especie:'Gato',
+     nome:'Lactobac Cat Plus 12ml',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:12,
+     valorCusto:0,valorVenda:0,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58.09,margem:0,
+     descricao:'Probiótico líquido para equilíbrio da flora intestinal em gatos. 12ml. ⚠️ Aguardando atualização de preço.'},
+    {id:'PRD152',marca:'Organnact',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Vitamínico',especie:'Cão/Gato',
+     nome:'Organnact Compplet Mix A-Z Cães e Gatos 120g',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:0,valorVenda:0,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58.09,margem:0,
+     descricao:'Suplemento vitamínico e mineral completo A-Z para cães e gatos. 120g. ⚠️ Aguardando atualização de preço.'},
+    {id:'PRD153',marca:'Organnact',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Ômega',especie:'Cão',
+     nome:'Ômega 3 Dog Organnact 500mg 30 cápsulas',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:76.28,valorVenda:121.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58.09,margem:0,
+     descricao:'Suplemento Ômega-3 500mg para saúde da pele e pelagem de cães. 30 cápsulas.'},
+    {id:'PRD154',marca:'Organnact',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Ômega',especie:'Cão',
+     nome:'Ômega 3 Dog Organnact 1000mg 30 cápsulas',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:93.89,valorVenda:148.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58.09,margem:0,
+     descricao:'Suplemento Ômega-3 1000mg para saúde da pele e pelagem de cães. 30 cápsulas.'},
+    {id:'PRD155',marca:'Organnact',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Sênior',especie:'Cão',
+     nome:'Organnact Geriatric Plus para Cães Idosos 28ml',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:28,
+     valorCusto:0,valorVenda:0,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58.09,margem:0,
+     descricao:'Suplemento geriátrico para cães idosos. Suporte cognitivo, articular e imunológico. 28ml. ⚠️ Aguardando atualização de preço.'},
+    {id:'PRD156',marca:'Organnact',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Sênior',especie:'Gato',
+     nome:'Organnact Geriatric Plus Cat para Gatos 120g',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:0,valorVenda:0,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58.09,margem:0,
+     descricao:'Suplemento geriátrico para gatos idosos. 120g. ⚠️ Aguardando atualização de preço.'},
+    {id:'PRD157',marca:'Organnact',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Reprodutivo',especie:'Cão',
+     nome:'Organnact Mammy Dog 120g',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:62.83,valorVenda:99.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58.09,margem:0,
+     descricao:'Suplemento para cadelas gestantes e lactantes. Vitaminas e minerais. 120g.'},
+    {id:'PRD158',marca:'Organnact',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Reprodutivo',especie:'Cão',
+     nome:'Organnact Mammy Dog 300g',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:60,
+     valorCusto:85.96,valorVenda:136.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58.09,margem:0,
+     descricao:'Suplemento para cadelas gestantes e lactantes. Vitaminas e minerais. 300g.'},
+    {id:'PRD159',marca:'Organnact',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Reprodutivo',especie:'Cão',
+     nome:'Organnact Mammy Dog Tabs 100g',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:30,
+     valorCusto:70.77,valorVenda:112.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58.09,margem:0,
+     descricao:'Suplemento comprimidos para cadelas gestantes e lactantes. 100g.'},
+    {id:'PRD160',marca:'Organnact',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Comportamental',especie:'Cão',
+     nome:'Organnact Calmyn & Susse para Cães 15g',categoria:'Suplemento',
+     pesoEmbalagem:null,qtdEmbalagem:1,duracaoDias:15,
+     valorCusto:70.44,valorVenda:111.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:45,margemTotal:58.09,margem:0,
+     descricao:'Suplemento calmante natural para cães. Triptofano e ervas. 15g.'},
+    // ── BE NATURE — BISCOITOS (Zoo Center) ────────────────────
+    {id:'PRD161',marca:'Be Nature',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Biscoito',especie:'Cão',
+     nome:'Be Nature Biscoito Ameixa 150g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:16.41,valorVenda:25.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Biscoito natural para cães sabor Ameixa. Sem corantes artificiais. 150g.'},
+    {id:'PRD162',marca:'Be Nature',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Biscoito',especie:'Cão',
+     nome:'Be Nature Biscoito Banana 150g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:16.41,valorVenda:25.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Biscoito natural para cães sabor Banana. Sem corantes artificiais. 150g.'},
+    {id:'PRD163',marca:'Be Nature',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Biscoito',especie:'Cão',
+     nome:'Be Nature Biscoito Beterraba 150g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:16.41,valorVenda:25.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Biscoito natural para cães sabor Beterraba. Sem corantes artificiais. 150g.'},
+    {id:'PRD164',marca:'Be Nature',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Biscoito',especie:'Cão',
+     nome:'Be Nature Biscoito Coco 150g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:16.41,valorVenda:25.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Biscoito natural para cães sabor Coco. Sem corantes artificiais. 150g.'},
+    {id:'PRD165',marca:'Be Nature',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Biscoito',especie:'Cão',
+     nome:'Be Nature Biscoito Maçã 150g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:16.41,valorVenda:25.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Biscoito natural para cães sabor Maçã. Sem corantes artificiais. 150g.'},
+    {id:'PRD166',marca:'Be Nature',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Biscoito',especie:'Cão',
+     nome:'Be Nature Biscoito Maracujá 150g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:16.41,valorVenda:25.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Biscoito natural para cães sabor Maracujá. Sem corantes artificiais. 150g.'},
+    {id:'PRD167',marca:'Be Nature',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Biscoito',especie:'Cão',
+     nome:'Be Nature Biscoito Morango 150g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:16.41,valorVenda:25.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Biscoito natural para cães sabor Morango. Sem corantes artificiais. 150g.'},
+    // ── BE NATURE — PATÊ CÃO ──────────────────────────────────
+    {id:'PRD168',marca:'Be Nature',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Patê Canino',especie:'Cão',
+     nome:'Be Nature Day By Day Filhotes Frango / Mandioquinha / Cenoura / Espinafre 300g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:20.95,valorVenda:32.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Patê completo para cães filhotes. Frango, Mandioquinha, Cenoura e Espinafre. 300g.'},
+    {id:'PRD169',marca:'Be Nature',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Patê Canino',especie:'Cão',
+     nome:'Be Nature Day By Day Adultos Carne Bovina / Batata Doce / Abóbora 300g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:20.95,valorVenda:32.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Patê completo para cães adultos. Carne Bovina, Batata Doce e Abóbora. 300g.'},
+    {id:'PRD170',marca:'Be Nature',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Patê Canino',especie:'Cão',
+     nome:'Be Nature Day By Day Idosos Salmão / Arroz Integral / Cenoura / Espinafre 300g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:20.95,valorVenda:32.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Patê completo para cães idosos. Salmão, Arroz Integral, Cenoura e Espinafre. 300g.'},
+    // ── BE NATURE — PATÊ GATO ─────────────────────────────────
+    {id:'PRD171',marca:'Be Nature',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Patê Felino',especie:'Gato',
+     nome:'Be Nature Day By Day Gatos Filhotes Frango / Fígado / Vegetais 120g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:17.21,valorVenda:26.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Patê completo para gatos filhotes. Frango, Fígado e Vegetais. 120g.'},
+    {id:'PRD172',marca:'Be Nature',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Patê Felino',especie:'Gato',
+     nome:'Be Nature Day By Day Gatos Idosos Carne e Fígado Bovino / Vegetais 120g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:17.21,valorVenda:26.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Patê completo para gatos idosos. Carne e Fígado Bovino com Vegetais. 120g.'},
+    {id:'PRD173',marca:'Be Nature',fornecedor:'Zoo Center',contato:'',
+     subCategoria:'Patê Felino',especie:'Gato',
+     nome:'Be Nature Day By Day Gatos Adultos Atum e Sardinha / Vegetais 120g',categoria:'Petisco',
+     pesoEmbalagem:null,qtdEmbalagem:1,
+     valorCusto:17.21,valorVenda:26.00,
+     margemCartao:6.09,margemImposto:5,margemOperacao:2,margemLucro:40,margemTotal:53.09,margem:0,
+     descricao:'Patê completo para gatos adultos. Atum e Sardinha com Vegetais. 120g.'},
+  ],
+  nextClienteId: 1,
+  nextAnimalId: 1,
+  nextVendaId: 1,
+  nextProdutoId: 174,
+};
+
+// Compute margins on seed data
+DB.produtos.forEach(p=>{
+  p.margem=p.valorCusto>0?((p.valorVenda-p.valorCusto)/p.valorVenda*100):0;
+  if(!p.margemCartao)p.margemCartao=0;
+  if(!p.margemImposto)p.margemImposto=0;
+  if(!p.margemOperacao)p.margemOperacao=0;
+  if(!p.margemLucro)p.margemLucro=0;
+  if(!p.margemTotal)p.margemTotal=0;
+  if(!p.marca)p.marca='';
+  if(!p.subCategoria)p.subCategoria='';
+  if(!p.especie)p.especie='';
+});
+
+// Save / load localStorage
+function saveDB(){try{localStorage.setItem('greenpet_db',JSON.stringify(DB))}catch(e){}}
+function loadDB(){
+  try{
+    const d=localStorage.getItem('greenpet_db');
+    if(d){
+      const p=JSON.parse(d);
+      if(p.clientes&&p.clientes.length)DB.clientes=p.clientes;
+      if(p.animais&&p.animais.length)DB.animais=p.animais;
+      if(p.vendas&&p.vendas.length)DB.vendas=p.vendas;
+      if(p.produtos&&p.produtos.length){
+        DB.produtos=p.produtos;
+        DB.produtos.forEach(pr=>{
+          pr.margem=pr.valorCusto>0?((pr.valorVenda-pr.valorCusto)/pr.valorVenda*100):0;
+          if(!pr.margemCartao)pr.margemCartao=0;if(!pr.margemImposto)pr.margemImposto=0;
+          if(!pr.margemOperacao)pr.margemOperacao=0;if(!pr.margemLucro)pr.margemLucro=0;
+          if(!pr.margemTotal)pr.margemTotal=0;if(!pr.marca)pr.marca='';
+          if(!pr.subCategoria)pr.subCategoria='';if(!pr.especie)pr.especie='';
+        });
+      }
+      if(p.nextClienteId)DB.nextClienteId=p.nextClienteId;
+      if(p.nextAnimalId)DB.nextAnimalId=p.nextAnimalId;
+      if(p.nextVendaId)DB.nextVendaId=p.nextVendaId;
+      if(p.nextProdutoId)DB.nextProdutoId=p.nextProdutoId;
+    }
+  }catch(e){}
+}
+
+// ─── UTILS ────────────────────────────────────────────────────
+function fmt(n){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n)}
+function fmtDate(s){if(!s)return'-';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`}
+function today(){return new Date().toISOString().slice(0,10)}
+function calcIdade(nasc){if(!nasc)return'-';const n=new Date(nasc),t=new Date();let a=t.getFullYear()-n.getFullYear();let m=t.getMonth()-n.getMonth();if(m<0||(m===0&&t.getDate()<n.getDate())){a--;m=12+m}if(a>0)return`${a} ${a===1?'ano':'anos'}`;return`${m} ${m===1?'mês':'meses'}`}
+function genId(prefix,n){return`${prefix}${String(n).padStart(3,'0')}`}
+function vendaTotal(v){return v.produtos.reduce((s,p)=>s+p.qtd*p.valor,0)}
+function clienteNome(id){const c=DB.clientes.find(c=>c.id===id);return c?c.nome:'Desconhecido'}
+function animalNome(id){const a=DB.animais.find(a=>a.id===id);return a?a.nome:'—'}
+
+// RER dosage
+function calcRER(peso){return Math.round(70*Math.pow(peso,0.75))}
+
+// ─── NAVIGATION ───────────────────────────────────────────────
+let currentPage='dashboard';
+const pageInfo={
+  dashboard:{title:'Dashboard',sub:'Visão geral e indicadores'},
+  clientes:{title:'Clientes',sub:'Cadastro e gerenciamento de clientes'},
+  animais:{title:'Animais',sub:'Cadastro e ficha dos animais'},
+  'nova-venda':{title:'Nova Venda',sub:'Registre uma venda com preenchimento automático do cliente e animal'},
+  vendas:{title:'Histórico de Vendas',sub:'Todas as vendas registradas'},
+  produtos:{title:'Produtos',sub:'Catálogo de produtos com preços e margens'},
+  dosagem:{title:'Calculadora de Dosagem',sub:'RER – Energia de Repouso'},
+};
+function goTo(page){
+  currentPage=page;
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    const onclick=el.getAttribute('onclick')||'';
+    el.classList.toggle('active',onclick===`goTo('${page}')`);
+  });
+  document.getElementById('topbar-title').textContent=pageInfo[page].title;
+  document.getElementById('topbar-sub').textContent=pageInfo[page].sub;
+  renderPage(page);
+}
+function renderPage(page){
+  const pages={dashboard:renderDashboard,clientes:renderClientes,animais:renderAnimais,'nova-venda':renderNovaVenda,produtos:renderProdutos,vendas:renderVendas,recompra:renderRecompra,dosagem:renderDosagem};
+  const fn=pages[page];
+  if(fn)fn();
+}
+function toggleSidebar(){
+  const s=document.getElementById('sidebar');
+  if(window.innerWidth<=700){s.classList.toggle('mobile-open')}
+  else{s.classList.toggle('collapsed')}
+}
+
+// ─── MODAL ────────────────────────────────────────────────────
+let modalSaveFn=null;
+function openModal(title,bodyHtml,footerHtml,saveFn){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').innerHTML=bodyHtml;
+  document.getElementById('modal-footer').innerHTML=footerHtml||(saveFn?`<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="modalSave()">💾 Salvar</button>`:'<button class="btn btn-secondary" onclick="closeModal()">Fechar</button>');
+  modalSaveFn=saveFn||null;
+  document.getElementById('modal-overlay').style.display='flex';
+}
+function closeModal(ev){if(!ev||ev.target===document.getElementById('modal-overlay')){document.getElementById('modal-overlay').style.display='none';}}
+function modalSave(){if(modalSaveFn)modalSaveFn();}
+
+// ─── TOAST ────────────────────────────────────────────────────
+function toast(msg,icon='✅'){
+  const t=document.createElement('div');
+  t.className='toast-item';t.innerHTML=`${icon} ${msg}`;
+  document.getElementById('toast').appendChild(t);
+  setTimeout(()=>{t.classList.add('toast-out');setTimeout(()=>t.remove(),350)},2800);
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────
+let dashFiltroMes='';
+function renderDashboard(){
+  const filtro=dashFiltroMes;
+  const vendasFiltradas=filtro?DB.vendas.filter(v=>v.data.startsWith(filtro)):DB.vendas;
+
+  const totalFiltrado=vendasFiltradas.reduce((s,v)=>s+vendaTotal(v),0);
+  const mesAtual=new Date().toISOString().slice(0,7);
+  const vendasMesAtual=DB.vendas.filter(v=>v.data.startsWith(mesAtual));
+  const totalMesAtual=vendasMesAtual.reduce((s,v)=>s+vendaTotal(v),0);
+  const totalGeral=DB.vendas.reduce((s,v)=>s+vendaTotal(v),0);
+
+  // Top clientes (do filtro)
+  const topCli={};vendasFiltradas.forEach(v=>{topCli[v.clienteId]=(topCli[v.clienteId]||0)+vendaTotal(v);});
+  const topArr=Object.entries(topCli).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxCli=topArr[0]?.[1]||1;
+
+  // Top produtos (do filtro)
+  const topProd={};vendasFiltradas.forEach(v=>v.produtos.forEach(p=>{topProd[p.nome]=(topProd[p.nome]||0)+p.qtd*p.valor;}));
+  const topProdArr=Object.entries(topProd).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxProd=topProdArr[0]?.[1]||1;
+
+  // Faturamento por mês (sempre mostra todos os meses)
+  const byMes={};DB.vendas.forEach(v=>{const k=v.data.slice(0,7);byMes[k]=(byMes[k]||0)+vendaTotal(v);});
+  const mesArr=Object.entries(byMes).sort();
+  const maxMes=Math.max(...mesArr.map(x=>x[1]))||1;
+
+  const mesesDisponiveis=[...new Set(DB.vendas.map(v=>v.data.slice(0,7)))].sort();
+
+  const kpi1Label=filtro?`Faturamento ${filtro.split('-')[1]}/${filtro.split('-')[0]}`:'Total Geral';
+  const kpi1Val=filtro?fmt(totalFiltrado):fmt(totalGeral);
+  const kpi1Sub=filtro?`${vendasFiltradas.length} vendas no período`:'Todas as vendas';
+  const ticketMedio=vendasFiltradas.length?fmt(totalFiltrado/vendasFiltradas.length):fmt(0);
+
+  document.getElementById('content').innerHTML=`
+  <div class="page-header" style="align-items:center">
+    <div><div class="page-title">Visão Geral</div><div class="page-sub">Atualizado em ${fmtDate(today())}</div></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <label style="font-size:13px;color:var(--text3);font-weight:500">Filtrar por mês:</label>
+      <select id="dash-mes" onchange="dashFiltroMes=this.value;renderDashboard()" style="padding:8px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:var(--font);font-size:13px;color:var(--text);background:var(--surface);cursor:pointer">
+        <option value="" ${!filtro?'selected':''}>📅 Todos os períodos</option>
+        ${mesesDisponiveis.map(m=>{
+          const [ano,mes]=m.split('-');
+          const nomes=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+          return`<option value="${m}" ${filtro===m?'selected':''}>${nomes[+mes]} ${ano}</option>`;
+        }).join('')}
+      </select>
+      ${filtro?`<button onclick="dashFiltroMes='';renderDashboard()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);font-size:12px;cursor:pointer;color:var(--text2);font-family:var(--font)">✕ Limpar</button>`:''}
+    </div>
+  </div>
+
+  ${filtro?`<div style="background:var(--amber-50);border:1px solid var(--amber-400);border-radius:8px;padding:9px 14px;margin-bottom:14px;font-size:13px;color:var(--amber-800);display:flex;align-items:center;gap:8px">
+    📅 Exibindo dados de <strong>${filtro.split('-')[1]}/${filtro.split('-')[0]}</strong> · ${vendasFiltradas.length} venda(s) encontrada(s)
+  </div>`:''}
+
+  <div class="grid-4" style="margin-bottom:18px">
+    <div class="stat-card"><div class="stat-label">${kpi1Label}</div><div class="stat-val">${kpi1Val}</div><div class="stat-sub">${kpi1Sub}</div></div>
+    <div class="stat-card"><div class="stat-label">Faturamento Mai/2026</div><div class="stat-val">${fmt(totalMesAtual)}</div><div class="stat-sub">${vendasMesAtual.length} vendas no mês</div></div>
+    <div class="stat-card"><div class="stat-label">Total Clientes</div><div class="stat-val">${DB.clientes.length}</div><div class="stat-sub">${DB.animais.length} animais cadastrados</div></div>
+    <div class="stat-card"><div class="stat-label">Ticket Médio${filtro?' (filtro)':''}</div><div class="stat-val">${ticketMedio}</div><div class="stat-sub">${vendasFiltradas.length} vendas</div></div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:18px">
+    <div class="card">
+      <div class="card-title"><div class="ct-icon">🏆</div>Top 5 Clientes${filtro?' (filtro)':''}</div>
+      ${topArr.length?`<div class="chart-bar-wrap">
+        ${topArr.map(([id,val])=>`
+        <div class="chart-bar-row">
+          <div class="chart-bar-label" title="${clienteNome(id)}">${clienteNome(id).split(' ').slice(0,2).join(' ')}</div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(val/maxCli*100)}%"></div></div>
+          <div class="chart-bar-val">${fmt(val)}</div>
+        </div>`).join('')}
+      </div>`:`<div style="color:var(--text3);font-size:13px;text-align:center;padding:16px">Nenhuma venda no período</div>`}
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="ct-icon">📦</div>Top 5 Produtos${filtro?' (filtro)':''}</div>
+      ${topProdArr.length?`<div class="chart-bar-wrap">
+        ${topProdArr.map(([nome,val])=>`
+        <div class="chart-bar-row">
+          <div class="chart-bar-label" title="${nome}">${nome.split(' ').slice(0,3).join(' ')}</div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(val/maxProd*100)}%;background:linear-gradient(90deg,var(--teal-600),var(--green-600))"></div></div>
+          <div class="chart-bar-val">${fmt(val)}</div>
+        </div>`).join('')}
+      </div>`:`<div style="color:var(--text3);font-size:13px;text-align:center;padding:16px">Nenhuma venda no período</div>`}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><div class="ct-icon">📈</div>Faturamento Mensal (visão geral)</div>
+    <div class="chart-bar-wrap">
+      ${mesArr.map(([mes,val])=>{
+        const [ano,m]=mes.split('-');
+        const nomes=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        const destaque=mes===filtro;
+        return`<div class="chart-bar-row">
+          <div class="chart-bar-label" style="${destaque?'font-weight:700;color:var(--accent)':''}">${nomes[+m]} ${ano}</div>
+          <div class="chart-bar-track" style="${destaque?'border:1px solid var(--accent-light)':''}">
+            <div class="chart-bar-fill" style="width:${Math.round(val/maxMes*100)}%;background:${destaque?'linear-gradient(90deg,var(--green-800),var(--teal-600))':'linear-gradient(90deg,var(--amber-600),var(--green-600))'}"></div>
+          </div>
+          <div class="chart-bar-val" style="${destaque?'color:var(--accent);font-weight:700':''}">${fmt(val)}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+// ─── CLIENTES ─────────────────────────────────────────────────
+function renderClientes(q=''){
+  const list=q?DB.clientes.filter(c=>c.nome.toLowerCase().includes(q.toLowerCase())||c.telefone.includes(q)||c.email.toLowerCase().includes(q)):DB.clientes;
+  document.getElementById('content').innerHTML=`
+  <div class="page-header">
+    <div><div class="page-title">Clientes</div><div class="page-sub">${DB.clientes.length} clientes cadastrados</div></div>
+    <button class="btn btn-primary" onclick="modalNovoCliente()">➕ Novo Cliente</button>
+  </div>
+  <div class="search-bar">
+    <input class="search-input" placeholder="🔍  Buscar por nome, telefone ou e-mail..." value="${q}" oninput="renderClientes(this.value)">
+  </div>
+  <div class="card" style="padding:0">
+  <div class="table-wrap" style="border:none">
+  <table>
+    <thead><tr><th>ID</th><th>Nome</th><th>Telefone</th><th>E-mail</th><th>Cidade</th><th>Animais</th><th>Compras</th><th>Ações</th></tr></thead>
+    <tbody>
+    ${list.length?list.map(c=>{
+      const nAnim=DB.animais.filter(a=>a.clienteId===c.id).length;
+      const nComp=DB.vendas.filter(v=>v.clienteId===c.id).length;
+      return`<tr>
+        <td><span style="font-family:var(--mono);font-size:11.5px;color:var(--text3)">${c.id}</span></td>
+        <td style="font-weight:500">${c.nome}</td>
+        <td>${c.telefone}</td>
+        <td style="color:var(--text3)">${c.email}</td>
+        <td>${c.cidade}</td>
+        <td><span class="pill pill-teal">🐾 ${nAnim}</span></td>
+        <td><span class="pill pill-green">🛒 ${nComp}</span></td>
+        <td><div class="actions">
+          <button class="btn btn-secondary btn-sm" onclick="verCliente('${c.id}')">👁 Ver</button>
+          <button class="btn btn-secondary btn-sm" onclick="editarCliente('${c.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="excluirCliente('${c.id}')">🗑</button>
+        </div></td>
+      </tr>`}).join(''):`<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Nenhum cliente encontrado</div></div></td></tr>`}
+    </tbody>
+  </table></div></div>`;
+}
+
+function modalNovoCliente(){
+  openModal('Novo Cliente',formCliente(),null,salvarCliente);
+}
+function formCliente(c={}){
+  return`<div class="form-grid">
+    <div class="field form-full"><label>Nome Completo *</label><input id="f-nome" value="${c.nome||''}" placeholder="Nome do cliente"></div>
+    <div class="field"><label>Telefone</label><input id="f-tel" value="${c.telefone||''}" placeholder="(92) 99999-9999"></div>
+    <div class="field"><label>E-mail</label><input id="f-email" type="email" value="${c.email||''}" placeholder="email@exemplo.com"></div>
+    <div class="field form-full"><label>Endereço</label><input id="f-end" value="${c.endereco||''}" placeholder="Rua, número – bairro"></div>
+    <div class="field"><label>Cidade</label><input id="f-cidade" value="${c.cidade||'Manaus'}" placeholder="Cidade"></div>
+    <div class="field form-full"><label>Observações</label><textarea id="f-obs">${c.obs||''}</textarea></div>
+  </div>`;
+}
+function salvarCliente(id=null){
+  const nome=document.getElementById('f-nome').value.trim();
+  if(!nome){toast('Nome é obrigatório!','⚠️');return;}
+  if(id){
+    const c=DB.clientes.find(c=>c.id===id);
+    c.nome=nome;c.telefone=document.getElementById('f-tel').value;
+    c.email=document.getElementById('f-email').value;c.endereco=document.getElementById('f-end').value;
+    c.cidade=document.getElementById('f-cidade').value;c.obs=document.getElementById('f-obs').value;
+    toast('Cliente atualizado!');
+  }else{
+    DB.clientes.push({id:genId('CLI',DB.nextClienteId++),nome,telefone:document.getElementById('f-tel').value,email:document.getElementById('f-email').value,endereco:document.getElementById('f-end').value,cidade:document.getElementById('f-cidade').value||'Manaus',obs:document.getElementById('f-obs').value});
+    toast('Cliente cadastrado!');
+  }
+  saveDB();closeModal();renderClientes();
+}
+function editarCliente(id){
+  const c=DB.clientes.find(c=>c.id===id);
+  openModal('Editar Cliente',formCliente(c),null,()=>salvarCliente(id));
+}
+function excluirCliente(id){
+  if(!confirm('Excluir este cliente?'))return;
+  DB.clientes.splice(DB.clientes.findIndex(c=>c.id===id),1);
+  saveDB();toast('Cliente removido.','🗑');renderClientes();
+}
+function verCliente(id){
+  const c=DB.clientes.find(c=>c.id===id);
+  const anim=DB.animais.filter(a=>a.clienteId===id);
+  const vends=DB.vendas.filter(v=>v.clienteId===id);
+  const total=vends.reduce((s,v)=>s+vendaTotal(v),0);
+  openModal(`👤 ${c.nome}`,`
+    <div class="info-row"><span class="info-label">📞 Telefone</span><span class="info-val">${c.telefone||'—'}</span></div>
+    <div class="info-row"><span class="info-label">📧 E-mail</span><span class="info-val">${c.email||'—'}</span></div>
+    <div class="info-row"><span class="info-label">📍 Endereço</span><span class="info-val">${c.endereco||'—'}</span></div>
+    <div class="info-row"><span class="info-label">🏙 Cidade</span><span class="info-val">${c.cidade||'—'}</span></div>
+    <div class="info-row"><span class="info-label">📝 Obs.</span><span class="info-val">${c.obs||'—'}</span></div>
+    <div class="divider"></div>
+    <div style="margin-bottom:10px;font-weight:600;color:var(--text2);font-size:13px">🐾 Animais (${anim.length})</div>
+    ${anim.map(a=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:8px 10px;background:var(--accent-glow);border-radius:8px">
+      <span style="font-size:18px">${a.especie==='Gato'?'🐱':'🐕'}</span>
+      <div><div style="font-weight:600;font-size:13px">${a.nome}</div><div style="font-size:12px;color:var(--text3)">${a.raca} · ${calcIdade(a.nascimento)} · ${a.peso}kg</div></div>
+    </div>`).join('')||'<p style="color:var(--text3);font-size:13px">Nenhum animal cadastrado.</p>'}
+    <div class="divider"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;color:var(--text2)">💰 Total gasto: <strong>${fmt(total)}</strong></span>
+      <span style="font-size:13px;color:var(--text3)">${vends.length} compras</span>
+    </div>`,null,null);
+}
+
+// ─── ANIMAIS ──────────────────────────────────────────────────
+function renderAnimais(q=''){
+  const list=q?DB.animais.filter(a=>a.nome.toLowerCase().includes(q)||a.raca.toLowerCase().includes(q)||clienteNome(a.clienteId).toLowerCase().includes(q)):DB.animais;
+  document.getElementById('content').innerHTML=`
+  <div class="page-header">
+    <div><div class="page-title">Animais</div><div class="page-sub">${DB.animais.length} animais cadastrados</div></div>
+    <button class="btn btn-primary" onclick="modalNovoAnimal()">➕ Novo Animal</button>
+  </div>
+  <div class="search-bar">
+    <input class="search-input" placeholder="🔍  Buscar por nome, raça ou tutor..." value="${q}" oninput="renderAnimais(this.value)">
+  </div>
+  <div class="card" style="padding:0">
+  <div class="table-wrap" style="border:none">
+  <table>
+    <thead><tr><th>ID</th><th>Nome</th><th>Espécie</th><th>Raça</th><th>Sexo</th><th>Idade</th><th>Peso</th><th>Tutor</th><th>Ações</th></tr></thead>
+    <tbody>
+    ${list.length?list.map(a=>`<tr>
+      <td><span style="font-family:var(--mono);font-size:11.5px;color:var(--text3)">${a.id}</span></td>
+      <td style="font-weight:500">${a.especie==='Gato'?'🐱':'🐕'} ${a.nome}</td>
+      <td><span class="pill ${a.especie==='Gato'?'pill-teal':'pill-amber'}">${a.especie}</span></td>
+      <td>${a.raca}</td>
+      <td>${a.sexo==='M'?'♂ Macho':'♀ Fêmea'}</td>
+      <td>${calcIdade(a.nascimento)}</td>
+      <td>${a.peso} kg</td>
+      <td style="color:var(--text2)">${clienteNome(a.clienteId)}</td>
+      <td><div class="actions">
+        <button class="btn btn-secondary btn-sm" onclick="verAnimal('${a.id}')">👁 Ver</button>
+        <button class="btn btn-secondary btn-sm" onclick="editarAnimal('${a.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="excluirAnimal('${a.id}')">🗑</button>
+      </div></td>
+    </tr>`).join(''):`<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🐾</div><div class="empty-title">Nenhum animal encontrado</div></div></td></tr>`}
+    </tbody>
+  </table></div></div>`;
+}
+
+function formAnimal(a={}){
+  return`<div class="form-grid">
+    <div class="field"><label>Nome *</label><input id="fa-nome" value="${a.nome||''}" placeholder="Nome do animal"></div>
+    <div class="field"><label>Tutor *</label><select id="fa-cli">
+      ${DB.clientes.map(c=>`<option value="${c.id}"${a.clienteId===c.id?' selected':''}>${c.nome}</option>`).join('')}
+    </select></div>
+    <div class="field"><label>Espécie</label><select id="fa-esp">
+      <option value="Cão"${a.especie==='Cão'?' selected':''}>Cão</option>
+      <option value="Gato"${a.especie==='Gato'?' selected':''}>Gato</option>
+      <option value="Outro"${a.especie==='Outro'?' selected':''}>Outro</option>
+    </select></div>
+    <div class="field"><label>Raça</label><input id="fa-raca" value="${a.raca||''}" placeholder="Ex: Labrador Retriever"></div>
+    <div class="field"><label>Sexo</label><select id="fa-sexo">
+      <option value="M"${a.sexo==='M'?' selected':''}>Macho</option>
+      <option value="F"${a.sexo==='F'?' selected':''}>Fêmea</option>
+    </select></div>
+    <div class="field"><label>Data de Nascimento</label><input id="fa-nasc" type="date" value="${a.nascimento||''}"></div>
+    <div class="field"><label>Peso (kg)</label><input id="fa-peso" type="number" step="0.1" value="${a.peso||''}" placeholder="Ex: 8.5"></div>
+    <div class="field form-full"><label>Observações</label><textarea id="fa-obs">${a.obs||''}</textarea></div>
+  </div>`;
+}
+function modalNovoAnimal(){openModal('Novo Animal',formAnimal(),null,salvarAnimal);}
+function salvarAnimal(id=null){
+  const nome=document.getElementById('fa-nome').value.trim();
+  if(!nome){toast('Nome é obrigatório!','⚠️');return;}
+  const data={nome,clienteId:document.getElementById('fa-cli').value,especie:document.getElementById('fa-esp').value,raca:document.getElementById('fa-raca').value,sexo:document.getElementById('fa-sexo').value,nascimento:document.getElementById('fa-nasc').value,peso:parseFloat(document.getElementById('fa-peso').value)||0,obs:document.getElementById('fa-obs').value};
+  if(id){Object.assign(DB.animais.find(a=>a.id===id),data);toast('Animal atualizado!');}
+  else{DB.animais.push({id:genId('ANI',DB.nextAnimalId++), ...data});toast('Animal cadastrado!');}
+  saveDB();closeModal();renderAnimais();
+}
+function editarAnimal(id){const a=DB.animais.find(a=>a.id===id);openModal('Editar Animal',formAnimal(a),null,()=>salvarAnimal(id));}
+function excluirAnimal(id){if(!confirm('Excluir este animal?'))return;DB.animais.splice(DB.animais.findIndex(a=>a.id===id),1);saveDB();toast('Animal removido.','🗑');renderAnimais();}
+function verAnimal(id){
+  const a=DB.animais.find(a=>a.id===id);
+  const cli=DB.clientes.find(c=>c.id===a.clienteId);
+  const rer=calcRER(a.peso);
+  openModal(`${a.especie==='Gato'?'🐱':'🐕'} ${a.nome}`,`
+    <div class="info-row"><span class="info-label">Espécie / Raça</span><span class="info-val">${a.especie} – ${a.raca}</span></div>
+    <div class="info-row"><span class="info-label">Sexo</span><span class="info-val">${a.sexo==='M'?'♂ Macho':'♀ Fêmea'}</span></div>
+    <div class="info-row"><span class="info-label">Nascimento</span><span class="info-val">${fmtDate(a.nascimento)} (${calcIdade(a.nascimento)})</span></div>
+    <div class="info-row"><span class="info-label">Peso</span><span class="info-val">${a.peso} kg</span></div>
+    <div class="info-row"><span class="info-label">Tutor</span><span class="info-val">${cli?.nome||'—'}</span></div>
+    <div class="info-row"><span class="info-label">Observações</span><span class="info-val">${a.obs||'—'}</span></div>
+    <div class="calc-result" style="margin-top:16px">
+      <div class="calc-result-title">RER – Energia de Repouso</div>
+      <div class="calc-result-val">${rer} <span class="calc-result-unit">kcal/dia</span></div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">Fórmula: 70 × ${a.peso}^0,75 = ${rer} kcal</div>
+    </div>`,null,null);
+}
+
+// ─── VENDAS ───────────────────────────────────────────────────
+let produtosVenda=[];
+function renderVendas(q=''){
+  const list=q?DB.vendas.filter(v=>clienteNome(v.clienteId).toLowerCase().includes(q)||v.id.toLowerCase().includes(q)):DB.vendas;
+  const sorted=[...list].sort((a,b)=>b.data.localeCompare(a.data));
+  document.getElementById('content').innerHTML=`
+  <div class="page-header">
+    <div><div class="page-title">Registro de Vendas</div><div class="page-sub">${DB.vendas.length} vendas registradas</div></div>
+    <button class="btn btn-primary" onclick="modalNovaVenda()">➕ Nova Venda</button>
+  </div>
+  <div class="search-bar">
+    <input class="search-input" placeholder="🔍  Buscar por cliente ou ID da venda..." value="${q}" oninput="renderVendas(this.value)">
+  </div>
+  <div class="card" style="padding:0">
+  <div class="table-wrap" style="border:none">
+  <table>
+    <thead><tr><th>ID</th><th>Data</th><th>Cliente</th><th>Produtos</th><th>Total</th><th>Pagamento</th><th>Ações</th></tr></thead>
+    <tbody>
+    ${sorted.length?sorted.map(v=>`<tr>
+      <td><span style="font-family:var(--mono);font-size:11.5px;color:var(--text3)">${v.id}</span></td>
+      <td>${fmtDate(v.data)}</td>
+      <td style="font-weight:500">${clienteNome(v.clienteId)}</td>
+      <td>${v.produtos.map(p=>`<span class="tag">${p.nome.split(' ').slice(0,3).join(' ')}</span>`).join('')}</td>
+      <td style="font-weight:700;color:var(--accent);font-family:var(--mono)">${fmt(vendaTotal(v))}</td>
+      <td><span class="pill pill-gray">${v.formaPag}</span></td>
+      <td><div class="actions">
+        <button class="btn btn-secondary btn-sm" onclick="verVenda('${v.id}')">👁 Ver</button>
+        <button class="btn btn-danger btn-sm" onclick="excluirVenda('${v.id}')">🗑</button>
+      </div></td>
+    </tr>`).join(''):`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🛒</div><div class="empty-title">Nenhuma venda encontrada</div></div></td></tr>`}
+    </tbody>
+  </table></div></div>`;
+}
+
+function modalNovaVenda(){
+  produtosVenda=[{nome:'',qtd:1,valor:0}];
+  openModal('Nova Venda',formVenda(),null,salvarVenda);
+}
+function formVenda(v={}){
+  return`<div class="form-grid">
+    <div class="field"><label>Data *</label><input id="fv-data" type="date" value="${v.data||today()}"></div>
+    <div class="field"><label>Cliente *</label><select id="fv-cli">
+      ${DB.clientes.map(c=>`<option value="${c.id}"${v.clienteId===c.id?' selected':''}>${c.nome}</option>`).join('')}
+    </select></div>
+    <div class="field"><label>Forma de Pagamento</label><select id="fv-pag">
+      ${['Pix','Dinheiro','Cartão Crédito','Cartão Débito','Boleto'].map(p=>`<option${v.formaPag===p?' selected':''}>${p}</option>`).join('')}
+    </select></div>
+    <div class="field form-full">
+      <label>Produtos</label>
+      <div id="prod-list" style="display:flex;flex-direction:column;gap:8px">
+        ${produtosVenda.map((p,i)=>prodRow(i,p)).join('')}
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="addProd()" style="margin-top:8px">➕ Adicionar produto</button>
+    </div>
+    <div class="field form-full" style="border-top:1px solid var(--border);padding-top:12px">
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px">
+        <span style="font-size:13px;color:var(--text3)">Total da venda:</span>
+        <span id="venda-total" style="font-size:20px;font-weight:700;color:var(--accent);font-family:var(--mono)">${fmt(0)}</span>
+      </div>
+    </div>
+  </div>`;
+}
+function prodRow(i,p){
+  return`<div style="display:grid;grid-template-columns:1fr 80px 100px 32px;gap:6px;align-items:center" id="prod-row-${i}">
+    <input placeholder="Nome do produto" value="${p.nome||''}" oninput="updProd(${i},'nome',this.value)" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px">
+    <input type="number" min="1" value="${p.qtd||1}" placeholder="Qtd" oninput="updProd(${i},'qtd',this.value)" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;text-align:center">
+    <input type="number" min="0" step="0.01" value="${p.valor||''}" placeholder="R$ Valor" oninput="updProd(${i},'valor',this.value)" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px">
+    <button onclick="remProd(${i})" style="background:var(--red-50);border:1px solid var(--red-400);border-radius:6px;cursor:pointer;padding:6px;color:var(--red-600);font-size:13px">✕</button>
+  </div>`;
+}
+function updProd(i,k,v){produtosVenda[i][k]=k==='nome'?v:parseFloat(v)||0;recalcTotal();}
+function addProd(){produtosVenda.push({nome:'',qtd:1,valor:0});document.getElementById('prod-list').innerHTML=produtosVenda.map((p,i)=>prodRow(i,p)).join('');recalcTotal();}
+function remProd(i){if(produtosVenda.length===1){toast('Precisa ter ao menos 1 produto','⚠️');return;}produtosVenda.splice(i,1);document.getElementById('prod-list').innerHTML=produtosVenda.map((p,i)=>prodRow(i,p)).join('');recalcTotal();}
+function recalcTotal(){const t=produtosVenda.reduce((s,p)=>s+p.qtd*p.valor,0);const el=document.getElementById('venda-total');if(el)el.textContent=fmt(t);}
+function salvarVenda(){
+  const data=document.getElementById('fv-data').value;
+  const clienteId=document.getElementById('fv-cli').value;
+  if(!data||!clienteId){toast('Preencha os campos obrigatórios!','⚠️');return;}
+  DB.vendas.push({id:genId('VEN',DB.nextVendaId++),data,clienteId,produtos:[...produtosVenda],formaPag:document.getElementById('fv-pag').value});
+  saveDB();closeModal();toast('Venda registrada!');renderVendas();
+}
+function excluirVenda(id){if(!confirm('Excluir esta venda?'))return;DB.vendas.splice(DB.vendas.findIndex(v=>v.id===id),1);saveDB();toast('Venda removida.','🗑');renderVendas();}
+function verVenda(id){
+  const v=DB.vendas.find(v=>v.id===id);
+  openModal(`🛒 Venda ${v.id}`,`
+    <div class="info-row"><span class="info-label">📅 Data</span><span class="info-val">${fmtDate(v.data)}</span></div>
+    <div class="info-row"><span class="info-label">👤 Cliente</span><span class="info-val">${clienteNome(v.clienteId)}</span></div>
+    <div class="info-row"><span class="info-label">💳 Pagamento</span><span class="info-val">${v.formaPag}</span></div>
+    <div class="divider"></div>
+    <div style="font-weight:600;color:var(--text2);font-size:13px;margin-bottom:10px">📦 Produtos</div>
+    <div class="table-wrap">
+    <table><thead><tr><th>Produto</th><th>Qtd</th><th>Valor Unit.</th><th>Subtotal</th></tr></thead>
+    <tbody>${v.produtos.map(p=>`<tr><td>${p.nome}</td><td style="text-align:center">${p.qtd}</td><td>${fmt(p.valor)}</td><td style="font-weight:600">${fmt(p.qtd*p.valor)}</td></tr>`).join('')}</tbody>
+    </table></div>
+    <div style="text-align:right;margin-top:14px;font-size:18px;font-weight:700;color:var(--accent)">Total: ${fmt(vendaTotal(v))}</div>`,null,null);
+}
+
+// ─── RECOMPRA ─────────────────────────────────────────────────
+function renderRecompra(){
+  const hoje=new Date();
+  const alertas=[];
+
+  // Para cada venda, verifica produtos que têm controle de recompra
+  DB.vendas.forEach(venda=>{
+    const cli=DB.clientes.find(c=>c.id===venda.clienteId);
+    const animal=venda.animalId?DB.animais.find(a=>a.id===venda.animalId):null;
+    venda.produtos.forEach(item=>{
+      const prod=DB.produtos.find(p=>p.nome===item.nome);
+      if(!prod)return;
+      let diasDura=null;
+      let metodo='';
+      if(prod.categoria==='Ração'&&prod.pesoEmbalagem){
+        const pesoAnim=animal?.peso||(venda.pesoAnimalInformado||null);
+        if(pesoAnim){
+          diasDura=calcDiasRacao(prod,pesoAnim)*item.qtd;
+          metodo=`RER · ${pesoAnim}kg`;
+        }else{diasDura=null;metodo='peso não informado';}
+      }else if((prod.categoria==='Medicamento'||prod.categoria==='Suplemento')&&prod.duracaoDias){
+        diasDura=prod.duracaoDias*item.qtd;
+        metodo=`${prod.duracaoDias}d por unidade`;
+      }
+      if(diasDura===null)return;
+
+      const compraDate=new Date(venda.data);
+      const endDate=new Date(compraDate.getTime()+diasDura*86400000);
+      const diasRestantes=Math.round((endDate-hoje)/86400000);
+      let status;
+      if(diasRestantes<=0)status='vencido';
+      else if(diasRestantes<=7)status='critico';
+      else if(diasRestantes<=15)status='atencao';
+      else status='ok';
+      alertas.push({venda,cli,animal,prod,item,endDate,diasRestantes,status,metodo});
+    });
+  });
+
+  // Agrupar por cliente + produto (pega só o mais recente)
+  const map={};
+  alertas.forEach(a=>{
+    const key=`${a.cli?.id}_${a.prod.id}`;
+    if(!map[key]||new Date(a.venda.data)>new Date(map[key].venda.data))map[key]=a;
+  });
+  const lista=Object.values(map).sort((a,b)=>(a.diasRestantes??-999)-(b.diasRestantes??-999));
+
+  const semaforo={vencido:'🔴',critico:'🟠',atencao:'🟡',ok:'🟢'};
+  const pillMap={vencido:'pill-red',critico:'pill-amber',atencao:'pill-amber',ok:'pill-green'};
+  const textoMap={vencido:'Vencido',critico:'Crítico (≤7d)',atencao:'Atenção (≤15d)',ok:'Em dia'};
+  const catIcon={'Ração':'🌾','Medicamento':'💊','Suplemento':'⚗️','Petisco':'🦴'};
+
+  const counts={vencido:lista.filter(e=>e.status==='vencido').length,critico:lista.filter(e=>e.status==='critico').length,atencao:lista.filter(e=>e.status==='atencao').length,ok:lista.filter(e=>e.status==='ok').length};
+
+  document.getElementById('content').innerHTML=`
+  <div class="page-header">
+    <div><div class="page-title">Controle de Recompra</div><div class="page-sub">Alertas inteligentes por categoria de produto</div></div>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:18px">
+    <div class="stat-card"><div class="stat-label">🔴 Vencidos</div><div class="stat-val" style="color:var(--red-600)">${counts.vencido}</div><div class="stat-sub">Ração/medicamento acabou</div></div>
+    <div class="stat-card"><div class="stat-label">🟠 Críticos</div><div class="stat-val" style="color:var(--amber-800)">${counts.critico}</div><div class="stat-sub">Acaba em até 7 dias</div></div>
+    <div class="stat-card"><div class="stat-label">🟡 Atenção</div><div class="stat-val" style="color:var(--amber-600)">${counts.atencao}</div><div class="stat-sub">Acaba em até 15 dias</div></div>
+    <div class="stat-card"><div class="stat-label">🟢 Em dia</div><div class="stat-val" style="color:var(--green-700)">${counts.ok}</div><div class="stat-sub">Estoque suficiente</div></div>
+  </div>
+
+  ${lista.length===0?`
+  <div class="empty-state">
+    <div class="empty-icon">🔄</div>
+    <div class="empty-title">Nenhum alerta de recompra</div>
+    <div class="empty-sub">As recompras aparecerão aqui quando houver vendas de rações (com peso cadastrado), medicamentos ou suplementos com duração definida.</div>
+  </div>`:`
+  <div class="card" style="padding:0">
+  <div class="table-wrap" style="border:none">
+  <table>
+    <thead><tr><th>Status</th><th>Produto</th><th>Categoria</th><th>Cliente</th><th>Animal</th><th>Compra</th><th>Método</th><th>Fim estimado</th><th>Dias</th><th>Ação</th></tr></thead>
+    <tbody>
+    ${lista.map(e=>`<tr>
+      <td style="text-align:center">
+        <div style="font-size:18px">${semaforo[e.status]}</div>
+        <span class="pill ${pillMap[e.status]}" style="font-size:10px;padding:2px 6px;margin-top:3px">${textoMap[e.status]}</span>
+      </td>
+      <td style="font-weight:600;max-width:180px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.prod.nome}">${e.prod.nome}</div></td>
+      <td><span style="font-size:16px">${catIcon[e.prod.categoria]||'📦'}</span> <span style="font-size:12px;color:var(--text3)">${e.prod.categoria}</span></td>
+      <td style="color:var(--text2)">${e.cli?.nome||'—'}</td>
+      <td>${e.animal?`${e.animal.especie==='Gato'?'🐱':'🐕'} ${e.animal.nome}`:'—'}</td>
+      <td style="font-size:12px;color:var(--text3)">${fmtDate(e.venda.data)}</td>
+      <td style="font-size:11.5px;color:var(--text3)">${e.metodo}</td>
+      <td style="font-weight:600">${fmtDate(e.endDate.toISOString().slice(0,10))}</td>
+      <td style="font-weight:700;font-family:var(--mono);color:${e.diasRestantes<=0?'var(--red-600)':e.diasRestantes<=7?'var(--amber-800)':'var(--text)'}">${e.diasRestantes<=0?'Acabou':e.diasRestantes+' dias'}</td>
+      <td><button class="btn btn-primary btn-sm" onclick="goTo('nova-venda')">🛒 Vender</button></td>
+    </tr>`).join('')}
+    </tbody>
+  </table></div></div>
+  <div style="margin-top:10px;font-size:11.5px;color:var(--text3);padding:0 4px">
+    🌾 Ração: RER = 70 × peso^0,75 kcal ÷ 4 kcal/g · 💊 Medicamento / ⚗️ Suplemento: duração informada no cadastro do produto
+  </div>`}`;
+}
+
+// ─── DOSAGEM ──────────────────────────────────────────────────
+function renderDosagem(){
+  document.getElementById('content').innerHTML=`
+  <div class="page-header">
+    <div><div class="page-title">Calculadora de Dosagem</div><div class="page-sub">RER – Energia de Repouso (Resting Energy Requirement)</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><div class="ct-icon">⚖️</div>Calcular RER</div>
+      <div class="form-grid">
+        <div class="field form-full"><label>Selecionar Animal Cadastrado</label>
+          <select id="dc-anim" onchange="preencherPeso()">
+            <option value="">— Digite manualmente —</option>
+            ${DB.animais.map(a=>`<option value="${a.id}">${a.especie==='Gato'?'🐱':'🐕'} ${a.nome} (${a.peso}kg) – ${clienteNome(a.clienteId)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field form-full"><label>Peso (kg) *</label><input id="dc-peso" type="number" step="0.1" min="0.1" placeholder="Ex: 12.5" oninput="calcDosagem()"></div>
+        <div class="field form-full"><label>Fator de Ajuste (multiplicador)</label>
+          <select id="dc-fator" onchange="calcDosagem()">
+            <option value="1.0">1,0 – Manutenção / Descanso</option>
+            <option value="1.2" selected>1,2 – Adulto castrado</option>
+            <option value="1.4">1,4 – Adulto inteiro</option>
+            <option value="1.6">1,6 – Atividade leve</option>
+            <option value="2.0">2,0 – Crescimento / filhote</option>
+            <option value="1.1">1,1 – Perda de peso</option>
+            <option value="1.8">1,8 – Gestação</option>
+          </select>
+        </div>
+      </div>
+      <div class="calc-result" id="dc-result" style="display:none">
+        <div class="calc-result-title">RER (energia de repouso)</div>
+        <div class="calc-result-val" id="dc-rer">0 <span class="calc-result-unit">kcal/dia</span></div>
+        <div class="divider" style="margin:12px 0"></div>
+        <div class="calc-result-title">DER (energia diária recomendada)</div>
+        <div class="calc-result-val" id="dc-der">0 <span class="calc-result-unit">kcal/dia</span></div>
+        <div style="margin-top:12px;padding:10px;background:rgba(255,255,255,0.6);border-radius:8px">
+          <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Quantidade diária estimada de ração seca (≈ 4 kcal/g):</div>
+          <div id="dc-grama" style="font-size:18px;font-weight:700;color:var(--teal-800)">0 g/dia</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="ct-icon">📋</div>Tabela de Referência RER</div>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Peso (kg)</th><th>RER (kcal/dia)</th><th>DER × 1,2</th><th>Ração (g/dia)</th></tr></thead>
+        <tbody>
+          ${[1,2,3,5,7,10,15,20,25,30,40,50].map(w=>{
+            const rer=calcRER(w);
+            const der=Math.round(rer*1.2);
+            const g=Math.round(der/4);
+            return`<tr><td>${w} kg</td><td style="font-family:var(--mono)">${rer}</td><td style="font-family:var(--mono)">${der}</td><td style="font-family:var(--mono);font-weight:600;color:var(--accent)">${g}g</td></tr>`;
+          }).join('')}
+        </tbody>
+      </table></div>
+      <div style="margin-top:12px;font-size:11.5px;color:var(--text3)">
+        Fórmula: RER = 70 × Peso<sup>0,75</sup> kcal/dia<br>
+        DER = RER × Fator de ajuste<br>
+        Ração = DER ÷ 4 kcal/g (ração seca padrão)
+      </div>
+    </div>
+  </div>`;
+}
+function preencherPeso(){
+  const id=document.getElementById('dc-anim').value;
+  if(!id){document.getElementById('dc-peso').value='';calcDosagem();return;}
+  const a=DB.animais.find(a=>a.id===id);
+  document.getElementById('dc-peso').value=a.peso;
+  calcDosagem();
+}
+function calcDosagem(){
+  const peso=parseFloat(document.getElementById('dc-peso')?.value);
+  const fator=parseFloat(document.getElementById('dc-fator')?.value)||1.2;
+  const res=document.getElementById('dc-result');
+  if(!peso||peso<=0){if(res)res.style.display='none';return;}
+  const rer=calcRER(peso);
+  const der=Math.round(rer*fator);
+  const g=Math.round(der/4);
+  res.style.display='block';
+  document.getElementById('dc-rer').innerHTML=`${rer} <span class="calc-result-unit">kcal/dia</span>`;
+  document.getElementById('dc-der').innerHTML=`${der} <span class="calc-result-unit">kcal/dia</span>`;
+  document.getElementById('dc-grama').textContent=`${g} g/dia`;
+}
+
+// ─── PRODUTOS ─────────────────────────────────────────────────
+const CATEGORIAS=['Ração','Medicamento','Suplemento','Petisco'];
+const CAT_CONFIG={
+  'Ração':     {icon:'🌾', pill:'pill-green',  cor:'var(--green-700)',  bg:'var(--green-50)'},
+  'Medicamento':{icon:'💊', pill:'pill-red',    cor:'var(--red-600)',    bg:'var(--red-50)'},
+  'Suplemento': {icon:'⚗️', pill:'pill-teal',   cor:'var(--teal-800)',  bg:'var(--teal-50)'},
+  'Petisco':    {icon:'🦴', pill:'pill-amber',  cor:'var(--amber-800)', bg:'var(--amber-50)'},
+};
+
+// Calcular dias de consumo de ração pelo RER
+function calcDiasRacao(p, pesoKg){
+  if(!p.pesoEmbalagem||!pesoKg)return null;
+  const rer=calcRER(pesoKg);
+  const gramsPerDay=rer/4; // ~4 kcal/g ração seca
+  const kgTotal=(p.qtdEmbalagem||1)*p.pesoEmbalagem;
+  return Math.round(kgTotal*1000/gramsPerDay);
+}
+
+let prodDistFiltro='';
+let prodCatFiltro='';
+let prodEspFiltro='';
+let prodSubFiltro='';
+let prodMarcaFiltro='';
+
+function _pq(){return(document.querySelector('.prd-search')?.value||'');}
+
+function renderProdutos(q=''){
+  const distF=prodDistFiltro;
+  const catF=prodCatFiltro;
+  const espF=prodEspFiltro;
+  const sq=(q||'').toLowerCase();
+
+  // Cascata: cada nível só mostra o que está disponível após o filtro anterior
+  const baseAll=DB.produtos;
+  const afterDist=distF?baseAll.filter(p=>p.fornecedor===distF):baseAll;
+  const afterCat=catF?afterDist.filter(p=>p.categoria===catF):afterDist;
+  const list=afterCat.filter(p=>{
+    const matchEsp=!espF||p.especie===espF||(p.especie||'').includes(espF.split('/')[0]);
+    const matchQ=!sq||p.nome.toLowerCase().includes(sq)||p.fornecedor.toLowerCase().includes(sq)||p.marca.toLowerCase().includes(sq)||p.subCategoria.toLowerCase().includes(sq);
+    return matchEsp&&matchQ;
+  });
+
+  // Distribuidoras disponíveis (sempre mostra todas)
+  const distribuidoras=[...new Map(baseAll.map(p=>[p.fornecedor,p])).entries()]
+    .map(([dist])=>({dist,n:baseAll.filter(p=>p.fornecedor===dist).length}))
+    .filter(x=>x.dist)
+    .sort((a,b)=>a.dist.localeCompare(b.dist));
+
+  // Categorias disponíveis após filtro de distribuidora
+  const categoriasDisp=[...new Set(afterDist.map(p=>p.categoria).filter(Boolean))];
+
+  // Espécies disponíveis após distribuidora + categoria
+  const especiesDisp=[...new Set(afterCat.map(p=>p.especie).filter(Boolean))]
+    .flatMap(e=>e.includes('/')? e.split('/') : [e])
+    .filter((v,i,a)=>a.indexOf(v)===i)
+    .sort();
+
+  const anyFilter=distF||catF||espF||sq;
+
+  // Cores por distribuidora
+  const distCor={
+    'Basso Pancotte':  {bg:'#fff8e1',border:'#ffca28',txt:'#e65100',ico:'🐾'},
+    'Central Pec':     {bg:'#fce4ec',border:'#e91e63',txt:'#880e4f',ico:'💊'},
+    'Distribuidora Prime':{bg:'#e8f5e9',border:'#66bb6a',txt:'#1b5e20',ico:'🌿'},
+    'Zoo Center':      {bg:'#e3f2fd',border:'#42a5f5',txt:'#0d47a1',ico:'🦁'},
+  };
+
+  document.getElementById('content').innerHTML=`
+  <div class="page-header">
+    <div>
+      <div class="page-title">Produtos</div>
+      <div class="page-sub">${baseAll.length} produto(s) no total · <strong>${list.length}</strong> exibido(s)</div>
+    </div>
+    <button class="btn btn-primary" onclick="modalNovoProduto()">➕ Novo Produto</button>
+  </div>
+
+  <!-- FILTRO 1: DISTRIBUIDORA -->
+  <div style="margin-bottom:10px">
+    <div style="font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px">🏭 1. Distribuidora</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="prodDistFiltro='';prodCatFiltro='';prodEspFiltro='';renderProdutos(_pq())"
+        class="btn btn-sm ${!distF?'btn-primary':'btn-secondary'}">
+        Todas <span style="opacity:0.65">(${baseAll.length})</span>
+      </button>
+      ${distribuidoras.map(({dist,n})=>{
+        const dc=distCor[dist]||{bg:'var(--gray-100)',border:'var(--gray-400)',txt:'var(--gray-800)',ico:'🏪'};
+        const ativo=distF===dist;
+        return`<button
+          onclick="prodDistFiltro='${dist}';prodCatFiltro='';prodEspFiltro='';renderProdutos(_pq())"
+          class="btn btn-sm ${ativo?'btn-primary':'btn-secondary'}"
+          style="${ativo?'':`background:${dc.bg};border-color:${dc.border};color:${dc.txt};`}">
+          ${dc.ico} ${dist} <span style="opacity:0.65">(${n})</span>
+        </button>`;
+      }).join('')}
+    </div>
+  </div>
+
+  <!-- FILTRO 2: CATEGORIA (condicional) -->
+  ${distF||true?`<div style="margin-bottom:10px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm)">
+    <div style="font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px">📂 2. Categoria${distF?` — ${distF}`:''}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="prodCatFiltro='';prodEspFiltro='';renderProdutos(_pq())"
+        class="btn btn-sm ${!catF?'btn-primary':'btn-secondary'}">
+        Todas <span style="opacity:0.65">(${afterDist.length})</span>
+      </button>
+      ${CATEGORIAS.filter(c=>categoriasDisp.includes(c)).map(c=>{
+        const ct=CAT_CONFIG[c];
+        const n=afterDist.filter(p=>p.categoria===c).length;
+        return`<button onclick="prodCatFiltro='${c}';prodEspFiltro='';renderProdutos(_pq())"
+          class="btn btn-sm ${catF===c?'btn-primary':'btn-secondary'}">
+          ${ct.icon} ${c} <span style="opacity:0.65">(${n})</span>
+        </button>`;
+      }).join('')}
+    </div>
+  </div>`:''}
+
+  <!-- FILTRO 3: ESPÉCIE (condicional, só aparece quando tem ambas) -->
+  ${especiesDisp.length>1?`<div style="margin-bottom:10px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm)">
+    <div style="font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px">🐾 3. Espécie${catF?' — '+catF:''}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="prodEspFiltro='';renderProdutos(_pq())"
+        class="btn btn-sm ${!espF?'btn-primary':'btn-secondary'}">
+        Todas <span style="opacity:0.65">(${afterCat.length})</span>
+      </button>
+      ${especiesDisp.map(e=>{
+        const n=afterCat.filter(p=>(p.especie||'').includes(e)).length;
+        return`<button onclick="prodEspFiltro='${e}';renderProdutos(_pq())"
+          class="btn btn-sm ${espF===e?'btn-primary':'btn-secondary'}">
+          ${e==='Cão'?'🐕':e==='Gato'?'🐱':'🐾'} ${e} <span style="opacity:0.65">(${n})</span>
+        </button>`;
+      }).join('')}
+    </div>
+  </div>`:''}
+
+  <!-- BUSCA + LIMPAR -->
+  <div class="search-bar" style="margin-bottom:16px">
+    <input class="search-input prd-search" placeholder="🔍  Buscar por nome, marca, linha..." value="${q}" oninput="renderProdutos(this.value)">
+    ${anyFilter?`<button onclick="prodDistFiltro='';prodCatFiltro='';prodEspFiltro='';prodSubFiltro='';prodMarcaFiltro='';renderProdutos('')"
+      class="btn btn-secondary btn-sm" style="white-space:nowrap;flex-shrink:0">✕ Limpar tudo</button>`:''}
+  </div>
+
+  <!-- RESUMO DO FILTRO ATIVO -->
+  ${distF||catF||espF?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+    <span style="font-size:12px;color:var(--text3)">Filtrando por:</span>
+    ${distF?`<span style="font-size:12px;font-weight:600;background:var(--accent-glow);color:var(--accent);padding:3px 10px;border-radius:20px;border:1px solid var(--border)">🏭 ${distF}</span>`:''}
+    ${catF?`<span style="font-size:12px;font-weight:600;background:var(--accent-glow);color:var(--accent);padding:3px 10px;border-radius:20px;border:1px solid var(--border)">${CAT_CONFIG[catF]?.icon} ${catF}</span>`:''}
+    ${espF?`<span style="font-size:12px;font-weight:600;background:var(--accent-glow);color:var(--accent);padding:3px 10px;border-radius:20px;border:1px solid var(--border)">${espF==='Cão'?'🐕':'🐱'} ${espF}</span>`:''}
+    <span style="font-size:12px;color:var(--text3)">${list.length} produto(s)</span>
+  </div>`:''}
+
+  <!-- CARDS -->
+  ${list.length===0?`<div class="empty-state"><div class="empty-icon">📦</div>
+    <div class="empty-title">Nenhum produto encontrado</div>
+    <div class="empty-sub">Tente ajustar os filtros ou a busca</div>
+  </div>`:''}
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px">
+    ${list.map(p=>{
+      const ct=CAT_CONFIG[p.categoria]||CAT_CONFIG['Petisco'];
+      const espBadge=p.especie?`<span style="font-size:13px">${p.especie.includes('Cão')&&p.especie.includes('Gato')?'🐕🐱':p.especie.includes('Gato')?'🐱':'🐕'}</span>`:'';
+      const semPreco=!p.valorVenda||p.valorVenda===0;
+      return`<div class="card" style="display:flex;flex-direction:column;padding:0;overflow:hidden;border-top:3px solid ${ct.cor}${semPreco?';opacity:0.75':''}">
+        <div style="padding:8px 13px 7px;background:${ct.bg};display:flex;align-items:center;gap:7px">
+          <span style="font-size:16px">${ct.icon}</span>${espBadge}
+          ${p.subCategoria?`<span style="font-size:9.5px;background:rgba(0,0,0,0.07);border-radius:10px;padding:2px 7px;font-weight:600;color:var(--text2);white-space:nowrap">${p.subCategoria}</span>`:''}
+          ${p.marca?`<span style="font-size:10px;color:var(--text2);font-weight:700;margin-left:auto;white-space:nowrap">${p.marca}</span>`:''}
+        </div>
+        <div style="padding:11px 14px 13px;flex:1;display:flex;flex-direction:column">
+          <div style="font-size:13px;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:3px">${p.nome}</div>
+          <div style="font-size:10.5px;color:var(--text3);margin-bottom:10px">🏭 ${p.fornecedor||'—'}</div>
+          ${semPreco
+            ?`<div style="font-size:12px;color:var(--amber-800);background:var(--amber-50);border:1px solid var(--amber-400);border-radius:6px;padding:4px 8px">⚠️ Preço a definir</div>`
+            :`<div>
+              <div style="font-size:9.5px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px">Preço de venda</div>
+              <div style="font-size:22px;font-weight:700;color:var(--accent);font-family:var(--mono)">${fmt(p.valorVenda)}</div>
+            </div>`
+          }
+        </div>
+        <div style="border-top:1px solid var(--border);padding:8px 13px;display:flex;gap:7px;background:var(--surface2)">
+          <button class="btn btn-secondary btn-sm" onclick="verProduto('${p.id}')" style="flex:1">🔍 Detalhes</button>
+          <button class="btn btn-secondary btn-sm" onclick="editarProduto('${p.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="excluirProduto('${p.id}')">🗑</button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function verProduto(id){
+  const p=DB.produtos.find(x=>x.id===id);
+  if(!p)return;
+  const lucro=p.valorVenda-p.valorCusto;
+  const margem=p.valorCusto>0?((lucro/p.valorVenda)*100):0;
+  const markup=p.valorCusto>0?((lucro/p.valorCusto)*100):0;
+  const margemCor=margem>=45?'var(--green-700)':margem>=35?'var(--amber-800)':'var(--red-600)';
+  const ct=CAT_CONFIG[p.categoria]||CAT_CONFIG['Petisco'];
+
+  // Custo real após descontar cartão+imposto+operação do valor de venda
+  const percCartao=p.margemCartao||0;
+  const percImposto=p.margemImposto||0;
+  const percOp=p.margemOperacao||0;
+  const percLucro=p.margemLucro||0;
+  const valCartao=p.valorVenda*(percCartao/100);
+  const valImposto=p.valorVenda*(percImposto/100);
+  const valOp=p.valorVenda*(percOp/100);
+  const valLucro=p.valorVenda*(percLucro/100);
+
+  // Seção de consumo por espécie/peso
+  let secaoEspecifica='';
+  if(p.categoria==='Ração'&&p.pesoEmbalagem){
+    const pesos=p.especie==='Gato'?[2,3,4,5,6,7,8]:[3,5,7,10,15,20,25,30,40];
+    secaoEspecifica=`
+    <div class="divider"></div>
+    <div style="font-weight:700;font-size:13px;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em">🌾 Estimativa de Consumo · ${p.pesoEmbalagem}kg (${p.qtdEmbalagem||1} emb.)</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px">Baseado em RER = 70 × peso^0,75 kcal ÷ 4 kcal/g</div>
+    <div class="table-wrap">
+    <table><thead><tr><th>Peso ${p.especie==='Gato'?'gato':'cão'}</th><th>g/dia</th><th>Dura (${p.pesoEmbalagem}kg)</th></tr></thead>
+    <tbody>${pesos.map(kg=>{const gpd=Math.round(calcRER(kg)/4);const dias=Math.round((p.pesoEmbalagem*(p.qtdEmbalagem||1)*1000)/gpd);return`<tr><td>${kg} kg</td><td style="font-family:var(--mono)">${gpd} g</td><td style="font-family:var(--mono);font-weight:600;color:var(--accent)">${dias} dias</td></tr>`;}).join('')}
+    </tbody></table></div>`;
+  }else if((p.categoria==='Medicamento'||p.categoria==='Suplemento')&&p.duracaoDias){
+    const icon=p.categoria==='Medicamento'?'💊':'⚗️';
+    const cor=p.categoria==='Medicamento'?'amber':'teal';
+    secaoEspecifica=`
+    <div class="divider"></div>
+    <div style="background:var(--${cor}-50);border:1px solid var(--${cor}-${cor==='amber'?'400':'200'});border-radius:10px;padding:16px;display:flex;gap:14px;align-items:center">
+      <div style="font-size:34px">${icon}</div>
+      <div>
+        <div style="font-size:22px;font-weight:700;color:var(--${cor}-800);font-family:var(--mono)">${p.duracaoDias} dias</div>
+        <div style="font-size:13px;color:var(--${cor}-800)">Duração estimada por embalagem</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:3px">Alerta de recompra programado automaticamente</div>
+      </div>
+    </div>`;
+  }
+
+  openModal(`${ct.icon} ${p.nome}`,`
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+      <span class="pill ${ct.pill}">${p.categoria}</span>
+      ${p.subCategoria?`<span class="pill pill-gray">${p.subCategoria}</span>`:''}
+      ${p.especie?`<span class="pill pill-gray">${p.especie==='Cão'?'🐕':'🐱'} ${p.especie}</span>`:''}
+      ${p.marca?`<span class="pill pill-teal">🏷 ${p.marca}</span>`:''}
+      <span class="pill pill-gray" style="font-family:var(--mono);font-size:10px;margin-left:auto">${p.id}</span>
+    </div>
+    ${p.descricao?`<div style="font-size:13px;color:var(--text3);margin-bottom:16px;padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid ${ct.cor}">${p.descricao}</div>`:''}
+
+    <div style="font-weight:700;font-size:12px;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em">💰 Precificação</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+      <div style="background:var(--red-50);border-radius:8px;padding:10px;text-align:center">
+        <div style="font-size:10px;color:var(--red-600);font-weight:700;text-transform:uppercase;margin-bottom:3px">Custo</div>
+        <div style="font-size:17px;font-weight:700;font-family:var(--mono);color:var(--red-600)">${fmt(p.valorCusto)}</div>
+      </div>
+      <div style="background:var(--accent-glow);border-radius:8px;padding:10px;text-align:center">
+        <div style="font-size:10px;color:var(--accent);font-weight:700;text-transform:uppercase;margin-bottom:3px">Venda</div>
+        <div style="font-size:17px;font-weight:700;font-family:var(--mono);color:var(--accent)">${fmt(p.valorVenda)}</div>
+      </div>
+      <div style="background:var(--teal-50);border-radius:8px;padding:10px;text-align:center">
+        <div style="font-size:10px;color:var(--teal-600);font-weight:700;text-transform:uppercase;margin-bottom:3px">Lucro</div>
+        <div style="font-size:17px;font-weight:700;font-family:var(--mono);color:var(--teal-600)">${fmt(lucro)}</div>
+      </div>
+    </div>
+
+    <!-- BREAKDOWN DE MARGENS -->
+    <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px;border:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px">Composição da margem total (${p.margemTotal||Math.round(margem)}%)</div>
+      ${[
+        {label:'💳 Maquininha de cartão',perc:percCartao,val:valCartao,cor:'var(--red-400)'},
+        {label:'📄 Imposto',perc:percImposto,val:valImposto,cor:'var(--amber-600)'},
+        {label:'⚙️ Operação',perc:percOp,val:valOp,cor:'var(--gray-600)'},
+        {label:'💰 Margem de lucro',perc:percLucro,val:valLucro,cor:'var(--green-600)'},
+      ].filter(x=>x.perc>0).map(x=>`
+      <div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:12.5px;color:var(--text2)">${x.label}</span>
+          <span style="font-size:12.5px;font-weight:700;font-family:var(--mono);color:${x.cor}">${x.perc}% · ${fmt(x.val)}</span>
+        </div>
+        <div style="height:5px;background:var(--gray-200);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${Math.min(100,x.perc*2)}%;background:${x.cor};border-radius:3px"></div>
+        </div>
+      </div>`).join('')}
+      <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;font-weight:600;color:var(--text2)">Markup sobre custo</span>
+        <span style="font-size:15px;font-weight:700;font-family:var(--mono);color:${margemCor}">${markup.toFixed(2)}%</span>
+      </div>
+    </div>
+
+    <div style="font-weight:700;font-size:12px;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em">🏭 Fornecedor</div>
+    <div class="info-row"><span class="info-label">Distribuidora</span><span class="info-val" style="font-weight:600">${p.fornecedor||'—'}</span></div>
+    <div class="info-row"><span class="info-label">Marca</span><span class="info-val">${p.marca||'—'}</span></div>
+    ${p.contato?`<div class="info-row"><span class="info-label">Contato</span><span class="info-val">${p.contato}</span></div>`:''}
+    ${secaoEspecifica}`,null,null);
+}
+
+function formProduto(p={}){
+  const cat=p.categoria||'Ração';
+  const isRacao=cat==='Ração';
+  const isMedSupl=cat==='Medicamento'||cat==='Suplemento';
+  return`<div class="form-grid">
+    <div class="field form-full"><label>Nome do Produto *</label><input id="fp-nome" value="${p.nome||''}" placeholder="Ex: Royal Canin Mini Adult 2,5kg"></div>
+    <div class="field"><label>Categoria *</label>
+      <select id="fp-cat" onchange="atualizarCamposCategoria()">
+        ${CATEGORIAS.map(c=>`<option value="${c}"${cat===c?' selected':''}>${CAT_CONFIG[c].icon} ${c}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field"><label>Subtipo</label>
+      <select id="fp-sub">
+        ${['','Adulto','Filhote','Raça Específica','Medicamentosa','Outro'].map(s=>`<option value="${s}"${(p.subCategoria||'')===s?' selected':''}>${s||'— Nenhum —'}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field"><label>Espécie</label>
+      <select id="fp-esp">
+        ${['','Cão','Gato','Ambos'].map(e=>`<option value="${e}"${(p.especie||'')===e?' selected':''}>${e||'— Nenhuma —'}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field"><label>Marca</label><input id="fp-marca" value="${p.marca||''}" placeholder="Ex: Royal Canin"></div>
+    <div class="field"><label>Fornecedor / Distribuidora</label><input id="fp-forn" value="${p.fornecedor||''}" placeholder="Ex: Basso Pancotte"></div>
+    <div class="field"><label>Contato do Fornecedor</label><input id="fp-cont" value="${p.contato||''}" placeholder="(11) 9999-0000"></div>
+    <div class="field"><label>Preço de Custo (R$)</label><input id="fp-custo" type="number" step="0.01" min="0" value="${p.valorCusto||''}" placeholder="0,00" oninput="atualizarPreviewMargem()"></div>
+    <div class="field"><label>Preço de Venda (R$) *</label><input id="fp-venda" type="number" step="0.01" min="0" value="${p.valorVenda||''}" placeholder="0,00" oninput="atualizarPreviewMargem()"></div>
+    <div class="field form-full"><label>Descrição</label><textarea id="fp-desc">${p.descricao||''}</textarea></div>
+
+    <!-- MARGENS DETALHADAS -->
+    <div class="form-full" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px">💰 Composição de Margem</div>
+      <div class="form-grid" style="margin:0">
+        <div class="field"><label>Maquininha cartão (%)</label><input id="fp-cartao" type="number" step="0.01" min="0" value="${p.margemCartao||6.09}" oninput="atualizarPreviewMargem()"></div>
+        <div class="field"><label>Imposto (%)</label><input id="fp-imposto" type="number" step="0.01" min="0" value="${p.margemImposto||5}" oninput="atualizarPreviewMargem()"></div>
+        <div class="field"><label>Operação (%)</label><input id="fp-operacao" type="number" step="0.01" min="0" value="${p.margemOperacao||2}" oninput="atualizarPreviewMargem()"></div>
+        <div class="field"><label>Margem de lucro (%)</label><input id="fp-lucro-perc" type="number" step="0.01" min="0" value="${p.margemLucro||45}" oninput="atualizarPreviewMargem()"></div>
+      </div>
+      <div id="fp-preview-wrap" style="margin-top:12px;display:none">
+        <div style="background:var(--surface);border-radius:8px;padding:10px;display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+          <div style="font-size:12px;color:var(--text3)">Custo: <strong id="fp-custo-exib" style="color:var(--red-600)">—</strong></div>
+          <div style="font-size:12px;color:var(--text3)">Lucro bruto: <strong id="fp-lucro-val" style="color:var(--teal-600)">—</strong></div>
+          <div style="font-size:12px;color:var(--text3)">Margem s/ venda: <strong id="fp-margem-val" style="color:var(--accent)">—</strong></div>
+          <div style="font-size:12px;color:var(--text3)">Markup: <strong id="fp-markup-val" style="color:var(--amber-800)">—</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAMPOS ESPECÍFICOS POR CATEGORIA -->
+    <div id="fp-racao-fields" class="form-full" style="display:${isRacao?'block':'none'}">
+      <div style="background:var(--green-50);border:1px solid var(--green-200);border-radius:10px;padding:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--green-800);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em">🌾 Dados da Embalagem (recompra automática)</div>
+        <div class="form-grid" style="margin:0">
+          <div class="field"><label>Peso da embalagem (kg)</label><input id="fp-peso-emb" type="number" step="0.5" min="0" value="${p.pesoEmbalagem||''}" placeholder="Ex: 2.5"></div>
+          <div class="field"><label>Qtd embalagens na venda</label><input id="fp-qtd-emb" type="number" step="1" min="1" value="${p.qtdEmbalagem||1}" placeholder="1"></div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--green-700)">💡 Com o peso do animal informado na venda, calculamos em quantos dias a ração vai acabar e geramos o alerta de recompra.</div>
+      </div>
+    </div>
+    <div id="fp-med-fields" class="form-full" style="display:${isMedSupl?'block':'none'}">
+      <div style="background:${cat==='Suplemento'?'var(--teal-50)':'var(--amber-50)'};border:1px solid ${cat==='Suplemento'?'var(--teal-200)':'var(--amber-400)'};border-radius:10px;padding:14px">
+        <div style="font-size:12px;font-weight:700;color:${cat==='Suplemento'?'var(--teal-800)':'var(--amber-800)'};margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em">${cat==='Suplemento'?'⚗️':'💊'} Controle de Recompra</div>
+        <div class="field"><label>Duração estimada (dias)</label><input id="fp-duracao" type="number" step="1" min="1" value="${p.duracaoDias||''}" placeholder="Ex: 30"></div>
+        <div style="margin-top:8px;font-size:12px;color:${cat==='Suplemento'?'var(--teal-700)':'var(--amber-800)'}">💡 O sistema alertará quando a recompra se aproximar.</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function atualizarCamposCategoria(){
+  const cat=document.getElementById('fp-cat')?.value;
+  if(!cat)return;
+  const racaoFields=document.getElementById('fp-racao-fields');
+  const medFields=document.getElementById('fp-med-fields');
+  if(racaoFields)racaoFields.style.display=cat==='Ração'?'block':'none';
+  if(medFields){
+    medFields.style.display=(cat==='Medicamento'||cat==='Suplemento')?'block':'none';
+    // Update color based on category
+    const isTeal=cat==='Suplemento';
+    medFields.querySelector('div').style.background=isTeal?'var(--teal-50)':'var(--amber-50)';
+    medFields.querySelector('div').style.border=`1px solid ${isTeal?'var(--teal-200)':'var(--amber-400)'}`;
+    medFields.querySelector('[style*="font-weight:700"]').style.color=isTeal?'var(--teal-800)':'var(--amber-800)';
+    medFields.querySelector('[style*="font-weight:700"]').innerHTML=isTeal?'⚗️ Prazo de uso':'💊 Controle de Tratamento';
+  }
+}
+
+function atualizarPreviewMargem(){
+  const v=parseFloat(document.getElementById('fp-venda')?.value)||0;
+  const c=parseFloat(document.getElementById('fp-custo')?.value)||0;
+  const wrap=document.getElementById('fp-preview-wrap');
+  if(!wrap)return;
+  if(v>0){
+    wrap.style.display='block';
+    const lucro=v-c;
+    const margem=c>0?(lucro/v*100):0;
+    const markup=c>0?(lucro/c*100):0;
+    const exib=document.getElementById('fp-custo-exib');
+    if(exib)exib.textContent=fmt(c);
+    document.getElementById('fp-lucro-val').textContent=fmt(lucro);
+    document.getElementById('fp-margem-val').textContent=margem.toFixed(2)+'%';
+    document.getElementById('fp-markup-val').textContent=markup.toFixed(2)+'%';
+  }else{wrap.style.display='none';}
+}
+
+function modalNovoProduto(){openModal('Novo Produto',formProduto(),null,salvarProduto);}
+
+function salvarProduto(id=null){
+  const nome=document.getElementById('fp-nome').value.trim();
+  const venda=parseFloat(document.getElementById('fp-venda').value)||0;
+  if(!nome){toast('Nome é obrigatório!','⚠️');return;}
+  if(!venda){toast('Preço de venda é obrigatório!','⚠️');return;}
+  const cat=document.getElementById('fp-cat').value;
+  const custo=parseFloat(document.getElementById('fp-custo').value)||0;
+  const margemCartao=parseFloat(document.getElementById('fp-cartao')?.value)||0;
+  const margemImposto=parseFloat(document.getElementById('fp-imposto')?.value)||0;
+  const margemOperacao=parseFloat(document.getElementById('fp-operacao')?.value)||0;
+  const margemLucro=parseFloat(document.getElementById('fp-lucro-perc')?.value)||0;
+  const data={
+    nome,categoria:cat,
+    subCategoria:document.getElementById('fp-sub')?.value||'',
+    especie:document.getElementById('fp-esp')?.value||'',
+    marca:document.getElementById('fp-marca')?.value||'',
+    valorVenda:venda,valorCusto:custo,
+    fornecedor:document.getElementById('fp-forn').value,
+    contato:document.getElementById('fp-cont').value,
+    descricao:document.getElementById('fp-desc').value,
+    margem:custo>0?((venda-custo)/venda*100):0,
+    margemCartao,margemImposto,margemOperacao,margemLucro,
+    margemTotal:margemCartao+margemImposto+margemOperacao+margemLucro,
+    pesoEmbalagem:cat==='Ração'?(parseFloat(document.getElementById('fp-peso-emb')?.value)||null):null,
+    qtdEmbalagem:cat==='Ração'?(parseInt(document.getElementById('fp-qtd-emb')?.value)||1):null,
+    duracaoDias:(cat==='Medicamento'||cat==='Suplemento')?(parseInt(document.getElementById('fp-duracao')?.value)||null):null,
+  };
+  if(id){Object.assign(DB.produtos.find(p=>p.id===id),data);toast('Produto atualizado!');}
+  else{DB.produtos.push({id:genId('PRD',DB.nextProdutoId++), ...data});toast('Produto cadastrado! 📦');}
+  saveDB();closeModal();renderProdutos();
+}
+function editarProduto(id){const p=DB.produtos.find(x=>x.id===id);openModal('Editar Produto',formProduto(p),null,()=>salvarProduto(id));}
+function excluirProduto(id){if(!confirm('Excluir este produto?'))return;DB.produtos.splice(DB.produtos.findIndex(p=>p.id===id),1);saveDB();toast('Produto removido.','🗑');renderProdutos();}
+
+// ─── NOVA VENDA ───────────────────────────────────────────────
+let nvProdutos=[{nome:'',qtd:1,valor:0}];
+
+function renderNovaVenda(){
+  nvProdutos=[{nome:'',qtd:1,valor:0}];
+  document.getElementById('content').innerHTML=`
+  <style>
+    .nv-step{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+    .nv-step-num{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+    .nv-step-num.done{background:var(--teal-600)}
+    .nv-step-label{font-size:14px;font-weight:700;color:var(--text)}
+    .nv-step-sub{font-size:12px;color:var(--text3)}
+    .nv-sep{flex:1;height:1px;background:var(--border);margin:0 6px}
+    .cli-card{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--accent-glow);border:1.5px solid var(--green-200);border-radius:var(--radius);margin-top:10px}
+    .cli-avatar{width:46px;height:46px;border-radius:50%;background:var(--green-600);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;flex-shrink:0}
+    .cli-info{flex:1}
+    .cli-name{font-size:15px;font-weight:700;color:var(--text)}
+    .cli-details{font-size:12.5px;color:var(--text3);margin-top:2px}
+    .anim-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .anim-card{padding:12px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all 0.15s;background:var(--surface);min-width:140px;flex:1}
+    .anim-card:hover{border-color:var(--accent-light);background:var(--accent-glow)}
+    .anim-card.selected{border-color:var(--accent);background:var(--accent-glow)}
+    .anim-icon{font-size:22px;margin-bottom:4px}
+    .anim-name{font-size:13.5px;font-weight:700;color:var(--text)}
+    .anim-info{font-size:11.5px;color:var(--text3);margin-top:2px}
+    .anim-selected-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--teal-50);border:1.5px solid var(--teal-200);border-radius:var(--radius);margin-top:10px}
+    .nv-prod-row{display:grid;grid-template-columns:1fr 70px 110px 34px;gap:6px;align-items:center;margin-bottom:6px}
+    .nv-prod-input{padding:9px 11px;border:1.5px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;color:var(--text);background:var(--surface);width:100%;outline:none;transition:border-color 0.15s}
+    .nv-prod-input:focus{border-color:var(--accent-light);box-shadow:0 0 0 3px rgba(67,160,71,0.1)}
+    .nv-total-bar{background:linear-gradient(135deg,var(--green-800),var(--teal-800));border-radius:var(--radius);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;color:#fff;margin-top:20px}
+    .nv-total-label{font-size:13px;opacity:0.8}
+    .nv-total-val{font-size:34px;font-weight:700;font-family:var(--mono)}
+    .nv-confirm-btn{background:#fff;color:var(--green-800);border:none;padding:12px 28px;border-radius:var(--radius-sm);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all 0.15s}
+    .nv-confirm-btn:hover{background:var(--green-50);transform:scale(1.02)}
+    .autocomplete-wrap{position:relative}
+    .autocomplete-list{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1.5px solid var(--accent-light);border-radius:var(--radius-sm);z-index:50;max-height:200px;overflow-y:auto;box-shadow:var(--shadow-md);margin-top:3px}
+    .autocomplete-item{padding:10px 14px;cursor:pointer;font-size:13.5px;border-bottom:1px solid var(--border);transition:background 0.12s}
+    .autocomplete-item:hover{background:var(--accent-glow)}
+    .autocomplete-item:last-child{border-bottom:none}
+    .autocomplete-item .ac-sub{font-size:11.5px;color:var(--text3)}
+    .nv-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px;box-shadow:var(--shadow)}
+    .nv-section-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .nv-section-title .step-badge{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .hint-box{background:var(--amber-50);border:1px solid var(--amber-400);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--amber-800);display:flex;gap:8px;align-items:flex-start}
+  </style>
+
+  <div style="max-width:820px;margin:0 auto">
+    <div class="page-header">
+      <div>
+        <div class="page-title">🛒 Nova Venda</div>
+        <div class="page-sub">Preencha os dados abaixo para registrar a venda</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <span id="nv-date-badge" style="font-size:13px;color:var(--text3);align-self:center">${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})}</span>
+      </div>
+    </div>
+
+    <!-- PASSO 1: CLIENTE -->
+    <div class="nv-section" id="sec-cliente">
+      <div class="nv-section-title">
+        <div class="step-badge">1</div>
+        Identificação do Cliente
+      </div>
+      <div class="autocomplete-wrap">
+        <input id="nv-cli-busca" class="search-input" placeholder="🔍  Digite o nome, telefone ou CPF do cliente..." autocomplete="off"
+          oninput="nvBuscarCliente(this.value)" onfocus="nvBuscarCliente(this.value)" style="width:100%">
+        <div id="nv-autocomplete" class="autocomplete-list" style="display:none"></div>
+      </div>
+      <div id="nv-cli-card" style="display:none"></div>
+      <div id="nv-novo-cli-hint" style="margin-top:10px;display:none">
+        <div class="hint-box">⚠️ <span>Cliente não encontrado. <a href="#" onclick="nvCadastrarNovoCliente()" style="color:var(--accent);font-weight:600">Cadastrar novo cliente</a> ou continue digitando.</span></div>
+      </div>
+    </div>
+
+    <!-- PASSO 2: ANIMAL -->
+    <div class="nv-section" id="sec-animal" style="opacity:0.4;pointer-events:none">
+      <div class="nv-section-title">
+        <div class="step-badge">2</div>
+        Animal Atendido
+      </div>
+      <div id="nv-animais-lista"><div style="color:var(--text3);font-size:13px">Selecione o cliente primeiro.</div></div>
+      <div id="nv-animal-card" style="display:none"></div>
+      <button class="btn btn-secondary btn-sm" onclick="nvCadastrarNovoAnimal()" style="margin-top:12px;display:none" id="nv-btn-novo-animal">➕ Cadastrar novo animal para este cliente</button>
+    </div>
+
+    <!-- PASSO 3: PRODUTOS -->
+    <div class="nv-section" id="sec-produtos" style="opacity:0.4;pointer-events:none">
+      <div class="nv-section-title">
+        <div class="step-badge">3</div>
+        Produtos / Serviços
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 70px 110px 34px;gap:6px;margin-bottom:6px">
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;padding:0 2px">Produto / Serviço</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;text-align:center">Qtd</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;text-align:right">Valor Unit. (R$)</div>
+        <div></div>
+      </div>
+      <div id="nv-prod-lista"></div>
+      <button class="btn btn-secondary" onclick="nvAddProd()" style="margin-top:8px;font-size:13px">➕ Adicionar item</button>
+      <div class="divider"></div>
+      <div class="field" style="max-width:260px">
+        <label>Forma de Pagamento</label>
+        <select id="nv-pag">
+          <option>Pix</option>
+          <option>Dinheiro</option>
+          <option>Cartão Crédito</option>
+          <option>Cartão Débito</option>
+          <option>Boleto</option>
+        </select>
+      </div>
+      <div class="field" style="max-width:200px;margin-top:10px">
+        <label>Data da Venda</label>
+        <input type="date" id="nv-data" value="${today()}">
+      </div>
+      <div class="field" style="max-width:100%;margin-top:10px">
+        <label>Observações (opcional)</label>
+        <textarea id="nv-obs" placeholder="Ex: cliente solicitou entrega..."></textarea>
+      </div>
+    </div>
+
+    <!-- TOTAL + FINALIZAR -->
+    <div id="sec-finalizar" style="display:none">
+      <div class="nv-total-bar">
+        <div>
+          <div class="nv-total-label">Total da Venda</div>
+          <div class="nv-total-val" id="nv-total-val">R$ 0,00</div>
+          <div style="font-size:12px;opacity:0.7;margin-top:4px" id="nv-total-itens">0 itens</div>
+        </div>
+        <button class="nv-confirm-btn" onclick="nvFinalizar()">✅ Finalizar Venda</button>
+      </div>
+    </div>
+  </div>`;
+
+  nvRenderProdutos();
+  document.addEventListener('click', nvFecharAutocomplete);
+}
+
+let nvClienteSelecionado=null;
+let nvAnimalSelecionado=null;
+let nvBuscaTimeout=null;
+
+function nvBuscarCliente(q){
+  clearTimeout(nvBuscaTimeout);
+  const ac=document.getElementById('nv-autocomplete');
+  const hintEl=document.getElementById('nv-novo-cli-hint');
+  if(!q||q.length<2){ac.style.display='none';hintEl.style.display='none';return;}
+  nvBuscaTimeout=setTimeout(()=>{
+    const res=DB.clientes.filter(c=>
+      c.nome.toLowerCase().includes(q.toLowerCase())||
+      c.telefone.includes(q)||
+      (c.email&&c.email.toLowerCase().includes(q.toLowerCase()))
+    );
+    if(!res.length){
+      ac.style.display='none';
+      hintEl.style.display='block';
+      return;
+    }
+    hintEl.style.display='none';
+    ac.innerHTML=res.map(c=>{
+      const nAnim=DB.animais.filter(a=>a.clienteId===c.id).length;
+      return`<div class="autocomplete-item" onclick="nvSelecionarCliente('${c.id}')">
+        <div style="font-weight:600">${c.nome}</div>
+        <div class="ac-sub">${c.telefone} · ${nAnim} animal(is)</div>
+      </div>`;
+    }).join('');
+    ac.style.display='block';
+  },200);
+}
+
+function nvFecharAutocomplete(e){
+  if(!e.target.closest('.autocomplete-wrap')){
+    const ac=document.getElementById('nv-autocomplete');
+    if(ac)ac.style.display='none';
+  }
+}
+
+function nvSelecionarCliente(id){
+  nvClienteSelecionado=DB.clientes.find(c=>c.id===id);
+  nvAnimalSelecionado=null;
+  document.getElementById('nv-autocomplete').style.display='none';
+  document.getElementById('nv-cli-busca').value=nvClienteSelecionado.nome;
+  document.getElementById('nv-novo-cli-hint').style.display='none';
+
+  const ini=nvClienteSelecionado.nome.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('nv-cli-card').style.display='flex';
+  document.getElementById('nv-cli-card').innerHTML=`
+    <div class="cli-card">
+      <div class="cli-avatar">${ini}</div>
+      <div class="cli-info">
+        <div class="cli-name">${nvClienteSelecionado.nome}</div>
+        <div class="cli-details">📞 ${nvClienteSelecionado.telefone||'—'} &nbsp;|&nbsp; 📧 ${nvClienteSelecionado.email||'—'}</div>
+        <div class="cli-details" style="margin-top:2px">📍 ${nvClienteSelecionado.endereco||'—'}</div>
+        ${nvClienteSelecionado.obs?`<div class="cli-details" style="margin-top:4px;color:var(--amber-800);font-weight:600">📝 ${nvClienteSelecionado.obs}</div>`:''}
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="nvLimparCliente()">✕ Trocar</button>
+    </div>`;
+
+  // Unlocks step 2
+  const sec2=document.getElementById('sec-animal');
+  sec2.style.opacity='1';sec2.style.pointerEvents='auto';
+  nvCarregarAnimais(id);
+}
+
+function nvLimparCliente(){
+  nvClienteSelecionado=null;nvAnimalSelecionado=null;
+  document.getElementById('nv-cli-busca').value='';
+  document.getElementById('nv-cli-card').style.display='none';
+  document.getElementById('sec-animal').style.opacity='0.4';
+  document.getElementById('sec-animal').style.pointerEvents='none';
+  document.getElementById('sec-produtos').style.opacity='0.4';
+  document.getElementById('sec-produtos').style.pointerEvents='none';
+  document.getElementById('sec-finalizar').style.display='none';
+  document.getElementById('nv-animais-lista').innerHTML='<div style="color:var(--text3);font-size:13px">Selecione o cliente primeiro.</div>';
+  document.getElementById('nv-btn-novo-animal').style.display='none';
+}
+
+function nvCarregarAnimais(clienteId){
+  const animais=DB.animais.filter(a=>a.clienteId===clienteId);
+  const lista=document.getElementById('nv-animais-lista');
+  const btnNovo=document.getElementById('nv-btn-novo-animal');
+  btnNovo.style.display='inline-flex';
+
+  if(!animais.length){
+    lista.innerHTML=`<div class="hint-box" style="margin-bottom:8px">🐾 <span>Nenhum animal cadastrado para este cliente. Cadastre um para continuar.</span></div>`;
+    return;
+  }
+  lista.innerHTML=`<div style="font-size:12.5px;color:var(--text3);margin-bottom:10px">Selecione o animal atendido nesta venda:</div>
+    <div class="anim-grid">${animais.map(a=>`
+      <div class="anim-card" id="anim-card-${a.id}" onclick="nvSelecionarAnimal('${a.id}')">
+        <div class="anim-icon">${a.especie==='Gato'?'🐱':'🐕'}</div>
+        <div class="anim-name">${a.nome}</div>
+        <div class="anim-info">${a.raca}</div>
+        <div class="anim-info">${calcIdade(a.nascimento)} · ${a.peso} kg</div>
+        ${a.obs?`<div style="font-size:11px;color:var(--amber-800);margin-top:4px;font-weight:600">⚠️ ${a.obs}</div>`:''}
+      </div>`).join('')}
+    </div>`;
+}
+
+function nvSelecionarAnimal(id){
+  nvAnimalSelecionado=DB.animais.find(a=>a.id===id);
+  document.querySelectorAll('.anim-card').forEach(el=>el.classList.remove('selected'));
+  const card=document.getElementById(`anim-card-${id}`);
+  if(card)card.classList.add('selected');
+
+  // Show selected animal bar
+  const bar=document.getElementById('nv-animal-card');
+  bar.style.display='flex';
+  bar.innerHTML=`<div class="anim-selected-bar">
+    <span style="font-size:24px">${nvAnimalSelecionado.especie==='Gato'?'🐱':'🐕'}</span>
+    <div style="flex:1">
+      <div style="font-weight:700;font-size:14px;color:var(--teal-800)">${nvAnimalSelecionado.nome} selecionado</div>
+      <div style="font-size:12px;color:var(--text3)">${nvAnimalSelecionado.raca} · ${nvAnimalSelecionado.sexo==='M'?'Macho':'Fêmea'} · ${nvAnimalSelecionado.peso}kg · RER: ${calcRER(nvAnimalSelecionado.peso)} kcal/dia</div>
+    </div>
+  </div>`;
+
+  // Unlocks step 3
+  const sec3=document.getElementById('sec-produtos');
+  sec3.style.opacity='1';sec3.style.pointerEvents='auto';
+  document.getElementById('sec-finalizar').style.display='block';
+  nvAtualizarTotal();
+}
+
+function nvRenderProdutos(){
+  const lista=document.getElementById('nv-prod-lista');
+  if(!lista)return;
+  lista.innerHTML=nvProdutos.map((p,i)=>`
+    <div class="nv-prod-row">
+      <input class="nv-prod-input" placeholder="Ex: Ração Royal Canin 15kg" value="${p.nome||''}"
+        oninput="nvUpdProd(${i},'nome',this.value)">
+      <input class="nv-prod-input" type="number" min="1" step="1" value="${p.qtd||1}" placeholder="1"
+        oninput="nvUpdProd(${i},'qtd',this.value)" style="text-align:center">
+      <input class="nv-prod-input" type="number" min="0" step="0.01" value="${p.valor||''}" placeholder="0,00"
+        oninput="nvUpdProd(${i},'valor',this.value)" style="text-align:right">
+      <button onclick="nvRemProd(${i})" style="background:var(--red-50);border:1.5px solid var(--red-400);border-radius:6px;cursor:pointer;padding:8px;color:var(--red-600);font-size:14px;line-height:1">✕</button>
+    </div>
+    <div style="text-align:right;font-size:11.5px;color:var(--text3);margin-bottom:8px;padding-right:42px">
+      Subtotal: <strong style="color:var(--text2)">${fmt((parseFloat(p.qtd)||1)*(parseFloat(p.valor)||0))}</strong>
+    </div>`).join('');
+  nvAtualizarTotal();
+}
+
+function nvUpdProd(i,k,v){
+  nvProdutos[i][k]=k==='nome'?v:(parseFloat(v)||0);
+  const lista=document.getElementById('nv-prod-lista');
+  if(lista){
+    const rows=lista.querySelectorAll('[style*="Subtotal"]');
+    const qtd=parseFloat(nvProdutos[i].qtd)||1;
+    const val=parseFloat(nvProdutos[i].valor)||0;
+    if(rows[i])rows[i].innerHTML=`Subtotal: <strong style="color:var(--text2)">${fmt(qtd*val)}</strong>`;
+  }
+  nvAtualizarTotal();
+}
+
+function nvAddProd(){nvProdutos.push({nome:'',qtd:1,valor:0});nvRenderProdutos();}
+function nvRemProd(i){if(nvProdutos.length===1){toast('A venda precisa de ao menos 1 item','⚠️');return;}nvProdutos.splice(i,1);nvRenderProdutos();}
+
+function nvAtualizarTotal(){
+  const total=nvProdutos.reduce((s,p)=>s+(parseFloat(p.qtd)||0)*(parseFloat(p.valor)||0),0);
+  const itens=nvProdutos.reduce((s,p)=>s+(parseInt(p.qtd)||0),0);
+  const el=document.getElementById('nv-total-val');
+  const el2=document.getElementById('nv-total-itens');
+  if(el)el.textContent=fmt(total);
+  if(el2)el2.textContent=`${itens} item(ns) · ${nvProdutos.filter(p=>p.nome).length} produto(s)`;
+}
+
+function nvFinalizar(){
+  if(!nvClienteSelecionado){toast('Selecione um cliente!','⚠️');return;}
+  if(!nvAnimalSelecionado){toast('Selecione o animal atendido!','⚠️');return;}
+  const prods=nvProdutos.filter(p=>p.nome.trim());
+  if(!prods.length){toast('Adicione ao menos um produto!','⚠️');return;}
+  const totalZero=prods.some(p=>!p.valor||p.valor<=0);
+  if(totalZero){if(!confirm('Um ou mais itens têm valor R$ 0,00. Deseja continuar mesmo assim?'))return;}
+
+  DB.vendas.push({
+    id:genId('VEN',DB.nextVendaId++),
+    data:document.getElementById('nv-data').value||today(),
+    clienteId:nvClienteSelecionado.id,
+    animalId:nvAnimalSelecionado.id,
+    produtos:prods,
+    formaPag:document.getElementById('nv-pag').value,
+    obs:document.getElementById('nv-obs').value,
+  });
+  saveDB();
+
+  const total=prods.reduce((s,p)=>s+(p.qtd||1)*(p.valor||0),0);
+  toast(`Venda registrada! ${fmt(total)} para ${nvClienteSelecionado.nome} 🎉`,'✅');
+
+  // Reset and stay on page
+  nvClienteSelecionado=null;nvAnimalSelecionado=null;
+  goTo('nova-venda');
+}
+
+function nvCadastrarNovoCliente(){
+  openModal('Novo Cliente',formCliente(),null,()=>{
+    const nome=document.getElementById('f-nome').value.trim();
+    if(!nome){toast('Nome é obrigatório!','⚠️');return;}
+    const novo={id:genId('CLI',DB.nextClienteId++),nome,telefone:document.getElementById('f-tel').value,email:document.getElementById('f-email').value,endereco:document.getElementById('f-end').value,cidade:document.getElementById('f-cidade').value||'Manaus',obs:document.getElementById('f-obs').value};
+    DB.clientes.push(novo);saveDB();closeModal();
+    toast(`Cliente ${nome} cadastrado!`);
+    setTimeout(()=>{
+      renderNovaVenda();
+      setTimeout(()=>{
+        document.getElementById('nv-cli-busca').value=nome;
+        nvSelecionarCliente(novo.id);
+      },50);
+    },100);
+  });
+}
+
+function nvCadastrarNovoAnimal(){
+  if(!nvClienteSelecionado){toast('Selecione um cliente primeiro!','⚠️');return;}
+  const form=formAnimal({clienteId:nvClienteSelecionado.id});
+  openModal('Novo Animal',form,null,()=>{
+    const nome=document.getElementById('fa-nome').value.trim();
+    if(!nome){toast('Nome é obrigatório!','⚠️');return;}
+    const novo={id:genId('ANI',DB.nextAnimalId++),nome,clienteId:nvClienteSelecionado.id,especie:document.getElementById('fa-esp').value,raca:document.getElementById('fa-raca').value,sexo:document.getElementById('fa-sexo').value,nascimento:document.getElementById('fa-nasc').value,peso:parseFloat(document.getElementById('fa-peso').value)||0,obs:document.getElementById('fa-obs').value};
+    DB.animais.push(novo);saveDB();closeModal();
+    toast(`Animal ${nome} cadastrado!`);
+    nvCarregarAnimais(nvClienteSelecionado.id);
+    setTimeout(()=>nvSelecionarAnimal(novo.id),100);
+  });
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+// Clear stale data from previous versions to apply new seed
+(function(){try{const v=localStorage.getItem('greenpet_version');if(v!=='v7'){localStorage.removeItem('greenpet_db');localStorage.setItem('greenpet_version','v7');}}catch(e){}})();
+loadDB();
+document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+renderPage('dashboard');
+</script>
+</body>
+</html>
