@@ -21,7 +21,14 @@
       "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" -Force | Select-Object Name, @{Name=\"Type\"; Expression={if \\($_.PSIsContainer\\) { \"Dir\" } else { \"File\" }}})",
       "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" | Format-Table -Property Name, @{Name=\"Type\"; Expression={if \\($_.PSIsContainer\\) { \"Directory\" } else { \"File\" }}})",
       "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\" | Format-Table -Property Name, @{Name=\"Type\"; Expression={if \\($_.PSIsContainer\\) { \"Directory\" } else { \"File\" }}})",
-      "PowerShell(cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\frontend\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"npm run dev -- --port 3001\" -WindowStyle Minimized; Start-Sleep 3; Write-Host \"Dev server started on port 3001\")"
+      "PowerShell(cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\frontend\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"npm run dev -- --port 3001\" -WindowStyle Minimized; Start-Sleep 3; Write-Host \"Dev server started on port 3001\")",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
+      "PowerShell(cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"npm run dev\" -WindowStyle Normal; Start-Sleep 4; Write-Host \"Backend iniciado\")",
+      "PowerShell(Invoke-RestMethod -Uri \"http://localhost:3000/health\" -ErrorAction SilentlyContinue)",
+      "PowerShell(cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\"; $env:DATABASE_URL=\"postgresql://greenpet:greenpet_dev_pass@localhost:5432/greenpet\"; npm run dev 2>&1 | Select-Object -First 5)",
+      "PowerShell(cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"cd 'c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend'; npm run dev\" -WindowStyle Normal; Start-Sleep 6; Invoke-RestMethod -Uri \"http://localhost:3000/health\" -ErrorAction SilentlyContinue | ConvertTo-Json)",
+      "PowerShell($body = '{\"email\":\"admin@greenpet.com\",\"senha\":\"admin123\"}'; $r = Invoke-RestMethod -Uri \"http://localhost:3000/api/v1/auth/login\" -Method POST -ContentType \"application/json\" -Body $body; Write-Host \"Login OK — usuário: $\\($r.user.nome\\) \\($\\($r.user.papel\\)\\)\")",
+      "PowerShell($body = '{\"email\":\"admin@greenpet.com\",\"password\":\"admin123\"}'; $r = Invoke-RestMethod -Uri \"http://localhost:3000/api/v1/auth/login\" -Method POST -ContentType \"application/json\" -Body $body; Write-Host \"✅ Backend funcionando! Usuário: $\\($r.user.nome\\) | papel: $\\($r.user.papel\\)\")"
     ]
   }
 }

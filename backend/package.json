@@ -6,7 +6,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "tsx watch src/main.ts",
+    "dev": "dotenv -e .env -- tsx watch src/main.ts",
     "build": "tsc --project tsconfig.build.json",
     "start": "node dist/main.js",
     "test:unit": "vitest run --config vitest.config.ts",
