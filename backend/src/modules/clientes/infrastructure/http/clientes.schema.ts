@@ -1,14 +1,14 @@
 import { z } from 'zod'
 
-const PHONE_REGEX = /^\(\d{2}\) \d \d{4}-\d{4}$|^\(\d{2}\) \d{4}-\d{4}$/
 const CPF_REGEX = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/
 
 export const CreateClienteSchema = z.object({
   nome: z.string().min(3),
-  telefone: z.string().regex(PHONE_REGEX, 'Formato inválido. Use (99) 9 9999-9999'),
+  telefone: z.string().transform((v) => v.replace(/\D/g, '')).refine((v) => v.length === 11, 'Telefone deve ter 11 dígitos'),
   email: z.string().email().optional(),
   cpf: z.string().regex(CPF_REGEX).optional(),
   endereco: z.string().optional(),
+  bairro: z.string().optional(),
   cidade: z.string().default('Manaus'),
   obs: z.string().optional(),
 })

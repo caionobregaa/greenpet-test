@@ -10,9 +10,11 @@ interface ClienteProps {
   email?: Email
   cpf?: CPF
   endereco?: string
+  bairro?: string
   cidade: string
   obs?: string
   deletedAt?: Date
+  numeroDeAnimais?: number
 }
 
 export class Cliente extends AggregateRoot<ClienteProps> {
@@ -23,9 +25,11 @@ export class Cliente extends AggregateRoot<ClienteProps> {
     email?: string
     cpf?: string
     endereco?: string
+    bairro?: string
     cidade?: string
     obs?: string
     deletedAt?: Date
+    numeroDeAnimais?: number
   }): Cliente {
     if (!data.nome || data.nome.trim().length < 3) {
       throw new ValidationError('VALIDATION_ERROR', 'Nome deve ter ao menos 3 caracteres')
@@ -37,9 +41,11 @@ export class Cliente extends AggregateRoot<ClienteProps> {
         email: data.email ? Email.create(data.email) : undefined,
         cpf: data.cpf ? CPF.create(data.cpf) : undefined,
         endereco: data.endereco,
+        bairro: data.bairro,
         cidade: data.cidade ?? 'Manaus',
         obs: data.obs,
         deletedAt: data.deletedAt,
+        numeroDeAnimais: data.numeroDeAnimais,
       },
       data.id,
     )
@@ -50,10 +56,12 @@ export class Cliente extends AggregateRoot<ClienteProps> {
   get email(): string | undefined { return this.props.email?.value }
   get cpf(): string | undefined { return this.props.cpf?.value }
   get endereco(): string | undefined { return this.props.endereco }
+  get bairro(): string | undefined { return this.props.bairro }
   get cidade(): string { return this.props.cidade }
   get obs(): string | undefined { return this.props.obs }
   get deletedAt(): Date | undefined { return this.props.deletedAt }
   get isActive(): boolean { return !this.props.deletedAt }
+  get numeroDeAnimais(): number { return this.props.numeroDeAnimais ?? 0 }
 
   update(fields: {
     nome?: string
@@ -61,6 +69,7 @@ export class Cliente extends AggregateRoot<ClienteProps> {
     email?: string
     cpf?: string
     endereco?: string
+    bairro?: string
     cidade?: string
     obs?: string
   }): void {
@@ -74,6 +83,7 @@ export class Cliente extends AggregateRoot<ClienteProps> {
     if (fields.email !== undefined) this.props.email = Email.create(fields.email)
     if (fields.cpf !== undefined) this.props.cpf = CPF.create(fields.cpf)
     if (fields.endereco !== undefined) this.props.endereco = fields.endereco
+    if (fields.bairro !== undefined) this.props.bairro = fields.bairro
     if (fields.cidade !== undefined) this.props.cidade = fields.cidade
     if (fields.obs !== undefined) this.props.obs = fields.obs
     this.updatedAt = new Date()

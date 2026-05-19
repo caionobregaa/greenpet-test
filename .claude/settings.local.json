@@ -32,7 +32,11 @@
       "PowerShell(netstat -ano)",
       "PowerShell(Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"cd 'c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\frontend'; npm run dev -- --port 3001\" -WindowStyle Normal)",
       "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
-      "PowerShell(Stop-Process -Force -ErrorAction SilentlyContinue)"
+      "PowerShell(Stop-Process -Force -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\" -Recurse -Directory | Select-Object -First 30 | ForEach-Object { $_.FullName })",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\\\\src\" -Recurse -Directory | ForEach-Object { $_.FullName } | Sort-Object)",
+      "PowerShell(head -100)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" | Select-Object Name, @{Name=\"Type\"; Expression={if\\($_.PSIsContainer\\){\"Directory\"}else{\"File\"}}})"
     ]
   }
 }

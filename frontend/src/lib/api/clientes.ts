@@ -1,6 +1,6 @@
 import { api } from "./client";
 import type { ApiResponse, ApiMeta } from "@/lib/types/api";
-import type { Cliente } from "@/lib/types/cliente";
+import type { Cliente, ClienteDetail } from "@/lib/types/cliente";
 import type { CreateClienteInput, UpdateClienteInput } from "@/lib/schemas/cliente.schema";
 
 interface ListParams {
@@ -15,8 +15,8 @@ export const apiClientes = {
     return data;
   },
 
-  get: async (id: string): Promise<Cliente> => {
-    const { data } = await api.get<ApiResponse<Cliente>>(`/clientes/${id}`);
+  get: async (id: string): Promise<ClienteDetail> => {
+    const { data } = await api.get<ApiResponse<ClienteDetail>>(`/clientes/${id}`);
     return data.data;
   },
 

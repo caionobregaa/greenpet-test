@@ -2,7 +2,7 @@ import type { FastifyRequest, FastifyReply } from 'fastify'
 import type { CreateClienteUseCase } from '../../application/use-cases/create-cliente.use-case.js'
 import type { UpdateClienteUseCase } from '../../application/use-cases/update-cliente.use-case.js'
 import type { DeleteClienteUseCase } from '../../application/use-cases/delete-cliente.use-case.js'
-import type { GetClienteUseCase } from '../../application/use-cases/get-cliente.use-case.js'
+import type { GetClienteDetailUseCase } from '../../application/use-cases/get-cliente-detail.use-case.js'
 import type { ListClientesUseCase } from '../../application/use-cases/list-clientes.use-case.js'
 import {
   CreateClienteSchema,
@@ -11,6 +11,8 @@ import {
 } from './clientes.schema.js'
 import { ValidationError } from '@/shared/errors/validation.error.js'
 import type { Cliente } from '../../domain/entities/cliente.entity.js'
+import type { Animal } from '@/modules/animais/domain/entities/animal.entity.js'
+import type { Venda } from '@/modules/vendas/domain/entities/venda.entity.js'
 
 function toResponse(c: Cliente) {
   return {
@@ -20,10 +22,35 @@ function toResponse(c: Cliente) {
     email: c.email,
     cpf: c.cpf,
     endereco: c.endereco,
+    bairro: c.bairro,
     cidade: c.cidade,
     obs: c.obs,
+    numeroDeAnimais: c.numeroDeAnimais,
     createdAt: c.createdAt,
     updatedAt: c.updatedAt,
+  }
+}
+
+function animalToResponse(a: Animal) {
+  return {
+    id: a.id,
+    nome: a.nome,
+    especie: a.especie,
+    raca: a.raca,
+    sexo: a.sexo,
+    nascimento: a.nascimento,
+    peso: a.peso,
+  }
+}
+
+function vendaToResponse(v: Venda) {
+  return {
+    id: v.id,
+    data: v.data,
+    formaPag: v.formaPag,
+    total: v.total,
+    animalId: v.animalId,
+    obs: v.obs,
   }
 }
 
@@ -32,7 +59,7 @@ export class ClientesController {
     private readonly createUseCase: CreateClienteUseCase,
     private readonly updateUseCase: UpdateClienteUseCase,
     private readonly deleteUseCase: DeleteClienteUseCase,
-    private readonly getUseCase: GetClienteUseCase,
+    private readonly getDetailUseCase: GetClienteDetailUseCase,
     private readonly listUseCase: ListClientesUseCase,
   ) {}
 
@@ -58,8 +85,14 @@ export class ClientesController {
   }
 
   async getOne(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void> {
-    const cliente = await this.getUseCase.execute({ id: request.params.id })
-    reply.status(200).send({ data: toResponse(cliente) })
+    const { cliente, animais, vendas } = await this.getDetailUseCase.execute({ id: request.params.id })
+    reply.status(200).send({
+      data: {
+        ...toResponse(cliente),
+        animais: animais.map(animalToResponse),
+        vendas: vendas.map(vendaToResponse),
+      },
+    })
   }
 
   async update(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void> {

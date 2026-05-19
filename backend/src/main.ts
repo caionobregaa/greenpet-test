@@ -17,13 +17,14 @@ import { PrismaClienteRepository } from './modules/clientes/infrastructure/repos
 import { CreateClienteUseCase } from './modules/clientes/application/use-cases/create-cliente.use-case.js'
 import { UpdateClienteUseCase } from './modules/clientes/application/use-cases/update-cliente.use-case.js'
 import { DeleteClienteUseCase } from './modules/clientes/application/use-cases/delete-cliente.use-case.js'
-import { GetClienteUseCase } from './modules/clientes/application/use-cases/get-cliente.use-case.js'
+import { GetClienteDetailUseCase } from './modules/clientes/application/use-cases/get-cliente-detail.use-case.js'
 import { ListClientesUseCase } from './modules/clientes/application/use-cases/list-clientes.use-case.js'
 import { ClientesController } from './modules/clientes/infrastructure/http/clientes.controller.js'
 import { registerClientesRoutes } from './modules/clientes/infrastructure/http/clientes.routes.js'
 
-// Animais
+// Animais + Vendas (repos needed for GetClienteDetailUseCase)
 import { PrismaAnimalRepository } from './modules/animais/infrastructure/repositories/prisma-animal.repository.js'
+import { PrismaVendaRepository } from './modules/vendas/infrastructure/repositories/prisma-venda.repository.js'
 import { CreateAnimalUseCase } from './modules/animais/application/use-cases/create-animal.use-case.js'
 import { UpdateAnimalUseCase } from './modules/animais/application/use-cases/update-animal.use-case.js'
 import { DeleteAnimalUseCase } from './modules/animais/application/use-cases/delete-animal.use-case.js'
@@ -55,17 +56,18 @@ async function bootstrap(): Promise<void> {
 
   // Clientes
   const clienteRepo = new PrismaClienteRepository(prisma)
+  const animalRepo = new PrismaAnimalRepository(prisma)
+  const vendaRepo = new PrismaVendaRepository(prisma)
   const clientesCtrl = new ClientesController(
     new CreateClienteUseCase(clienteRepo),
     new UpdateClienteUseCase(clienteRepo),
     new DeleteClienteUseCase(clienteRepo),
-    new GetClienteUseCase(clienteRepo),
+    new GetClienteDetailUseCase(clienteRepo, animalRepo, vendaRepo),
     new ListClientesUseCase(clienteRepo),
   )
   registerClientesRoutes(app, clientesCtrl)
 
   // Animais
-  const animalRepo = new PrismaAnimalRepository(prisma)
   const animaisCtrl = new AnimaisController(
     new CreateAnimalUseCase(animalRepo, clienteRepo),
     new UpdateAnimalUseCase(animalRepo),

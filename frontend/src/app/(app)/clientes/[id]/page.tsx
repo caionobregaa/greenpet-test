@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 import { useCliente } from "@/lib/hooks/use-clientes";
-import { useAnimais } from "@/lib/hooks/use-animais";
-import { useVendas } from "@/lib/hooks/use-vendas";
 import { useOrcamentos } from "@/lib/hooks/use-orcamentos";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -28,9 +26,10 @@ export default function ClienteDetailPage({ params }: Props) {
   const [newAnimalOpen, setNewAnimalOpen] = useState(false);
 
   const { data: cliente, isLoading } = useCliente(id);
-  const { data: animaisData } = useAnimais({ clienteId: id, limit: 50 });
-  const { data: vendasData } = useVendas({ clienteId: id, limit: 20 });
   const { data: orcamentosData } = useOrcamentos({ clienteId: id, limit: 20 });
+
+  const animais = cliente?.animais ?? [];
+  const vendas = cliente?.vendas ?? [];
 
   if (isLoading) {
     return (
@@ -71,8 +70,8 @@ export default function ClienteDetailPage({ params }: Props) {
       <Tabs defaultValue="info">
         <TabsList className="mb-4">
           <TabsTrigger value="info">Informações</TabsTrigger>
-          <TabsTrigger value="animais">Animais ({animaisData?.data.length ?? 0})</TabsTrigger>
-          <TabsTrigger value="vendas">Vendas ({vendasData?.meta?.total ?? 0})</TabsTrigger>
+          <TabsTrigger value="animais">Animais ({animais.length})</TabsTrigger>
+          <TabsTrigger value="vendas">Vendas ({vendas.length})</TabsTrigger>
           <TabsTrigger value="orcamentos">Orçamentos ({orcamentosData?.meta?.total ?? 0})</TabsTrigger>
         </TabsList>
 
@@ -84,6 +83,7 @@ export default function ClienteDetailPage({ params }: Props) {
               ["E-mail", cliente.email ?? "—"],
               ["CPF", cliente.cpf ?? "—"],
               ["Endereço", cliente.endereco ?? "—"],
+              ["Bairro", cliente.bairro ?? "—"],
               ["Cidade", cliente.cidade],
               ["Cadastrado em", formatDate(cliente.createdAt)],
               ["Observações", cliente.obs ?? "—"],
@@ -104,9 +104,9 @@ export default function ClienteDetailPage({ params }: Props) {
             </Button>
           </div>
           <div className="space-y-2">
-            {animaisData?.data.length === 0 ? (
+            {animais.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">Nenhum animal cadastrado.</p>
-            ) : animaisData?.data.map((a) => (
+            ) : animais.map((a) => (
               <div key={a.id} className="bg-card rounded-lg border border-border px-4 py-3 flex items-center gap-4">
                 <span className="text-2xl">{a.especie === "Cão" ? "🐕" : "🐈"}</span>
                 <div className="flex-1">
@@ -134,12 +134,14 @@ export default function ClienteDetailPage({ params }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {vendasData?.data.length === 0 ? (
+                {vendas.length === 0 ? (
                   <tr><td colSpan={5} className="text-center py-8 text-muted-foreground text-sm">Nenhuma venda registrada.</td></tr>
-                ) : vendasData?.data.map((v) => (
+                ) : vendas.map((v) => (
                   <tr key={v.id} className="border-t border-border hover:bg-accent/30">
                     <td className="px-4 py-3">{formatDate(v.data)}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{v.animal?.nome ?? "—"}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {v.animalId ? animais.find((a) => a.id === v.animalId)?.nome ?? "—" : "—"}
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground">{v.formaPag}</td>
                     <td className="px-4 py-3 text-right font-bold text-primary font-mono">{formatBRL(v.total)}</td>
                     <td className="px-4 py-3">

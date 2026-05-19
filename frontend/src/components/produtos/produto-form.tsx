@@ -65,9 +65,9 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
   const imagemUrl = useWatch({ control, name: "imagemUrl" as keyof CreateProdutoInput });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      {/* Imagem */}
-      <div className="flex gap-6 items-start">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Imagem + Identificação */}
+      <div className="flex flex-col sm:flex-row gap-6 items-start">
         <div className="space-y-1.5 shrink-0">
           <Label>Foto do Produto</Label>
           <ImageUpload
@@ -76,8 +76,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
           />
         </div>
 
-        {/* Identificação */}
-        <div className="flex-1 grid grid-cols-2 gap-4">
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div className="space-y-1.5 col-span-2">
             <Label htmlFor="nome">Nome *</Label>
             <Input id="nome" {...register("nome")} placeholder="Nome do produto" />
@@ -124,7 +123,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
       </div>
 
       {/* Detalhes */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="space-y-1.5">
           <Label htmlFor="marca">Marca</Label>
           <Input id="marca" {...register("marca")} placeholder="Royal Canin, Pedigree..." />
@@ -150,9 +149,9 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
       <Separator />
 
       {/* Preços e Margens */}
-      <div>
-        <h3 className="text-sm font-semibold mb-3">Preços e Margens</h3>
-        <div className="grid grid-cols-2 gap-4">
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold">Preços e Margens</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div className="space-y-1.5">
             <Label htmlFor="valorCusto">Custo (R$) *</Label>
             <Input id="valorCusto" type="number" step="0.01" min="0" {...register("valorCusto", { valueAsNumber: true })} placeholder="0.00" />
@@ -164,7 +163,6 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
             {errors.valorVenda && <p className="text-xs text-destructive">{errors.valorVenda.message}</p>}
           </div>
 
-          {/* Margem preview */}
           {(custo > 0 || venda > 0) && (
             <div className="col-span-2 bg-accent rounded-lg px-4 py-3 flex items-center justify-between">
               <div>
@@ -202,7 +200,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="flex justify-end gap-3 pt-4">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
           Cancelar
         </Button>

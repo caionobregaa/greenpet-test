@@ -24,7 +24,7 @@ Ver [rules.md](rules.md).
     {
       "id": "uuid",
       "nome": "Maria Silva",
-      "telefone": "(92) 9 9999-1234",
+      "telefone": "(92) 9 9999-1234",  // sempre neste formato, independente da entrada
       "email": "maria@email.com",
       "cidade": "Manaus",
       "totalAnimais": 2,

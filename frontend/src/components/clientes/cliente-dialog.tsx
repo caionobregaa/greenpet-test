@@ -42,7 +42,7 @@ export function ClienteDialog({ open, onOpenChange, cliente }: ClienteDialogProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="sm:max-w-2xl sm:p-6 max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{cliente ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
         </DialogHeader>

@@ -50,6 +50,16 @@ describe('Cliente entity', () => {
       const c = Cliente.create({ nome: 'Ana', telefone: '(92) 9 1234-5678' })
       expect(c.cidade).toBe('Manaus')
     })
+
+    it('numeroDeAnimais retorna 0 por padrão', () => {
+      const c = Cliente.create({ nome: 'Ana', telefone: '(92) 9 1234-5678' })
+      expect(c.numeroDeAnimais).toBe(0)
+    })
+
+    it('numeroDeAnimais retorna valor passado no create', () => {
+      const c = Cliente.create({ nome: 'Ana', telefone: '(92) 9 1234-5678', numeroDeAnimais: 3 })
+      expect(c.numeroDeAnimais).toBe(3)
+    })
   })
 
   describe('softDelete', () => {

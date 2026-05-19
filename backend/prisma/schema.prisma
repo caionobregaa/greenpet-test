@@ -45,6 +45,7 @@ model Cliente {
   email      String?     @unique
   cpf        String?     @unique
   endereco   String?
+  bairro     String?
   cidade     String      @default("Manaus")
   obs        String?
   deletedAt  DateTime?

@@ -5,9 +5,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboard } from "@/lib/hooks/use-dashboard";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { PeriodFilter } from "@/components/dashboard/period-filter";
-import { TopClientesCard } from "@/components/dashboard/top-clientes-card";
-import { TopProdutosCard } from "@/components/dashboard/top-produtos-card";
 import { ReceitaPorMesChart } from "@/components/dashboard/receita-por-mes-chart";
+import { TopClientesChart } from "@/components/dashboard/top-clientes-chart";
+import { TopProdutosChart } from "@/components/dashboard/top-produtos-chart";
 import { formatBRL, todayISO } from "@/lib/utils/format";
 
 function firstDayOfMonth(): string {
@@ -23,7 +23,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
+      {/* Header + Filters */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
         <PeriodFilter
@@ -70,28 +70,26 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Charts + Rankings */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          {isLoading ? (
+      {/* Receita & Vendas por Mês — full width */}
+      {isLoading ? (
+        <Skeleton className="h-72 rounded-xl" />
+      ) : (
+        <ReceitaPorMesChart data={data?.receitaPorMes ?? []} />
+      )}
+
+      {/* Top Clientes + Top Produtos — side by side */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {isLoading ? (
+          <>
             <Skeleton className="h-64 rounded-xl" />
-          ) : (
-            <ReceitaPorMesChart data={data?.receitaPorMes ?? []} />
-          )}
-        </div>
-        <div className="space-y-4">
-          {isLoading ? (
-            <>
-              <Skeleton className="h-48 rounded-xl" />
-              <Skeleton className="h-48 rounded-xl" />
-            </>
-          ) : (
-            <>
-              <TopClientesCard clientes={data?.topClientes ?? []} />
-              <TopProdutosCard produtos={data?.topProdutos ?? []} />
-            </>
-          )}
-        </div>
+            <Skeleton className="h-64 rounded-xl" />
+          </>
+        ) : (
+          <>
+            <TopClientesChart clientes={data?.topClientes ?? []} />
+            <TopProdutosChart produtos={data?.topProdutos ?? []} />
+          </>
+        )}
       </div>
     </div>
   );

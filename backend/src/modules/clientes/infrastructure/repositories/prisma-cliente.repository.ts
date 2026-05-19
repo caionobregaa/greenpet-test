@@ -6,7 +6,10 @@ export class PrismaClienteRepository implements IClienteRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async findById(id: string): Promise<Cliente | null> {
-    const row = await this.prisma.cliente.findFirst({ where: { id, deletedAt: null } })
+    const row = await this.prisma.cliente.findFirst({
+      where: { id, deletedAt: null },
+      include: { _count: { select: { animais: true } } },
+    })
     return row ? this.toDomain(row) : null
   }
 
@@ -34,6 +37,7 @@ export class PrismaClienteRepository implements IClienteRepository {
         skip: (params.page - 1) * params.limit,
         take: params.limit,
         orderBy: { nome: 'asc' },
+        include: { _count: { select: { animais: true } } },
       }),
       this.prisma.cliente.count({ where }),
     ])
@@ -47,6 +51,7 @@ export class PrismaClienteRepository implements IClienteRepository {
       email: cliente.email ?? null,
       cpf: cliente.cpf ?? null,
       endereco: cliente.endereco ?? null,
+      bairro: cliente.bairro ?? null,
       cidade: cliente.cidade,
       obs: cliente.obs ?? null,
       deletedAt: cliente.deletedAt ?? null,
@@ -73,9 +78,11 @@ export class PrismaClienteRepository implements IClienteRepository {
     email: string | null
     cpf: string | null
     endereco: string | null
+    bairro: string | null
     cidade: string
     obs: string | null
     deletedAt: Date | null
+    _count?: { animais: number }
   }): Cliente {
     return Cliente.create({
       id: row.id,
@@ -84,9 +91,11 @@ export class PrismaClienteRepository implements IClienteRepository {
       email: row.email ?? undefined,
       cpf: row.cpf ?? undefined,
       endereco: row.endereco ?? undefined,
+      bairro: row.bairro ?? undefined,
       cidade: row.cidade,
       obs: row.obs ?? undefined,
       deletedAt: row.deletedAt ?? undefined,
+      numeroDeAnimais: row._count?.animais ?? 0,
     })
   }
 }
