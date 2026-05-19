@@ -28,7 +28,11 @@
       "PowerShell(cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\"; $env:DATABASE_URL=\"postgresql://greenpet:greenpet_dev_pass@localhost:5432/greenpet\"; npm run dev 2>&1 | Select-Object -First 5)",
       "PowerShell(cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"cd 'c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend'; npm run dev\" -WindowStyle Normal; Start-Sleep 6; Invoke-RestMethod -Uri \"http://localhost:3000/health\" -ErrorAction SilentlyContinue | ConvertTo-Json)",
       "PowerShell($body = '{\"email\":\"admin@greenpet.com\",\"senha\":\"admin123\"}'; $r = Invoke-RestMethod -Uri \"http://localhost:3000/api/v1/auth/login\" -Method POST -ContentType \"application/json\" -Body $body; Write-Host \"Login OK — usuário: $\\($r.user.nome\\) \\($\\($r.user.papel\\)\\)\")",
-      "PowerShell($body = '{\"email\":\"admin@greenpet.com\",\"password\":\"admin123\"}'; $r = Invoke-RestMethod -Uri \"http://localhost:3000/api/v1/auth/login\" -Method POST -ContentType \"application/json\" -Body $body; Write-Host \"✅ Backend funcionando! Usuário: $\\($r.user.nome\\) | papel: $\\($r.user.papel\\)\")"
+      "PowerShell($body = '{\"email\":\"admin@greenpet.com\",\"password\":\"admin123\"}'; $r = Invoke-RestMethod -Uri \"http://localhost:3000/api/v1/auth/login\" -Method POST -ContentType \"application/json\" -Body $body; Write-Host \"✅ Backend funcionando! Usuário: $\\($r.user.nome\\) | papel: $\\($r.user.papel\\)\")",
+      "PowerShell(netstat -ano)",
+      "PowerShell(Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"cd 'c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\frontend'; npm run dev -- --port 3001\" -WindowStyle Normal)",
+      "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Force -ErrorAction SilentlyContinue)"
     ]
   }
 }
