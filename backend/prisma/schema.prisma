@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────── AUTH ───────────────
+
+model User {
+  id            String         @id @default(uuid())
+  nome          String
+  email         String         @unique
+  senhaHash     String
+  papel         String         @default("admin")
+  loginAttempts Int            @default(0)
+  lockedUntil   DateTime?
+  refreshTokens RefreshToken[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("refresh_tokens")
+}
+
+// ─────────────── CLIENTES ───────────────
+
+model Cliente {
+  id         String      @id @default(uuid())
+  nome       String
+  telefone   String
+  email      String?     @unique
+  cpf        String?     @unique
+  endereco   String?
+  cidade     String      @default("Manaus")
+  obs        String?
+  deletedAt  DateTime?
+  animais    Animal[]
+  vendas     Venda[]
+  orcamentos Orcamento[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@map("clientes")
+}
+
+// ─────────────── ANIMAIS ───────────────
+
+model Animal {
+  id         String      @id @default(uuid())
+  nome       String
+  clienteId  String
+  cliente    Cliente     @relation(fields: [clienteId], references: [id])
+  especie    String
+  raca       String?
+  sexo       String      @default("Indefinido")
+  nascimento DateTime?
+  peso       Decimal     @default(0) @db.Decimal(8, 2)
+  obs        String?
+  deletedAt  DateTime?
+  vendas     Venda[]
+  orcamentos Orcamento[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@map("animais")
+}
+
+// ─────────────── PRODUTOS ───────────────
+
+model Produto {
+  id             String       @id @default(uuid())
+  nome           String       @unique
+  categoria      String
+  especie        String?
+  subCategoria   String?
+  marca          String?
+  fornecedor     String?
+  pesoEmbalagem  Decimal?     @db.Decimal(8, 2)
+  valorCusto     Decimal      @default(0) @db.Decimal(10, 2)
+  valorVenda     Decimal      @db.Decimal(10, 2)
+  margemCartao   Decimal      @default(0) @db.Decimal(5, 2)
+  margemImposto  Decimal      @default(0) @db.Decimal(5, 2)
+  margemOperacao Decimal      @default(0) @db.Decimal(5, 2)
+  margemLucro    Decimal      @default(0) @db.Decimal(5, 2)
+  diasRecompra   Int?
+  descricao      String?
+  imagemUrl      String?
+  deletedAt      DateTime?
+  compraItens    CompraItem[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("produtos")
+}
+
+// ─────────────── VENDAS ───────────────
+
+model Venda {
+  id        String      @id @default(uuid())
+  data      DateTime
+  clienteId String
+  cliente   Cliente     @relation(fields: [clienteId], references: [id])
+  animalId  String?
+  animal    Animal?     @relation(fields: [animalId], references: [id])
+  formaPag  String
+  total     Decimal     @db.Decimal(10, 2)
+  obs       String?
+  itens     VendaItem[]
+  orcamento Orcamento?
+  createdAt DateTime    @default(now())
+
+  @@map("vendas")
+}
+
+model VendaItem {
+  id            String  @id @default(uuid())
+  vendaId       String
+  venda         Venda   @relation(fields: [vendaId], references: [id], onDelete: Cascade)
+  produtoId     String?
+  nome          String
+  qtd           Int
+  valorUnitario Decimal @db.Decimal(10, 2)
+  total         Decimal @db.Decimal(10, 2)
+
+  @@map("venda_itens")
+}
+
+// ─────────────── ORÇAMENTOS ───────────────
+
+model Orcamento {
+  id        String          @id @default(uuid())
+  data      DateTime
+  validade  DateTime
+  clienteId String
+  cliente   Cliente         @relation(fields: [clienteId], references: [id])
+  animalId  String?
+  animal    Animal?         @relation(fields: [animalId], references: [id])
+  status    String          @default("pendente")
+  total     Decimal         @db.Decimal(10, 2)
+  obs       String?
+  vendaId   String?         @unique
+  venda     Venda?          @relation(fields: [vendaId], references: [id])
+  itens     OrcamentoItem[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@map("orcamentos")
+}
+
+model OrcamentoItem {
+  id            String    @id @default(uuid())
+  orcamentoId   String
+  orcamento     Orcamento @relation(fields: [orcamentoId], references: [id], onDelete: Cascade)
+  produtoId     String?
+  nome          String
+  qtd           Int
+  valorUnitario Decimal   @db.Decimal(10, 2)
+  total         Decimal   @db.Decimal(10, 2)
+
+  @@map("orcamento_itens")
+}
+
+// ─────────────── COMPRAS ───────────────
+
+model Compra {
+  id              String       @id @default(uuid())
+  dataPedido      DateTime
+  dataRecebimento DateTime?
+  fornecedor      String
+  status          String       @default("pendente")
+  total           Decimal      @db.Decimal(10, 2)
+  obs             String?
+  itens           CompraItem[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@map("compras")
+}
+
+model CompraItem {
+  id            String   @id @default(uuid())
+  compraId      String
+  compra        Compra   @relation(fields: [compraId], references: [id], onDelete: Cascade)
+  produtoId     String?
+  produto       Produto? @relation(fields: [produtoId], references: [id])
+  nome          String
+  qtd           Int
+  valorUnitario Decimal  @db.Decimal(10, 2)
+  total         Decimal  @db.Decimal(10, 2)
+
+  @@map("compra_itens")
+}

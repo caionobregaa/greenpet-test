@@ -1,7 +1,27 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" -Recurse -Force -File | Select-Object Name, @{Name=\"RelativePath\";Expression={$_.FullName -replace [regex]::Escape\\(\"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\"\\)}} | Sort-Object RelativePath)"
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" -Recurse -Force -File | Select-Object Name, @{Name=\"RelativePath\";Expression={$_.FullName -replace [regex]::Escape\\(\"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\"\\)}} | Sort-Object RelativePath)",
+      "WebFetch(domain:mmarcosab.medium.com)",
+      "PowerShell(head -50)",
+      "PowerShell(@\\(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" -File -Force\\).Name)",
+      "PowerShell(@\\(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\" -Force\\).Name)",
+      "PowerShell(@\\(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\.claude\" -Force\\).Name)",
+      "PowerShell(docker info 2>&1)",
+      "PowerShell(Get-Process \"Docker Desktop\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-Service -Name \"com.docker.service\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux, VirtualMachinePlatform)",
+      "PowerShell(Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux)",
+      "PowerShell(Get-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform)",
+      "PowerShell(wsl --status 2>&1)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" -Force | Select-Object Name, @{N=\"Type\";E={if\\($_.PSIsContainer\\){\"DIR\"}else{\"FILE\"}}} | Format-Table -AutoSize)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\" -Depth 2 -Directory | Select-Object FullName | ForEach-Object { $_.FullName.Replace\\(\"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\\\\\", \"\"\\) } | Sort-Object)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\\\\src\" -Depth 3 -Directory | Where-Object { $_.Name -ne 'node_modules' } | ForEach-Object { $_.FullName.Replace\\(\"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\\\\src\\\\\", \"\"\\) } | Sort-Object)",
+      "PowerShell($root = \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\"; Get-ChildItem -Path $root -Force | Where-Object { $_.Name -ne 'node_modules' -and $_.Name -ne '.git' } | ForEach-Object { if \\($_.PSIsContainer\\) { \"📁 $_\"; Get-ChildItem -Path $_.FullName -Depth 1 | Where-Object { $_.Name -ne 'node_modules' } | ForEach-Object { \"`t\" + \\(\"├─ \" + $_.Name\\) } } else { \"📄 $_\" } })",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" -Force | Select-Object Name, @{Name=\"Type\"; Expression={if \\($_.PSIsContainer\\) { \"Dir\" } else { \"File\" }}})",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" | Format-Table -Property Name, @{Name=\"Type\"; Expression={if \\($_.PSIsContainer\\) { \"Directory\" } else { \"File\" }}})",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\" | Format-Table -Property Name, @{Name=\"Type\"; Expression={if \\($_.PSIsContainer\\) { \"Directory\" } else { \"File\" }}})",
+      "PowerShell(cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\frontend\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"npm run dev -- --port 3001\" -WindowStyle Minimized; Start-Sleep 3; Write-Host \"Dev server started on port 3001\")"
     ]
   }
 }

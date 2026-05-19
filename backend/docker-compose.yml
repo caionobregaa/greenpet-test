@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: greenpet-db
+    environment:
+      POSTGRES_DB: greenpet
+      POSTGRES_USER: greenpet
+      POSTGRES_PASSWORD: greenpet_dev_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - greenpet_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U greenpet"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: greenpet-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://greenpet:greenpet_dev_pass@db:5432/greenpet
+      JWT_SECRET: change_this_to_a_random_64_char_string_in_production_change_it_now
+      JWT_EXPIRES_IN: 28800
+      REFRESH_TOKEN_EXPIRES_IN: 30
+      BCRYPT_ROUNDS: 12
+      PORT: 3000
+      HOST: 0.0.0.0
+      NODE_ENV: production
+      TZ: America/Manaus
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  greenpet_db_data:

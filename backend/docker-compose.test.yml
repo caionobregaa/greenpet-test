@@ -1,0 +1,17 @@
+services:
+  db_test:
+    image: postgres:16-alpine
+    container_name: greenpet-db-test
+    environment:
+      POSTGRES_DB: greenpet_test
+      POSTGRES_USER: greenpet_test
+      POSTGRES_PASSWORD: greenpet_test_pass
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U greenpet_test"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
