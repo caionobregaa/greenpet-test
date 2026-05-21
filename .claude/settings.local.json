@@ -43,7 +43,9 @@
       "PowerShell(Get-Process | Where-Object { $_.Name -match \"node|tsx\" } | ForEach-Object { Write-Host \"Killing: $\\($_.Id\\) $\\($_.Name\\)\"; Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue })",
       "PowerShell(Get-Process | Where-Object { $_.Name -match \"node|tsx\" } | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 1; Set-Location \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\"; npm run dev)",
       "PowerShell(Invoke-WebRequest -Uri \"http://localhost:3001/\" -UseBasicParsing | Select-Object StatusCode, @{N='Body';E={$_.Content.Substring\\(0,100\\)}})",
-      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:3001/\" -UseBasicParsing; Write-Host \"Status: $\\($r.StatusCode\\)\"; Write-Host $r.Content.Substring\\(0,150\\))"
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:3001/\" -UseBasicParsing; Write-Host \"Status: $\\($r.StatusCode\\)\"; Write-Host $r.Content.Substring\\(0,150\\))",
+      "PowerShell($login = Invoke-RestMethod -Uri \"http://localhost:3001/api/v1/auth/login\" -Method Post -ContentType \"application/json\" -Body '{\"email\":\"admin@greenpet.com\",\"password\":\"admin123\"}'; $token = $login.data.accessToken; Write-Host \"Token OK: $\\($token.Substring\\(0,20\\)\\)...\")",
+      "PowerShell($login = Invoke-RestMethod -Uri \"http://localhost:3001/api/v1/auth/login\" -Method Post -ContentType \"application/json\" -Body '{\"email\":\"admin@greenpet.com\",\"password\":\"admin123\"}'; $token = $login.data.token; $headers = @{ Authorization = \"Bearer $token\" }; $body = '{\"nome\":\"Teste Silva\",\"telefone\":\"92999991234\",\"cidade\":\"Manaus\"}'; try { Invoke-RestMethod -Uri \"http://localhost:3001/api/v1/clientes\" -Method Post -ContentType \"application/json\" -Headers $headers -Body $body | ConvertTo-Json } catch { $_.Exception.Response.StatusCode; $_.ErrorDetails.Message })"
     ]
   }
 }
