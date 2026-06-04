@@ -1,10 +1,11 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 COPY frontend/package*.json ./
 RUN npm ci
 COPY frontend/ .
+# Only override .env.production if the build arg is explicitly provided
+ARG NEXT_PUBLIC_API_URL
+RUN [ -z "$NEXT_PUBLIC_API_URL" ] || printf 'NEXT_PUBLIC_API_URL=%s\n' "$NEXT_PUBLIC_API_URL" > .env.local
 RUN npm run build
 
 FROM node:20-alpine AS production
