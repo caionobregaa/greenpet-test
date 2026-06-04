@@ -14,10 +14,10 @@ function fmtDate(iso: string | null | undefined): string {
   return `${d}/${m}/${y}`;
 }
 
-const GREEN = [45, 122, 45] as const;
-const DARK  = [30,  30,  30] as const;
-const GRAY  = [100, 100, 100] as const;
-const LIGHT = [245, 248, 245] as const;
+const GREEN: [number, number, number] = [45, 122, 45];
+const DARK:  [number, number, number] = [30,  30,  30];
+const GRAY:  [number, number, number] = [100, 100, 100];
+const LIGHT: [number, number, number] = [245, 248, 245];
 
 export function gerarOrcamentoPDF(
   orcamento: Orcamento,

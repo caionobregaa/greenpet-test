@@ -213,7 +213,7 @@ export function ClienteForm({
 
               <div className="space-y-1.5">
                 <Label>Espécie *</Label>
-                <Select value={animal.especie} onValueChange={(v) => updateAnimal(idx, "especie", v)}>
+                <Select value={animal.especie} onValueChange={(v) => { if (v !== null) updateAnimal(idx, "especie", v); }}>
                   <SelectTrigger ref={(el) => { especieRefs.current[idx] = el; }}>
                     {animal.especie
                       ? <span className="flex flex-1 text-left text-sm">{animal.especie}</span>
@@ -233,7 +233,7 @@ export function ClienteForm({
 
               <div className="space-y-1.5">
                 <Label>Sexo</Label>
-                <Select value={animal.sexo} onValueChange={(v) => updateAnimal(idx, "sexo", v)}>
+                <Select value={animal.sexo} onValueChange={(v) => { if (v !== null) updateAnimal(idx, "sexo", v); }}>
                   <SelectTrigger ref={(el) => { sexoRefs.current[idx] = el; }}>
                     <span className="flex flex-1 text-left text-sm">{SEXO_LABEL[animal.sexo]}</span>
                   </SelectTrigger>

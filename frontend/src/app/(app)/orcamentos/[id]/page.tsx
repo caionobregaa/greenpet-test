@@ -68,7 +68,7 @@ export default function OrcamentoDetailPage({ params }: Props) {
   }
 
   async function handleDownloadPDF() {
-    if (!orcamento) return;
+    if (!orcamento || !orcamento.clienteId) return;
     setPdfLoading(true);
     try {
       const [cliente, animal] = await Promise.all([
