@@ -1,0 +1,1 @@
+{"version":3,"file":"animais.routes.d.ts","sourceRoot":"","sources":["../../../../../src/modules/animais/infrastructure/http/animais.routes.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,eAAe,EAAE,MAAM,SAAS,CAAA;AAC9C,OAAO,KAAK,EAAE,iBAAiB,EAAE,MAAM,yBAAyB,CAAA;AAEhE,wBAAgB,qBAAqB,CAAC,GAAG,EAAE,eAAe,EAAE,UAAU,EAAE,iBAAiB,GAAG,IAAI,CAM/F"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"fastify-app.d.ts","sourceRoot":"","sources":["../../../../src/shared/infrastructure/http/fastify-app.ts"],"names":[],"mappings":"AAAA,OAAgB,EAAE,KAAK,eAAe,EAAE,MAAM,SAAS,CAAA;AAMvD,MAAM,WAAW,UAAU;IACzB,SAAS,EAAE,MAAM,CAAA;IACjB,MAAM,CAAC,EAAE,OAAO,CAAA;CACjB;AAED,wBAAsB,QAAQ,CAAC,IAAI,EAAE,UAAU,GAAG,OAAO,CAAC,eAAe,CAAC,CAuDzE"}

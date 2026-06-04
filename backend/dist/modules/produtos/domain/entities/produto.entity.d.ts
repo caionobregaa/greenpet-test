@@ -1,0 +1,81 @@
+import { AggregateRoot } from '@/shared/domain/aggregate-root.base.js';
+import { Money } from '@/shared/domain/value-objects/money.vo.js';
+declare const CATEGORIAS_VALIDAS: readonly ["Ração", "Petisco", "Medicamento", "Acessório", "Higiene", "Serviço"];
+type Categoria = (typeof CATEGORIAS_VALIDAS)[number];
+interface ProdutoProps {
+    nome: string;
+    categoria: Categoria;
+    especie?: string;
+    subCategoria?: string;
+    marca?: string;
+    fornecedor?: string;
+    pesoEmbalagem?: number;
+    valorCusto: Money;
+    valorVenda: Money;
+    margemCartao: number;
+    margemImposto: number;
+    margemOperacao: number;
+    margemLucro: number;
+    diasRecompra?: number;
+    descricao?: string;
+    deletedAt?: Date;
+}
+export declare class Produto extends AggregateRoot<ProdutoProps> {
+    static create(data: {
+        id?: string;
+        nome: string;
+        categoria: string;
+        especie?: string;
+        subCategoria?: string;
+        marca?: string;
+        fornecedor?: string;
+        pesoEmbalagem?: number;
+        valorCusto?: number;
+        valorVenda: number;
+        margemCartao?: number;
+        margemImposto?: number;
+        margemOperacao?: number;
+        margemLucro?: number;
+        diasRecompra?: number;
+        descricao?: string;
+        deletedAt?: Date;
+    }): Produto;
+    get nome(): string;
+    get categoria(): string;
+    get especie(): string | undefined;
+    get subCategoria(): string | undefined;
+    get marca(): string | undefined;
+    get fornecedor(): string | undefined;
+    get pesoEmbalagem(): number | undefined;
+    get valorCusto(): number;
+    get valorVenda(): number;
+    get margemCartao(): number;
+    get margemImposto(): number;
+    get margemOperacao(): number;
+    get margemLucro(): number;
+    get diasRecompra(): number | undefined;
+    get descricao(): string | undefined;
+    get deletedAt(): Date | undefined;
+    get isActive(): boolean;
+    get margemCalculada(): number;
+    softDelete(): void;
+    update(fields: Partial<{
+        nome: string;
+        categoria: string;
+        especie: string;
+        subCategoria: string;
+        marca: string;
+        fornecedor: string;
+        pesoEmbalagem: number;
+        valorCusto: number;
+        valorVenda: number;
+        margemCartao: number;
+        margemImposto: number;
+        margemOperacao: number;
+        margemLucro: number;
+        diasRecompra: number;
+        descricao: string;
+    }>): void;
+}
+export {};
+//# sourceMappingURL=produto.entity.d.ts.map
