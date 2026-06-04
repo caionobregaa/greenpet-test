@@ -20,7 +20,7 @@ class InMemoryAnimalRepository implements IAnimalRepository {
       if (params.clienteId) return a.clienteId === params.clienteId
       return true
     })
-    return { animais: filtered, clienteNomes: {}, total: filtered.length }
+    return { animais: filtered, clienteNomes: {} as Record<string, string>, total: filtered.length }
   }
 
   async save(animal: Animal): Promise<void> {
