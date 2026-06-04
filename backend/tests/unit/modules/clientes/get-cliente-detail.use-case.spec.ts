@@ -121,4 +121,25 @@ describe('GetClienteDetailUseCase', () => {
       code: 'NOT_FOUND',
     })
   })
+
+  it('animal excluído não é contabilizado em numeroDeAnimais', async () => {
+    clienteRepo.animalItems = animalRepo.items
+
+    const cliente = Cliente.create({ nome: 'Pedro Silva', telefone: '(92) 9 9999-1111' })
+    await clienteRepo.save(cliente)
+
+    const animal = Animal.create({ nome: 'Thor', clienteId: cliente.id, especie: 'Cão' })
+    await animalRepo.save(animal)
+
+    const antes = await useCase.execute({ id: cliente.id })
+    expect(antes.animais).toHaveLength(1)
+    expect(antes.cliente.numeroDeAnimais).toBe(1)
+
+    animal.softDelete()
+    await animalRepo.save(animal)
+
+    const depois = await useCase.execute({ id: cliente.id })
+    expect(depois.animais).toHaveLength(0)
+    expect(depois.cliente.numeroDeAnimais).toBe(0)
+  })
 })

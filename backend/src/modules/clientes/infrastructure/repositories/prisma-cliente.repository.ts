@@ -8,7 +8,7 @@ export class PrismaClienteRepository implements IClienteRepository {
   async findById(id: string): Promise<Cliente | null> {
     const row = await this.prisma.cliente.findFirst({
       where: { id, deletedAt: null },
-      include: { _count: { select: { animais: true } } },
+      include: { _count: { select: { animais: { where: { deletedAt: null } } } } },
     })
     return row ? this.toDomain(row) : null
   }
@@ -37,7 +37,7 @@ export class PrismaClienteRepository implements IClienteRepository {
         skip: (params.page - 1) * params.limit,
         take: params.limit,
         orderBy: { nome: 'asc' },
-        include: { _count: { select: { animais: true } } },
+        include: { _count: { select: { animais: { where: { deletedAt: null } } } } },
       }),
       this.prisma.cliente.count({ where }),
     ])
