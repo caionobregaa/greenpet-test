@@ -72,7 +72,11 @@
       "PowerShell($git = \"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.12\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; & $git -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" show --stat HEAD)",
       "PowerShell($git = \"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.12\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; & $git -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" show --stat HEAD~1)",
       "PowerShell($git = \"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.12\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; & $git -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" show 886261d -- backend/tests/unit/modules/clientes/get-cliente-detail.use-case.spec.ts)",
-      "PowerShell(& \"C:\\\\Program Files\\\\Git\\\\bin\\\\git.exe\" -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" log --oneline -10)"
+      "PowerShell(& \"C:\\\\Program Files\\\\Git\\\\bin\\\\git.exe\" -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" log --oneline -10)",
+      "PowerShell($response = try { Invoke-WebRequest -Uri \"http://localhost:3001/api/v1/clientes\" -UseBasicParsing -TimeoutSec 3 } catch { $_.Exception.Message }; $response)",
+      "PowerShell($git = \"C:\\\\Program Files\\\\Git\\\\bin\\\\git.exe\"; cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\"; & $git diff --stat)",
+      "PowerShell($git = \"C:\\\\Program Files\\\\Git\\\\bin\\\\git.exe\"; cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\"; & $git add backend/prisma/migrations/20260604000000_add_venda_item_produto_relation/migration.sql frontend/Dockerfile.frontend; & $git status --short)",
+      "PowerShell($git = \"C:\\\\Program Files\\\\Git\\\\bin\\\\git.exe\"; cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\"; & $git log --oneline -3)"
     ]
   }
 }
