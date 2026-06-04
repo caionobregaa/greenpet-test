@@ -47,6 +47,7 @@ export function AppSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: A
   const pathname = usePathname();
 
   function isActive(href: string): boolean {
+    if (!pathname) return false;
     if (href === "/vendas/nova") return pathname === "/vendas/nova";
     if (href === "/vendas") return pathname.startsWith("/vendas") && pathname !== "/vendas/nova";
     return pathname === href || pathname.startsWith(href + "/");
@@ -55,34 +56,35 @@ export function AppSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: A
   return (
     <aside
       className={cn(
-        // Mobile (drawer fixo): desliza sobre o conteúdo
-        "fixed inset-y-0 left-0 z-50 w-[260px] flex flex-col bg-card border-r border-border transition-transform duration-300",
+        "fixed inset-y-0 left-0 z-50 w-[260px] flex flex-col bg-sidebar border-r border-sidebar-border transition-transform duration-300",
         mobileOpen ? "translate-x-0" : "-translate-x-full",
-        // Desktop (sidebar estático): sempre visível, largura controlada por collapsed
         "md:static md:z-auto md:translate-x-0 md:transition-all md:duration-250 md:overflow-hidden md:shrink-0",
         collapsed ? "md:w-16" : "md:w-[220px]"
       )}
     >
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-4 py-5 border-b border-border">
+      <div className="flex items-center gap-3 px-4 py-5 border-b border-sidebar-border">
         <div
-          className="w-9 h-9 rounded-lg flex items-center justify-center text-lg shrink-0 text-white font-bold"
-          style={{ background: "linear-gradient(135deg, #388e3c, #00897b)" }}
+          className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 shadow-lg"
+          style={{ background: "linear-gradient(135deg, #5cbf7a 0%, #1a9688 100%)" }}
         >
-          🐾
+          <span className="text-[15px]">🐾</span>
         </div>
         <div className={cn("overflow-hidden", collapsed && "md:hidden")}>
-          <p className="text-[17px] font-bold text-primary leading-tight whitespace-nowrap">
+          <p
+            className="text-[16px] font-semibold leading-tight whitespace-nowrap tracking-tight"
+            style={{ color: "#d4ead4", fontFamily: "var(--font-sora)" }}
+          >
             GreenPET
           </p>
-          <p className="text-[10px] text-muted-foreground tracking-wide uppercase whitespace-nowrap">
+          <p className="text-[9px] tracking-widest uppercase whitespace-nowrap" style={{ color: "#5a7a5a" }}>
             Gestão Pet Shop
           </p>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-2 overflow-y-auto space-y-0.5">
+      <nav className="flex-1 px-2 py-3 overflow-y-auto space-y-0.5">
         {NAV_ITEMS.map(({ href, label, icon: Icon, highlight }) => {
           const active = isActive(href);
           return (
@@ -92,26 +94,34 @@ export function AppSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: A
               title={collapsed ? label : undefined}
               onClick={onMobileClose}
               className={cn(
-                "flex items-center gap-2.5 px-2.5 py-2.5 md:py-2 rounded-lg text-sm font-medium transition-all duration-150 whitespace-nowrap overflow-hidden",
+                "flex items-center gap-2.5 px-2.5 py-2 md:py-[7px] rounded-md text-[13px] font-medium transition-all duration-150 whitespace-nowrap overflow-hidden",
                 highlight && !active
-                  ? "bg-primary text-primary-foreground hover:bg-brand-800"
+                  ? "bg-sidebar-primary/20 text-sidebar-primary border border-sidebar-primary/25 hover:bg-sidebar-primary/30"
                   : active
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  ? "bg-sidebar-accent text-sidebar-primary border-l-2 border-sidebar-primary ml-0"
+                  : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )}
             >
-              <Icon className="w-[18px] h-[18px] shrink-0" />
+              <Icon
+                className={cn(
+                  "w-[17px] h-[17px] shrink-0",
+                  active ? "text-sidebar-primary" : highlight && !active ? "text-sidebar-primary" : "opacity-70"
+                )}
+              />
               <span className={cn("truncate", collapsed && "md:hidden")}>{label}</span>
             </Link>
           );
         })}
       </nav>
 
-      {/* Toggle — só visível no desktop */}
-      <div className="hidden md:block p-2 border-t border-border">
+      {/* Toggle — desktop only */}
+      <div className="hidden md:block px-2 py-2 border-t border-sidebar-border">
         <button
           onClick={onToggle}
-          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
+          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-xs transition-colors"
+          style={{ color: "#3a5a3a" }}
+          onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#152219")}
+          onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
         >
           {collapsed ? (
             <ChevronRight className="w-4 h-4 shrink-0" />

@@ -3,7 +3,7 @@ import { UnauthorizedError } from '../../errors/unauthorized.error.js'
 
 export function registerAuthHook(app: FastifyInstance): void {
   app.addHook('onRequest', async (request, _reply) => {
-    const routeConfig = request.routeOptions.config as Record<string, unknown>
+    const routeConfig = request.routeOptions.config as unknown as Record<string, unknown>
     if (routeConfig?.public === true) return
 
     try {

@@ -45,11 +45,13 @@ export class PrismaClienteRepository implements IClienteRepository {
   }
 
   async save(cliente: Cliente): Promise<void> {
+    const deleted = !!cliente.deletedAt
     const data = {
       nome: cliente.nome,
       telefone: cliente.telefone,
-      email: cliente.email ?? null,
-      cpf: cliente.cpf ?? null,
+      // Limpa campos únicos ao deletar para liberar o índice
+      email: deleted ? null : (cliente.email ?? null),
+      cpf: deleted ? null : (cliente.cpf ?? null),
       endereco: cliente.endereco ?? null,
       bairro: cliente.bairro ?? null,
       cidade: cliente.cidade,

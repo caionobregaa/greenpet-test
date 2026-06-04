@@ -8,7 +8,7 @@ export class ListAnimaisUseCase {
     clienteId?: string
     page?: number
     limit?: number
-  }): Promise<{ animais: Animal[]; total: number }> {
+  }): Promise<{ animais: Animal[]; clienteNomes: Record<string, string>; total: number }> {
     return this.repo.findMany({
       clienteId: params.clienteId,
       page: params.page ?? 1,

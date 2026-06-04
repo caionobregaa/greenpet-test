@@ -1,7 +1,7 @@
 import { api } from "./client";
 import type { ApiResponse, ApiMeta } from "@/lib/types/api";
 import type { Orcamento } from "@/lib/types/orcamento";
-import type { CreateOrcamentoInput, ConverterOrcamentoInput } from "@/lib/schemas/orcamento.schema";
+import type { CreateOrcamentoInput, UpdateOrcamentoInput, ConverterOrcamentoInput } from "@/lib/schemas/orcamento.schema";
 import type { Venda } from "@/lib/types/venda";
 
 interface ListParams {
@@ -30,6 +30,16 @@ export const apiOrcamentos = {
       data: input.data || undefined,
     };
     const { data } = await api.post<ApiResponse<Orcamento>>("/orcamentos", payload);
+    return data.data;
+  },
+
+  update: async (id: string, input: UpdateOrcamentoInput): Promise<Orcamento> => {
+    const payload = {
+      ...input,
+      obs: input.obs || undefined,
+      itens: input.itens?.map((item) => ({ ...item, produtoId: item.produtoId ?? undefined })),
+    };
+    const { data } = await api.put<ApiResponse<Orcamento>>(`/orcamentos/${id}`, payload);
     return data.data;
   },
 

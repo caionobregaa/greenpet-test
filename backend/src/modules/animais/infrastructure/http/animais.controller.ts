@@ -8,11 +8,12 @@ import { CreateAnimalSchema, UpdateAnimalSchema, ListAnimaisQuerySchema } from '
 import { ValidationError } from '@/shared/errors/validation.error.js'
 import type { Animal } from '../../domain/entities/animal.entity.js'
 
-function toResponse(a: Animal) {
+function toResponse(a: Animal, clienteNome?: string) {
   return {
     id: a.id,
     nome: a.nome,
     clienteId: a.clienteId,
+    cliente: clienteNome ? { nome: clienteNome } : undefined,
     especie: a.especie,
     raca: a.raca,
     sexo: a.sexo,
@@ -46,7 +47,7 @@ export class AnimaisController {
     if (!query.success) throw new ValidationError('VALIDATION_ERROR', query.error.errors[0].message)
     const result = await this.listUseCase.execute(query.data)
     reply.status(200).send({
-      data: result.animais.map(toResponse),
+      data: result.animais.map((a) => toResponse(a, result.clienteNomes[a.id])),
       meta: { page: query.data.page, limit: query.data.limit, total: result.total },
     })
   }

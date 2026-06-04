@@ -74,7 +74,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
 
   private toDomain(row: {
     id: string
-    clienteId: string
+    clienteId: string | null
     animalId: string | null
     data: Date
     validade: Date
@@ -93,7 +93,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
   }): Orcamento {
     return Orcamento.create({
       id: row.id,
-      clienteId: row.clienteId,
+      clienteId: row.clienteId ?? undefined,
       animalId: row.animalId ?? undefined,
       data: row.data,
       validade: row.validade,

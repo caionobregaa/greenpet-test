@@ -9,8 +9,10 @@ import { ListOrcamentosUseCase } from '../../application/use-cases/list-orcament
 import { UpdateOrcamentoStatusUseCase } from '../../application/use-cases/update-orcamento-status.use-case.js'
 import { ConverterOrcamentoUseCase } from '../../application/use-cases/converter-orcamento.use-case.js'
 import { DeleteOrcamentoUseCase } from '../../application/use-cases/delete-orcamento.use-case.js'
+import { UpdateOrcamentoUseCase } from '../../application/use-cases/update-orcamento.use-case.js'
 import {
   CreateOrcamentoSchema,
+  UpdateOrcamentoSchema,
   UpdateOrcamentoStatusSchema,
   ConverterOrcamentoSchema,
   ListOrcamentosQuerySchema,
@@ -47,6 +49,7 @@ export function registerOrcamentosRoutes(app: FastifyInstance, prisma: PrismaCli
   const statusUC = new UpdateOrcamentoStatusUseCase(orcamentoRepo)
   const converterUC = new ConverterOrcamentoUseCase(orcamentoRepo, vendaRepo)
   const deleteUC = new DeleteOrcamentoUseCase(orcamentoRepo)
+  const updateUC = new UpdateOrcamentoUseCase(orcamentoRepo)
 
   app.get('/api/v1/orcamentos', async (req, rep) => {
     const q = ListOrcamentosQuerySchema.safeParse(req.query)
@@ -82,6 +85,14 @@ export function registerOrcamentosRoutes(app: FastifyInstance, prisma: PrismaCli
     if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
     const venda = await converterUC.execute({ id, formaPag: body.data.formaPag })
     rep.status(201).send({ data: { vendaId: venda.id } })
+  })
+
+  app.put('/api/v1/orcamentos/:id', async (req, rep) => {
+    const { id } = req.params as { id: string }
+    const body = UpdateOrcamentoSchema.safeParse(req.body)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    const o = await updateUC.execute({ id, ...body.data })
+    rep.send({ data: toResponse(o) })
   })
 
   app.delete('/api/v1/orcamentos/:id', async (req, rep) => {

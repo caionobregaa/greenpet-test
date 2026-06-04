@@ -7,8 +7,15 @@ export const OrcamentoItemSchema = z.object({
   valorUnitario: z.number().min(0.01, "Valor deve ser maior que zero"),
 });
 
+export const UpdateOrcamentoSchema = z.object({
+  validade: z.string().date({ message: "Data de validade inválida" }).optional(),
+  obs: z.string().optional().or(z.literal("")),
+  itens: z.array(OrcamentoItemSchema).min(1, "Adicione pelo menos um item").optional(),
+});
+export type UpdateOrcamentoInput = z.infer<typeof UpdateOrcamentoSchema>;
+
 export const CreateOrcamentoSchema = z.object({
-  clienteId: z.string().uuid("Selecione um cliente"),
+  clienteId: z.string().uuid().optional().or(z.literal("")),
   animalId: z.string().uuid().optional().nullable(),
   data: z.string().date().optional(),
   validade: z.string().date({ message: "Data de validade é obrigatória" }),

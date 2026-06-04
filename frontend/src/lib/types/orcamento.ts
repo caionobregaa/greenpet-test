@@ -13,7 +13,7 @@ export interface Orcamento {
   id: string;
   data: string;
   validade: string;
-  clienteId: string;
+  clienteId?: string | null;
   cliente?: { nome: string };
   animalId: string | null;
   animal?: { nome: string } | null;

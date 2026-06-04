@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { formatBRL } from "@/lib/utils/format";
@@ -67,7 +66,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Imagem + Identificação */}
-      <div className="flex flex-col sm:flex-row gap-6 items-start">
+      <div className="flex flex-col sm:flex-row gap-8 items-start">
         <div className="space-y-1.5 shrink-0">
           <Label>Foto do Produto</Label>
           <ImageUpload
@@ -76,7 +75,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
           />
         </div>
 
-        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
           <div className="space-y-1.5 col-span-2">
             <Label htmlFor="nome">Nome *</Label>
             <Input id="nome" {...register("nome")} placeholder="Nome do produto" />
@@ -123,7 +122,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
       </div>
 
       {/* Detalhes */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
         <div className="space-y-1.5">
           <Label htmlFor="marca">Marca</Label>
           <Input id="marca" {...register("marca")} placeholder="Royal Canin, Pedigree..." />
@@ -146,12 +145,10 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
         </div>
       </div>
 
-      <Separator />
-
       {/* Preços e Margens */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Preços e Margens</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div className="space-y-4 pt-1 border-t border-border/60">
+        <span className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Preços e Margens</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
           <div className="space-y-1.5">
             <Label htmlFor="valorCusto">Custo (R$) *</Label>
             <Input id="valorCusto" type="number" step="0.01" min="0" {...register("valorCusto", { valueAsNumber: true })} placeholder="0.00" />
@@ -200,8 +197,8 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+      <div className="flex justify-end gap-2 pt-4 mt-1 border-t border-border/60">
+        <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading} className="text-muted-foreground">
           Cancelar
         </Button>
         <Button type="submit" disabled={isLoading}>

@@ -28,6 +28,27 @@ export function errorHandler(
     return
   }
 
+  // Prisma P2002 — unique constraint violation
+  const prismaCode = (error as { code?: string }).code
+  if (prismaCode === 'P2002') {
+    const target = ((error as { meta?: { target?: string[] } }).meta?.target ?? []).join(', ')
+    reply.status(409).send({
+      error: {
+        code: 'CONFLICT',
+        message: target ? `${target} já está em uso` : 'Registro já existe',
+      },
+    })
+    return
+  }
+
+  // Prisma P2025 — registro não encontrado
+  if (prismaCode === 'P2025') {
+    reply.status(404).send({
+      error: { code: 'NOT_FOUND', message: 'Registro não encontrado' },
+    })
+    return
+  }
+
   console.error(error)
   reply.status(500).send({
     error: {

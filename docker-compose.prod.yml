@@ -1,0 +1,54 @@
+name: greenpet
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: greenpet-db
+    environment:
+      POSTGRES_DB: greenpet
+      POSTGRES_USER: greenpet
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - greenpet_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U greenpet"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    image: ${BACKEND_IMAGE}
+    container_name: greenpet-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://greenpet:${POSTGRES_PASSWORD}@db:5432/greenpet
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-28800}
+      REFRESH_TOKEN_EXPIRES_IN: ${REFRESH_TOKEN_EXPIRES_IN:-30}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
+      PORT: 3000
+      HOST: 0.0.0.0
+      NODE_ENV: production
+      TZ: America/Manaus
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  frontend:
+    image: ${FRONTEND_IMAGE}
+    container_name: greenpet-frontend
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+
+volumes:
+  greenpet_db_data:

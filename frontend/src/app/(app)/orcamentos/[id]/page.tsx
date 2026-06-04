@@ -3,7 +3,7 @@
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, Trash2, CheckCircle, XCircle, RotateCcw, RefreshCw } from "lucide-react";
+import { ArrowLeft, Trash2, CheckCircle, XCircle, RotateCcw, RefreshCw, FileDown } from "lucide-react";
 import {
   useOrcamento,
   useDeleteOrcamento,
@@ -19,6 +19,9 @@ import { Label } from "@/components/ui/label";
 import { FormaPagSelect } from "@/components/vendas/forma-pag-select";
 import { formatDate, formatBRL } from "@/lib/utils/format";
 import { Loader2 } from "lucide-react";
+import { apiClientes } from "@/lib/api/clientes";
+import { apiAnimais } from "@/lib/api/animais";
+import { gerarOrcamentoPDF } from "@/lib/utils/orcamento-pdf";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -36,6 +39,7 @@ export default function OrcamentoDetailPage({ params }: Props) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [converterOpen, setConverterOpen] = useState(false);
   const [formaPag, setFormaPag] = useState("");
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   async function handleStatus(acao: "aprovar" | "recusar" | "reabrir") {
     try {
@@ -63,6 +67,23 @@ export default function OrcamentoDetailPage({ params }: Props) {
     catch { toast.error("Erro ao excluir."); }
   }
 
+  async function handleDownloadPDF() {
+    if (!orcamento) return;
+    setPdfLoading(true);
+    try {
+      const [cliente, animal] = await Promise.all([
+        apiClientes.get(orcamento.clienteId),
+        orcamento.animalId ? apiAnimais.get(orcamento.animalId) : Promise.resolve(null),
+      ]);
+      gerarOrcamentoPDF(orcamento, cliente, animal);
+      toast.success("PDF gerado com sucesso!");
+    } catch {
+      toast.error("Erro ao gerar o PDF.");
+    } finally {
+      setPdfLoading(false);
+    }
+  }
+
   if (isLoading) return <div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-64 w-full" /></div>;
   if (!orcamento) return <p className="text-muted-foreground">Orçamento não encontrado.</p>;
 
@@ -75,6 +96,10 @@ export default function OrcamentoDetailPage({ params }: Props) {
           <p className="text-sm text-muted-foreground">{formatDate(orcamento.data)}</p>
         </div>
         <StatusPill status={orcamento.status} />
+        <Button variant="outline" size="sm" onClick={handleDownloadPDF} disabled={pdfLoading}>
+          {pdfLoading ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5 mr-1.5" />}
+          Baixar PDF
+        </Button>
         <Button variant="outline" size="sm" className="text-destructive border-destructive hover:bg-destructive/10" onClick={() => setDeleteOpen(true)}>
           <Trash2 className="w-3.5 h-3.5 mr-1.5" />Excluir
         </Button>

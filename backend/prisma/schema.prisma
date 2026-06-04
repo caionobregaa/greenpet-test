@@ -102,6 +102,7 @@ model Produto {
   imagemUrl      String?
   deletedAt      DateTime?
   compraItens    CompraItem[]
+  vendaItens     VendaItem[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -128,14 +129,15 @@ model Venda {
 }
 
 model VendaItem {
-  id            String  @id @default(uuid())
+  id            String   @id @default(uuid())
   vendaId       String
-  venda         Venda   @relation(fields: [vendaId], references: [id], onDelete: Cascade)
+  venda         Venda    @relation(fields: [vendaId], references: [id], onDelete: Cascade)
   produtoId     String?
+  produto       Produto? @relation(fields: [produtoId], references: [id])
   nome          String
   qtd           Int
-  valorUnitario Decimal @db.Decimal(10, 2)
-  total         Decimal @db.Decimal(10, 2)
+  valorUnitario Decimal  @db.Decimal(10, 2)
+  total         Decimal  @db.Decimal(10, 2)
 
   @@map("venda_itens")
 }
@@ -146,8 +148,8 @@ model Orcamento {
   id        String          @id @default(uuid())
   data      DateTime
   validade  DateTime
-  clienteId String
-  cliente   Cliente         @relation(fields: [clienteId], references: [id])
+  clienteId String?
+  cliente   Cliente?        @relation(fields: [clienteId], references: [id])
   animalId  String?
   animal    Animal?         @relation(fields: [animalId], references: [id])
   status    String          @default("pendente")

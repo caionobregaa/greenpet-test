@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@prisma/client'
 import { classifyUrgency, calcDiasRestantes, type UrgencyLevel } from '../../domain/services/recompra-alert.service.js'
+export type { UrgencyLevel } from '../../domain/services/recompra-alert.service.js'
 
 export interface RecompraAlerta {
   clienteId: string

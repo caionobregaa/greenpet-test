@@ -22,7 +22,7 @@ export interface OrcamentoItemReadOnly {
 }
 
 interface OrcamentoProps {
-  clienteId: string
+  clienteId?: string
   animalId?: string
   data: Date
   validade: Date
@@ -36,7 +36,7 @@ interface OrcamentoProps {
 export class Orcamento extends AggregateRoot<OrcamentoProps> {
   static create(data: {
     id?: string
-    clienteId: string
+    clienteId?: string
     animalId?: string
     data?: Date
     validade: Date
@@ -72,7 +72,7 @@ export class Orcamento extends AggregateRoot<OrcamentoProps> {
     )
   }
 
-  get clienteId(): string { return this.props.clienteId }
+  get clienteId(): string | undefined { return this.props.clienteId }
   get animalId(): string | undefined { return this.props.animalId }
   get data(): Date { return this.props.data }
   get validade(): Date { return this.props.validade }

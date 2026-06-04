@@ -1,14 +1,20 @@
 import { z } from 'zod'
 
 const OrcamentoItemSchema = z.object({
-  produtoId: z.string().uuid().optional(),
+  produtoId: z.string().uuid().nullable().optional().transform((v) => v ?? undefined),
   nome: z.string().min(1),
-  qtd: z.number().int().positive(),
-  valorUnitario: z.number().min(0),
+  qtd: z.coerce.number().int().positive(),
+  valorUnitario: z.coerce.number().min(0),
+})
+
+export const UpdateOrcamentoSchema = z.object({
+  validade: z.string().date().transform((v) => new Date(v)).optional(),
+  obs: z.string().optional(),
+  itens: z.array(OrcamentoItemSchema).min(1).optional(),
 })
 
 export const CreateOrcamentoSchema = z.object({
-  clienteId: z.string().uuid(),
+  clienteId: z.string().uuid().optional(),
   animalId: z.string().uuid().optional(),
   data: z.string().date().optional().transform((v) => v ? new Date(v) : undefined),
   validade: z.string().date().transform((v) => new Date(v)),

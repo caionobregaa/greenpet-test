@@ -1,4 +1,10 @@
 import { api } from "./client";
+
+function formatCPF(v: string): string {
+  const d = v.replace(/\D/g, "");
+  if (d.length !== 11) return v;
+  return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}`;
+}
 import type { ApiResponse, ApiMeta } from "@/lib/types/api";
 import type { Cliente, ClienteDetail } from "@/lib/types/cliente";
 import type { CreateClienteInput, UpdateClienteInput } from "@/lib/schemas/cliente.schema";
@@ -24,6 +30,7 @@ export const apiClientes = {
     const payload = Object.fromEntries(
       Object.entries(input).filter(([, v]) => v !== "" && v !== undefined)
     );
+    if (payload.cpf) payload.cpf = formatCPF(payload.cpf as string);
     const { data } = await api.post<ApiResponse<Cliente>>("/clientes", payload);
     return data.data;
   },
@@ -32,6 +39,7 @@ export const apiClientes = {
     const payload = Object.fromEntries(
       Object.entries(input).filter(([, v]) => v !== "" && v !== undefined)
     );
+    if (payload.cpf) payload.cpf = formatCPF(payload.cpf as string);
     const { data } = await api.put<ApiResponse<Cliente>>(`/clientes/${id}`, payload);
     return data.data;
   },

@@ -20,7 +20,11 @@ export class UpdateAnimalUseCase {
     const { id, ...fields } = input
     const animal = await this.repo.findById(id)
     if (!animal) throw new NotFoundError('NOT_FOUND', 'Animal não encontrado')
-    animal.update(fields)
+    animal.update({
+      ...fields,
+      especie: fields.especie as 'Cão' | 'Gato' | undefined,
+      sexo: fields.sexo as 'M' | 'F' | 'Indefinido' | undefined,
+    })
     await this.repo.save(animal)
     return animal
   }

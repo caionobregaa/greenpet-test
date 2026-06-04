@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiOrcamentos } from "@/lib/api/orcamentos";
-import type { CreateOrcamentoInput, ConverterOrcamentoInput } from "@/lib/schemas/orcamento.schema";
+import type { CreateOrcamentoInput, UpdateOrcamentoInput, ConverterOrcamentoInput } from "@/lib/schemas/orcamento.schema";
 
 interface ListParams {
   clienteId?: string;
@@ -28,6 +28,15 @@ export function useCreateOrcamento() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateOrcamentoInput) => apiOrcamentos.create(input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["orcamentos"] }),
+  });
+}
+
+export function useUpdateOrcamento() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: UpdateOrcamentoInput }) =>
+      apiOrcamentos.update(id, input),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["orcamentos"] }),
   });
 }

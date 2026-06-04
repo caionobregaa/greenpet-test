@@ -54,7 +54,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const { title, subtitle } = getPageMeta(pathname);
+  const { title, subtitle } = getPageMeta(pathname ?? "");
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

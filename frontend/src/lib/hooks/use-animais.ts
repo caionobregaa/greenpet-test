@@ -49,6 +49,9 @@ export function useDeleteAnimal() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => apiAnimais.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["animais"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["animais"] });
+      qc.invalidateQueries({ queryKey: ["clientes"] });
+    },
   });
 }

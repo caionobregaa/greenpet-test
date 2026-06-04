@@ -44,12 +44,12 @@ function NovaCompraDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[820px] sm:p-8 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nova Compra</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-2 gap-6">
             <div className="space-y-1.5">
               <Label htmlFor="fornecedor">Fornecedor *</Label>
               <Input {...register("fornecedor")} placeholder="Nome do fornecedor" />
@@ -68,8 +68,8 @@ function NovaCompraDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
             control={control as unknown as Parameters<typeof ItensTable>[0]["control"]}
             setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
           />
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <div className="flex justify-end gap-2 pt-4 mt-1 border-t border-border/60">
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="text-muted-foreground">Cancelar</Button>
             <Button type="submit" disabled={create.isPending}>
               {create.isPending ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Salvando...</> : "Registrar Compra"}
             </Button>

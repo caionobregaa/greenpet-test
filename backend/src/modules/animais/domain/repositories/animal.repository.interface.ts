@@ -6,6 +6,6 @@ export interface IAnimalRepository {
     clienteId?: string
     page: number
     limit: number
-  }): Promise<{ animais: Animal[]; total: number }>
+  }): Promise<{ animais: Animal[]; clienteNomes: Record<string, string>; total: number }>
   save(animal: Animal): Promise<void>
 }

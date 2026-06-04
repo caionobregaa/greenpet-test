@@ -18,13 +18,16 @@ export class PrismaAnimalRepository implements IAnimalRepository {
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.animal.findMany({
         where,
+        include: { cliente: { select: { nome: true } } },
         skip: (params.page - 1) * params.limit,
         take: params.limit,
         orderBy: { nome: 'asc' },
       }),
       this.prisma.animal.count({ where }),
     ])
-    return { animais: rows.map((r) => this.toDomain(r)), total }
+    const clienteNomes: Record<string, string> = {}
+    rows.forEach((r) => { clienteNomes[r.id] = r.cliente?.nome ?? '' })
+    return { animais: rows.map((r) => this.toDomain(r)), clienteNomes, total }
   }
 
   async save(animal: Animal): Promise<void> {

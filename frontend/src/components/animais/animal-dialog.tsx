@@ -44,7 +44,7 @@ export function AnimalDialog({ open, onOpenChange, animal, fixedClienteId }: Ani
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl sm:p-6 max-h-[90dvh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] sm:p-8 max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{animal ? "Editar Animal" : "Novo Animal"}</DialogTitle>
         </DialogHeader>

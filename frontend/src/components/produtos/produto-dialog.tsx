@@ -41,7 +41,7 @@ export function ProdutoDialog({ open, onOpenChange, produto }: ProdutoDialogProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl sm:p-6 max-h-[90dvh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[940px] sm:p-8 max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{produto ? "Editar Produto" : "Novo Produto"}</DialogTitle>
         </DialogHeader>

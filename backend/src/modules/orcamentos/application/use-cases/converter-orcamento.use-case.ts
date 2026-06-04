@@ -22,8 +22,13 @@ export class ConverterOrcamentoUseCase {
       throw new UnprocessableError('INVALID_STATUS', 'Orçamento recusado não pode ser convertido')
     }
 
+    const clienteId = orcamento.clienteId
+    if (!clienteId) {
+      throw new UnprocessableError('MISSING_CLIENTE', 'Orçamento sem cliente não pode ser convertido em venda')
+    }
+
     const venda = Venda.create({
-      clienteId: orcamento.clienteId,
+      clienteId,
       animalId: orcamento.animalId,
       data: new Date(),
       formaPag,

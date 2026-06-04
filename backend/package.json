@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "dotenv -e .env -- tsx watch src/main.ts",
-    "build": "tsc --project tsconfig.build.json",
+    "build": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "start": "node dist/main.js",
     "test:unit": "vitest run --config vitest.config.ts",
     "test:unit:watch": "vitest --config vitest.config.ts",
@@ -37,6 +37,7 @@
     "prisma": "^5.22.0",
     "supertest": "^7.0.0",
     "tsx": "^4.19.0",
+    "tsc-alias": "^1.8.10",
     "typescript": "^5.5.4",
     "vitest": "^2.1.1"
   }

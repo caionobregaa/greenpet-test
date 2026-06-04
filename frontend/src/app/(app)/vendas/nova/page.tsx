@@ -122,7 +122,7 @@ export default function NovaVendaPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       <div className="flex items-center gap-3 mb-8">
         <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => router.back()}>
           <ArrowLeft className="w-4 h-4" />
@@ -134,9 +134,9 @@ export default function NovaVendaPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-          <h2 className="text-sm font-semibold mb-5">Dados da Venda</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="bg-card rounded-lg border border-border/50 p-8 shadow-sm shadow-black/5">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground mb-5">Dados da Venda</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
 
             <div className="space-y-1.5">
               <Label htmlFor="data">Data *</Label>
@@ -190,17 +190,17 @@ export default function NovaVendaPage() {
                       )}
                     </div>
                     {clienteOpen && clienteOptions.length > 0 && (
-                      <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
+                      <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border/60 rounded-md shadow-md shadow-black/5 overflow-hidden">
                         {clienteOptions.map((c) => (
                           <button
                             key={c.id}
                             type="button"
-                            className="w-full text-left px-3 py-2.5 text-sm hover:bg-accent transition-colors border-b border-border last:border-0"
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-muted/60 transition-colors border-b border-border/40 last:border-0"
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={() => selectCliente(c, field.onChange)}
                           >
-                            <p className="font-medium">{c.nome}</p>
-                            <p className="text-xs text-muted-foreground">{c.cidade}{c.telefone ? ` · ${c.telefone}` : ""}</p>
+                            <p className="font-medium text-[13px]">{c.nome}</p>
+                            <p className="text-[11px] text-muted-foreground">{c.cidade}{c.telefone ? ` · ${c.telefone}` : ""}</p>
                           </button>
                         ))}
                       </div>
@@ -275,7 +275,7 @@ export default function NovaVendaPage() {
           </div>
         </div>
 
-        <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+        <div className="bg-card rounded-lg border border-border/50 p-8 shadow-sm shadow-black/5">
           <ItensTable
             control={control as unknown as Parameters<typeof ItensTable>[0]["control"]}
             setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
@@ -286,8 +286,8 @@ export default function NovaVendaPage() {
           )}
         </div>
 
-        <div className="flex justify-end gap-3 pb-8">
-          <Button type="button" variant="outline" onClick={() => router.back()}>
+        <div className="flex justify-end gap-2 pb-8">
+          <Button type="button" variant="ghost" onClick={() => router.back()} className="text-muted-foreground">
             Cancelar
           </Button>
           <Button type="submit" disabled={createVenda.isPending}>

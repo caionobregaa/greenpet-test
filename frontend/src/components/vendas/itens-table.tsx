@@ -1,8 +1,8 @@
 "use client";
 
 import { useFieldArray, useWatch, type Control, type UseFormSetValue } from "react-hook-form";
-import { useEffect, useRef, useState, memo } from "react";
-import { Plus, Trash2, Search } from "lucide-react";
+import { useRef, useState, memo } from "react";
+import { Plus, Trash2, Search, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatBRL } from "@/lib/utils/format";
@@ -50,30 +50,32 @@ const ProdutoSearch = memo(function ProdutoSearch({
   return (
     <div className="relative">
       <div className="relative">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50 pointer-events-none" />
         <Input
           value={query}
           onChange={(e) => handleChange(e.target.value)}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
           placeholder="Buscar produto..."
-          className="pl-8 h-8 text-xs"
+          className="pl-8"
         />
       </div>
       {open && results.length > 0 && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border/60 rounded-md shadow-md shadow-black/5 overflow-hidden">
           {results.map((p) => (
             <button
               key={p.id}
               type="button"
-              className="w-full text-left px-3 py-2 text-xs hover:bg-accent transition-colors border-b border-border last:border-0"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-muted/60 transition-colors border-b border-border/40 last:border-0"
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => {
                 onSelect(p);
-                setQuery("");
+                setQuery(p.nome);
                 setResults([]);
                 setOpen(false);
               }}
             >
-              <p className="font-medium text-foreground">{p.nome}</p>
-              <p className="text-muted-foreground">{p.categoria} · {formatBRL(p.valorVenda)}</p>
+              <p className="font-medium text-[13px] text-foreground">{p.nome}</p>
+              <p className="text-[11px] text-muted-foreground">{p.categoria} · {formatBRL(p.valorVenda)}</p>
             </button>
           ))}
         </div>
@@ -87,9 +89,7 @@ export function ItensTable({ control, setValue, errors }: ItensTableProps) {
   const itens = useWatch({ control, name: "itens" as never }) as unknown as ItemRow[];
 
   const total = (itens ?? []).reduce((acc, item) => {
-    const q = Number(item?.qtd ?? 0);
-    const v = Number(item?.valorUnitario ?? 0);
-    return acc + q * v;
+    return acc + Number(item?.qtd ?? 0) * Number(item?.valorUnitario ?? 0);
   }, 0);
 
   function addEmpty() {
@@ -102,93 +102,126 @@ export function ItensTable({ control, setValue, errors }: ItensTableProps) {
     setValue(`itens.${index}.valorUnitario` as never, p.valorVenda as never);
   }
 
+  function stepQtd(index: number, delta: number) {
+    const current = Number((itens ?? [])[index]?.qtd ?? 1);
+    const next = Math.max(1, current + delta);
+    setValue(`itens.${index}.qtd` as never, next as never);
+  }
+
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-sm font-semibold">Itens</p>
-        <Button type="button" variant="outline" size="sm" onClick={addEmpty}>
-          <Plus className="w-3.5 h-3.5 mr-1.5" />
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Itens</span>
+        <Button type="button" variant="outline" size="sm" onClick={addEmpty} className="h-7 text-xs gap-1">
+          <Plus className="w-3 h-3" />
           Adicionar Item
         </Button>
       </div>
 
       {fields.length === 0 && (
-        <div className="rounded-lg border border-dashed border-border text-center py-8 text-sm text-muted-foreground">
-          Nenhum item adicionado. Clique em &quot;Adicionar Item&quot; para começar.
+        <div className="rounded-md border border-dashed border-border/50 text-center py-6 text-[11px] text-muted-foreground/60">
+          Nenhum item. Clique em &quot;Adicionar Item&quot; para começar.
         </div>
       )}
 
-      {fields.map((field, index) => {
-        const item = (itens ?? [])[index] ?? {};
-        const subtotal = Number(item.qtd ?? 0) * Number(item.valorUnitario ?? 0);
-        return (
-          <div key={field.id} className="bg-muted/30 rounded-lg p-3 border border-border space-y-2">
-            <div className="grid grid-cols-12 gap-2 items-start">
-              {/* Busca produto */}
-              <div className="col-span-4">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-1">Produto</p>
-                <ProdutoSearch onSelect={(p) => selectProduto(index, p)} />
-              </div>
-              {/* Nome */}
-              <div className="col-span-4">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-1">Descrição *</p>
-                <Input
-                  {...control.register(`itens.${index}.nome` as never)}
-                  placeholder="Nome do item"
-                  className="h-8 text-xs"
-                />
-                {errors?.[index]?.nome && (
-                  <p className="text-[10px] text-destructive mt-0.5">{errors[index]?.nome?.message}</p>
-                )}
-              </div>
-              {/* Qtd */}
-              <div className="col-span-1">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-1">Qtd *</p>
-                <Input
-                  type="number"
-                  min="1"
-                  {...control.register(`itens.${index}.qtd` as never, { valueAsNumber: true })}
-                  className="h-8 text-xs"
-                />
-              </div>
-              {/* Valor */}
-              <div className="col-span-2">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-1">Valor Unit. *</p>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  {...control.register(`itens.${index}.valorUnitario` as never, { valueAsNumber: true })}
-                  placeholder="0.00"
-                  className="h-8 text-xs"
-                />
-              </div>
-              {/* Total + remove */}
-              <div className="col-span-1 flex flex-col items-end">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-1">Total</p>
-                <div className="flex items-center gap-1.5 h-8">
-                  <span className="text-xs font-bold font-mono text-primary">{formatBRL(subtotal)}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                    onClick={() => remove(index)}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
+      <div className="space-y-2">
+        {fields.map((field, index) => {
+          const item = (itens ?? [])[index] ?? {};
+          const subtotal = Number(item.qtd ?? 0) * Number(item.valorUnitario ?? 0);
+
+          return (
+            <div key={field.id} className="bg-muted/20 rounded-md border border-border/50 p-3.5 space-y-3">
+
+              {/* Row 1 — Product search + Description */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Buscar Produto</p>
+                  <ProdutoSearch onSelect={(p) => selectProduto(index, p)} />
+                </div>
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Descrição *</p>
+                  <Input
+                    {...control.register(`itens.${index}.nome` as never)}
+                    placeholder="Nome do item ou serviço"
+                  />
+                  {errors?.[index]?.nome && (
+                    <p className="text-[11px] text-destructive">{errors[index]?.nome?.message}</p>
+                  )}
                 </div>
               </div>
+
+              {/* Row 2 — Qty, Unit price, Subtotal, Delete */}
+              <div className="flex items-end gap-3 flex-wrap">
+
+                {/* Quantity stepper */}
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Qtd *</p>
+                  <div className="flex items-center border border-input bg-muted/25 rounded-md overflow-hidden h-9">
+                    <button
+                      type="button"
+                      className="w-8 h-full flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors border-r border-input shrink-0"
+                      onClick={() => stepQtd(index, -1)}
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <Input
+                      type="number"
+                      min="1"
+                      {...control.register(`itens.${index}.qtd` as never, { valueAsNumber: true })}
+                      defaultValue={1}
+                      className="w-12 h-full border-0 bg-transparent text-center font-semibold rounded-none focus-visible:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <button
+                      type="button"
+                      className="w-8 h-full flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors border-l border-input shrink-0"
+                      onClick={() => stepQtd(index, 1)}
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Unit price */}
+                <div className="space-y-1.5 flex-1 min-w-[100px]">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Valor Unit. *</p>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    {...control.register(`itens.${index}.valorUnitario` as never, { valueAsNumber: true })}
+                    placeholder="0,00"
+                  />
+                </div>
+
+                {/* Subtotal */}
+                <div className="space-y-1.5 flex-1 min-w-[80px]">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Subtotal</p>
+                  <div className="flex items-center h-9">
+                    <span className="text-[13px] font-bold text-primary tabular-nums">{formatBRL(subtotal)}</span>
+                  </div>
+                </div>
+
+                {/* Delete */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-9 w-9 p-0 text-destructive/50 hover:text-destructive hover:bg-destructive/10 shrink-0 mb-0"
+                  onClick={() => remove(index)}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
 
       {fields.length > 0 && (
-        <div className="flex justify-end pt-1">
+        <div className="flex justify-end pt-3 border-t border-border/50">
           <div className="text-right">
-            <p className="text-xs text-muted-foreground">Total Geral</p>
-            <p className="text-xl font-bold text-primary font-mono">{formatBRL(total)}</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground mb-1">Total Geral</p>
+            <p className="text-xl font-bold text-primary tabular-nums">{formatBRL(total)}</p>
           </div>
         </div>
       )}

@@ -22,7 +22,7 @@ interface TopProdutosChartProps {
   produtos: TopProduto[];
 }
 
-const COLORS = ["#00695c", "#00796b", "#00897b", "#26a69a", "#80cbc4"];
+const COLORS = ["#0e5049", "#1a9688", "#2ab8a8", "#7eccc5", "#b2e0db"];
 
 export function TopProdutosChart({ produtos }: TopProdutosChartProps) {
   const data = produtos.slice(0, 5).map((p) => ({
@@ -33,9 +33,8 @@ export function TopProdutosChart({ produtos }: TopProdutosChartProps) {
   }));
 
   return (
-    <div className="bg-card rounded-xl border border-border p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-        <span className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center text-sm">📦</span>
+    <div className="bg-card rounded-lg border border-border/50 p-5 shadow-sm shadow-black/5">
+      <h3 className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-widest mb-5">
         Top Produtos
       </h3>
       {data.length === 0 ? (
@@ -49,7 +48,7 @@ export function TopProdutosChart({ produtos }: TopProdutosChartProps) {
           >
             <XAxis
               type="number"
-              tick={{ fontSize: 10, fill: "#7a9a7a" }}
+              tick={{ fontSize: 10, fill: "#6b6460" }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`}
@@ -57,7 +56,7 @@ export function TopProdutosChart({ produtos }: TopProdutosChartProps) {
             <YAxis
               type="category"
               dataKey="nome"
-              tick={{ fontSize: 11, fill: "#4a7a4a" }}
+              tick={{ fontSize: 11, fill: "#6b6460" }}
               axisLine={false}
               tickLine={false}
               width={80}
@@ -69,8 +68,8 @@ export function TopProdutosChart({ produtos }: TopProdutosChartProps) {
                   : [value, "Qtd."]
               }
               labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? ""}
-              labelStyle={{ color: "#1a2e1a", fontWeight: 600 }}
-              contentStyle={{ borderColor: "#d0e8d0", borderRadius: 8, fontSize: 12 }}
+              labelStyle={{ color: "#1c1917", fontWeight: 600 }}
+              contentStyle={{ borderColor: "#dbd5cc", borderRadius: 6, fontSize: 12, background: "#fefcf8" }}
             />
             <Bar dataKey="totalVendido" radius={[0, 4, 4, 0]} maxBarSize={24}>
               {data.map((_, i) => (

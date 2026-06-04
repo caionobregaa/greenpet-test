@@ -80,36 +80,39 @@ export default function LoginPage() {
           {/* Logo — sempre visível */}
           <div className="flex items-center gap-2.5">
             <div
-              className="w-9 h-9 lg:w-10 lg:h-10 rounded-xl flex items-center justify-center text-base font-bold text-white shrink-0"
-              style={{ background: "linear-gradient(135deg, #388e3c, #00897b)" }}
+              className="w-8 h-8 lg:w-9 lg:h-9 rounded-md flex items-center justify-center shrink-0 shadow-lg"
+              style={{ background: "linear-gradient(135deg, #5cbf7a 0%, #1a9688 100%)" }}
             >
-              🐾
+              <span className="text-[15px]">🐾</span>
             </div>
-            <span className="text-white text-base lg:text-lg font-bold tracking-tight">GreenPET</span>
+            <span className="text-white/90 text-[15px] lg:text-base font-semibold tracking-tight">GreenPET</span>
           </div>
 
           {/* Mobile: tagline simples na base do banner */}
-          <p className="lg:hidden text-white/90 text-sm font-medium">
+          <p className="lg:hidden text-white/80 text-sm font-light tracking-wide">
             Sistema de Gestão para Pet Shops
           </p>
 
           {/* Desktop: título completo + lista de funcionalidades */}
           <div className="hidden lg:block">
-            <h1 className="text-4xl font-bold text-white leading-tight mb-3">
+            <h1
+              className="text-[38px] text-white leading-[1.15] mb-4"
+              style={{ fontFamily: "var(--font-dm-serif)", fontStyle: "italic" }}
+            >
               Gestão inteligente<br />para o seu Pet Shop
             </h1>
-            <p className="text-white/70 text-base mb-8">
-              Tudo que você precisa para gerenciar clientes, pets, estoque e vendas em um só lugar.
+            <p className="text-white/60 text-sm font-light mb-8 tracking-wide">
+              Tudo que você precisa em um só lugar.
             </p>
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               {FEATURES.map((feat) => (
                 <li key={feat} className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-brand-400 shrink-0" />
-                  <span className="text-white/90 text-sm">{feat}</span>
+                  <CheckCircle2 className="w-4 h-4 text-brand-400 shrink-0" />
+                  <span className="text-white/80 text-[13px]">{feat}</span>
                 </li>
               ))}
             </ul>
-            <p className="text-white/40 text-xs mt-10">
+            <p className="text-white/30 text-[11px] mt-10 tracking-wider uppercase">
               GreenPET © {new Date().getFullYear()} · Manaus, AM
             </p>
           </div>
@@ -117,12 +120,17 @@ export default function LoginPage() {
       </div>
 
       {/* ── Painel do formulário ── */}
-      <div className="flex-1 flex flex-col items-center justify-center bg-background p-6">
-        <div className="w-full max-w-sm">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-foreground">Bem-vindo de volta</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Entre com suas credenciais para acessar o sistema.
+      <div className="flex-1 flex flex-col items-center justify-center bg-background p-6 lg:p-10">
+        <div className="w-full max-w-[340px]">
+          <div className="mb-9">
+            <h2
+              className="text-[28px] text-foreground leading-tight mb-1.5"
+              style={{ fontFamily: "var(--font-dm-serif)" }}
+            >
+              Bem-vindo de volta
+            </h2>
+            <p className="text-[13px] text-muted-foreground font-light">
+              Entre com suas credenciais para continuar.
             </p>
           </div>
 
@@ -169,7 +177,7 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <p className="text-center text-xs text-muted-foreground mt-8">
+          <p className="text-center text-[11px] text-muted-foreground/50 mt-8 tracking-wider uppercase">
             GreenPET © {new Date().getFullYear()} · Manaus, AM
           </p>
         </div>
