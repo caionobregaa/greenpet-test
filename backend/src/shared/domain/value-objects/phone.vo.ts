@@ -4,10 +4,8 @@ interface PhoneProps {
   value: string
 }
 
-function formatPhone(digits: string): string {
-  // digits must be exactly 11: DD + 9 + 8 digits
-  return `(${digits.slice(0, 2)}) ${digits[2]} ${digits.slice(3, 7)}-${digits.slice(7)}`
-}
+const CELULAR = /^\(\d{2}\) \d \d{4}-\d{4}$/
+const FIXO = /^\(\d{2}\) \d{4}-\d{4}$/
 
 export class Phone extends ValueObject<PhoneProps> {
   get value(): string {
@@ -15,11 +13,10 @@ export class Phone extends ValueObject<PhoneProps> {
   }
 
   static create(raw: string): Phone {
-    const digits = raw.replace(/\D/g, '')
-    if (digits.length !== 11) {
-      throw new Error(`Telefone inválido: informe exatamente 11 dígitos`)
+    if (!CELULAR.test(raw) && !FIXO.test(raw)) {
+      throw new Error('Telefone inválido: use o formato (99) 9 9999-9999 ou (99) 9999-9999')
     }
-    return new Phone({ value: formatPhone(digits) })
+    return new Phone({ value: raw })
   }
 
   toString(): string {
