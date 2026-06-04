@@ -71,7 +71,8 @@
       "PowerShell($git = \"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.12\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; & $git -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" log --oneline -5)",
       "PowerShell($git = \"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.12\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; & $git -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" show --stat HEAD)",
       "PowerShell($git = \"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.12\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; & $git -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" show --stat HEAD~1)",
-      "PowerShell($git = \"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.12\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; & $git -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" show 886261d -- backend/tests/unit/modules/clientes/get-cliente-detail.use-case.spec.ts)"
+      "PowerShell($git = \"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.12\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; & $git -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" show 886261d -- backend/tests/unit/modules/clientes/get-cliente-detail.use-case.spec.ts)",
+      "PowerShell(& \"C:\\\\Program Files\\\\Git\\\\bin\\\\git.exe\" -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" log --oneline -10)"
     ]
   }
 }
