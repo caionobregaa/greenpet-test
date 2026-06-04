@@ -64,7 +64,14 @@
       "PowerShell(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\.github\\\\workflows\")",
       "PowerShell(cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\frontend\"; npx tsc --noEmit 2>&1 | Where-Object { $_ -notmatch \"clientes/cliente-form\" } | Select-Object -First 20)",
       "PowerShell(cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\frontend\"; npx tsc --noEmit 2>&1 | Where-Object { $_ -match \"error TS\" } | Select-Object -First 20)",
-      "PowerShell(cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\frontend\"; npx tsc --noEmit 2>&1 | Where-Object { $_ -match \"error TS\" })"
+      "PowerShell(cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\frontend\"; npx tsc --noEmit 2>&1 | Where-Object { $_ -match \"error TS\" })",
+      "PowerShell($env:PATH; \\(Get-Command git -ErrorAction SilentlyContinue\\).Source)",
+      "PowerShell(& \"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.4.17\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\" -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" status)",
+      "PowerShell($git = \"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.12\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; & $git -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" diff HEAD -- backend/tests/unit/modules/clientes/get-cliente-detail.use-case.spec.ts)",
+      "PowerShell($git = \"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.12\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; & $git -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" log --oneline -5)",
+      "PowerShell($git = \"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.12\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; & $git -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" show --stat HEAD)",
+      "PowerShell($git = \"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.12\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; & $git -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" show --stat HEAD~1)",
+      "PowerShell($git = \"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.12\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; & $git -C \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\" show 886261d -- backend/tests/unit/modules/clientes/get-cliente-detail.use-case.spec.ts)"
     ]
   }
 }
