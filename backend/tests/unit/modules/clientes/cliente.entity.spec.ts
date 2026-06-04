@@ -29,7 +29,7 @@ describe('Cliente entity', () => {
     })
 
     it('rejeita telefone inválido', () => {
-      expect(() => Cliente.create({ nome: 'João', telefone: '92987654321' })).toThrow(
+      expect(() => Cliente.create({ nome: 'João', telefone: '929876' })).toThrow(
         'Telefone inválido',
       )
     })

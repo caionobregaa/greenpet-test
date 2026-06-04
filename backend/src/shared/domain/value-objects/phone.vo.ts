@@ -1,4 +1,5 @@
 import { ValueObject } from '../value-object.base.js'
+import { ValidationError } from '../../errors/validation.error.js'
 
 interface PhoneProps {
   value: string
@@ -13,10 +14,17 @@ export class Phone extends ValueObject<PhoneProps> {
   }
 
   static create(raw: string): Phone {
-    if (!CELULAR.test(raw) && !FIXO.test(raw)) {
-      throw new Error('Telefone inválido: use o formato (99) 9 9999-9999 ou (99) 9999-9999')
+    const digits = raw.replace(/\D/g, '')
+    let formatted = raw
+    if (digits.length === 11) {
+      formatted = `(${digits.slice(0, 2)}) ${digits[2]} ${digits.slice(3, 7)}-${digits.slice(7)}`
+    } else if (digits.length === 10) {
+      formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`
     }
-    return new Phone({ value: raw })
+    if (!CELULAR.test(formatted) && !FIXO.test(formatted)) {
+      throw new ValidationError('VALIDATION_ERROR', 'Telefone inválido: use o formato (99) 9 9999-9999 ou (99) 9999-9999')
+    }
+    return new Phone({ value: formatted })
   }
 
   toString(): string {
