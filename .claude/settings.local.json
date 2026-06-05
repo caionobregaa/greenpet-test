@@ -80,7 +80,10 @@
       "Bash(Get-ChildItem -Force)",
       "Bash(Select-Object -Property Name, Attributes)",
       "Bash(Get-ChildItem -Recurse -Directory)",
-      "Bash(Select-Object -ExpandProperty FullName)"
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
