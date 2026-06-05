@@ -190,10 +190,6 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
             <Label htmlFor="margemLucro">Margem Lucro (%)</Label>
             <Input id="margemLucro" type="number" step="0.1" min="0" max="100" {...register("margemLucro", { valueAsNumber: true })} placeholder="0" />
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="diasRecompra">Dias para Recompra</Label>
-            <Input id="diasRecompra" type="number" min="1" {...register("diasRecompra", { valueAsNumber: true })} placeholder="30" />
-          </div>
         </div>
       </div>
 

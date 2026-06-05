@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { useProdutos, useDeleteProduto } from "@/lib/hooks/use-produtos";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,6 +11,7 @@ import { PaginationBar } from "@/components/shared/pagination-bar";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ProdutoDialog } from "@/components/produtos/produto-dialog";
+import { ProdutoInfoDialog } from "@/components/produtos/produto-info-dialog";
 import { formatBRL } from "@/lib/utils/format";
 import type { Produto } from "@/lib/types/produto";
 
@@ -20,6 +21,7 @@ export default function ProdutosPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduto, setEditingProduto] = useState<Produto | undefined>();
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [infoProduto, setInfoProduto] = useState<Produto | null>(null);
 
   const { data, isLoading } = useProdutos({ q: search || undefined, page, limit: 20 });
   const deleteProduto = useDeleteProduto();
@@ -91,16 +93,16 @@ export default function ProdutosPage() {
                   return (
                     <tr key={p.id} className="border-t border-border hover:bg-accent/30 transition-colors">
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-3">
                           {p.imagemUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={p.imagemUrl}
                               alt={p.nome}
-                              className="w-8 h-8 rounded object-cover border border-border shrink-0"
+                              className="w-16 h-16 rounded-lg object-cover border border-border shrink-0"
                             />
                           ) : (
-                            <div className="w-8 h-8 rounded bg-muted border border-border flex items-center justify-center text-xs text-muted-foreground shrink-0">
+                            <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center text-2xl shrink-0">
                               📦
                             </div>
                           )}
@@ -118,6 +120,9 @@ export default function ProdutosPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1 justify-end">
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground" onClick={() => setInfoProduto(p)}>
+                            <Eye className="w-3.5 h-3.5" />
+                          </Button>
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => { setEditingProduto(p); setDialogOpen(true); }}>
                             <Pencil className="w-3.5 h-3.5" />
                           </Button>
@@ -156,6 +161,10 @@ export default function ProdutosPage() {
         description="O produto será marcado como excluído. Vendas e orçamentos já realizados são mantidos."
         onConfirm={handleDelete}
         loading={deleteProduto.isPending}
+      />
+      <ProdutoInfoDialog
+        produto={infoProduto}
+        onOpenChange={(o) => { if (!o) setInfoProduto(null); }}
       />
     </div>
   );
