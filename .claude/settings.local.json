@@ -76,7 +76,11 @@
       "PowerShell($response = try { Invoke-WebRequest -Uri \"http://localhost:3001/api/v1/clientes\" -UseBasicParsing -TimeoutSec 3 } catch { $_.Exception.Message }; $response)",
       "PowerShell($git = \"C:\\\\Program Files\\\\Git\\\\bin\\\\git.exe\"; cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\"; & $git diff --stat)",
       "PowerShell($git = \"C:\\\\Program Files\\\\Git\\\\bin\\\\git.exe\"; cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\"; & $git add backend/prisma/migrations/20260604000000_add_venda_item_produto_relation/migration.sql frontend/Dockerfile.frontend; & $git status --short)",
-      "PowerShell($git = \"C:\\\\Program Files\\\\Git\\\\bin\\\\git.exe\"; cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\"; & $git log --oneline -3)"
+      "PowerShell($git = \"C:\\\\Program Files\\\\Git\\\\bin\\\\git.exe\"; cd \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\"; & $git log --oneline -3)",
+      "Bash(Get-ChildItem -Force)",
+      "Bash(Select-Object -Property Name, Attributes)",
+      "Bash(Get-ChildItem -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)"
     ]
   }
 }

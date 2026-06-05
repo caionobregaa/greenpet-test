@@ -10,9 +10,10 @@ export class PrismaCompraRepository implements ICompraRepository {
     return row ? this.toDomain(row) : null
   }
 
-  async findMany(params: { status?: string; fornecedor?: string; page: number; limit: number }) {
+  async findMany(params: { status?: string; categoria?: string; fornecedor?: string; page: number; limit: number }) {
     const where = {
       ...(params.status ? { status: params.status } : {}),
+      ...(params.categoria ? { categoria: params.categoria } : {}),
       ...(params.fornecedor ? { fornecedor: { contains: params.fornecedor, mode: 'insensitive' as const } } : {}),
     }
     const [rows, total] = await this.prisma.$transaction([
@@ -35,6 +36,8 @@ export class PrismaCompraRepository implements ICompraRepository {
         where: { id: compra.id },
         data: {
           fornecedor: compra.fornecedor,
+          categoria: compra.categoria,
+          descricaoSimples: compra.descricaoSimples ?? null,
           status: compra.status,
           obs: compra.obs ?? null,
           total: compra.total,
@@ -49,6 +52,8 @@ export class PrismaCompraRepository implements ICompraRepository {
           fornecedor: compra.fornecedor,
           dataPedido: compra.dataPedido,
           dataRecebimento: compra.dataRecebimento ?? null,
+          categoria: compra.categoria,
+          descricaoSimples: compra.descricaoSimples ?? null,
           status: compra.status,
           total: compra.total,
           obs: compra.obs ?? null,
@@ -76,6 +81,8 @@ export class PrismaCompraRepository implements ICompraRepository {
     fornecedor: string
     dataPedido: Date
     dataRecebimento: Date | null
+    categoria: string
+    descricaoSimples: string | null
     status: string
     total: unknown
     obs: string | null
@@ -93,6 +100,8 @@ export class PrismaCompraRepository implements ICompraRepository {
       fornecedor: row.fornecedor,
       dataPedido: row.dataPedido,
       dataRecebimento: row.dataRecebimento ?? undefined,
+      categoria: row.categoria,
+      descricaoSimples: row.descricaoSimples ?? undefined,
       status: row.status as CompraStatus,
       obs: row.obs ?? undefined,
       itens: row.itens.map((i) => ({

@@ -58,6 +58,7 @@ export function useConverterOrcamento() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["orcamentos"] });
       qc.invalidateQueries({ queryKey: ["vendas"] });
+      qc.invalidateQueries({ queryKey: ["estoque"] });
     },
   });
 }

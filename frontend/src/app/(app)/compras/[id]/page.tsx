@@ -58,7 +58,7 @@ export default function CompraDetailPage({ params }: Props) {
       <div className="flex items-center gap-3 mb-6">
         <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => router.back()}><ArrowLeft className="w-4 h-4" /></Button>
         <div className="flex-1">
-          <h1 className="text-xl font-bold">Compra — {compra.fornecedor}</h1>
+          <h1 className="text-xl font-bold">Despesa — {compra.categoria ?? compra.fornecedor}</h1>
           <p className="text-sm text-muted-foreground">{formatDate(compra.dataPedido)}</p>
         </div>
         <StatusPill status={compra.status} />
@@ -95,10 +95,10 @@ export default function CompraDetailPage({ params }: Props) {
       {/* Info */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
-          ["Fornecedor", compra.fornecedor],
-          ["Data Pedido", formatDate(compra.dataPedido)],
-          ["Data Recebimento", formatDate(compra.dataRecebimento)],
-          ["Status", compra.status],
+          ["Categoria", compra.categoria ?? "—"],
+          ["Fornecedor / Fonte", compra.fornecedor],
+          ["Data", formatDate(compra.dataPedido)],
+          ["Recebimento", formatDate(compra.dataRecebimento)],
         ].map(([label, value]) => (
           <div key={label} className="bg-card rounded-xl border border-border p-4 shadow-sm">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">{label}</p>
@@ -107,38 +107,54 @@ export default function CompraDetailPage({ params }: Props) {
         ))}
       </div>
 
-      {/* Itens */}
-      <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
-        <div className="px-5 py-3 border-b border-border">
-          <p className="text-sm font-semibold">Itens da Compra</p>
+      {/* Descrição simples (categorias não-produtos) */}
+      {compra.descricaoSimples && (
+        <div className="bg-card rounded-xl border border-border p-4 mb-6 shadow-sm">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Descrição da despesa</p>
+          <p className="text-sm text-foreground leading-relaxed">{compra.descricaoSimples}</p>
+          <div className="mt-4 flex justify-end">
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Total</p>
+              <p className="text-2xl font-bold text-primary font-mono">{formatBRL(compra.total)}</p>
+            </div>
+          </div>
         </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-muted/50">
-              <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Produto</th>
-              <th className="text-center px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Qtd</th>
-              <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Custo Unit.</th>
-              <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {compra.itens.map((item) => (
-              <tr key={item.id} className="border-t border-border">
-                <td className="px-4 py-3">{item.nome}</td>
-                <td className="px-4 py-3 text-center text-muted-foreground">{item.qtd}</td>
-                <td className="px-4 py-3 text-right font-mono text-muted-foreground">{formatBRL(item.valorUnitario)}</td>
-                <td className="px-4 py-3 text-right font-mono font-semibold">{formatBRL(item.total)}</td>
+      )}
+
+      {/* Itens (Produtos Pets) */}
+      {compra.itens.length > 0 && (
+        <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
+          <div className="px-5 py-3 border-b border-border">
+            <p className="text-sm font-semibold">Produtos Adquiridos</p>
+          </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-muted/50">
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Produto</th>
+                <th className="text-center px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Qtd</th>
+                <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Custo Unit.</th>
+                <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Total</th>
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="border-t-2 border-border bg-accent/30">
-              <td colSpan={3} className="px-4 py-3 text-right font-semibold text-sm">Total</td>
-              <td className="px-4 py-3 text-right font-bold text-primary font-mono text-lg">{formatBRL(compra.total)}</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {compra.itens.map((item) => (
+                <tr key={item.id} className="border-t border-border">
+                  <td className="px-4 py-3">{item.nome}</td>
+                  <td className="px-4 py-3 text-center text-muted-foreground">{item.qtd}</td>
+                  <td className="px-4 py-3 text-right font-mono text-muted-foreground">{formatBRL(item.valorUnitario)}</td>
+                  <td className="px-4 py-3 text-right font-mono font-semibold">{formatBRL(item.total)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-border bg-accent/30">
+                <td colSpan={3} className="px-4 py-3 text-right font-semibold text-sm">Total</td>
+                <td className="px-4 py-3 text-right font-bold text-primary font-mono text-lg">{formatBRL(compra.total)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      )}
 
       {/* Receber Dialog */}
       <Dialog open={receberOpen} onOpenChange={setReceberOpen}>
@@ -160,7 +176,7 @@ export default function CompraDetailPage({ params }: Props) {
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog open={deleteOpen} onOpenChange={setDeleteOpen} title="Excluir compra?" description="Esta ação não pode ser desfeita." onConfirm={handleDelete} loading={deleteCompra.isPending} />
+      <ConfirmDialog open={deleteOpen} onOpenChange={setDeleteOpen} title="Excluir despesa?" description="Esta ação não pode ser desfeita." onConfirm={handleDelete} loading={deleteCompra.isPending} />
     </div>
   );
 }

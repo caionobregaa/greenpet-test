@@ -15,6 +15,8 @@ export interface Compra {
   dataPedido: string | null;
   dataRecebimento: string | null;
   fornecedor: string;
+  categoria: string;
+  descricaoSimples: string | null;
   status: CompraStatus;
   total: number;
   obs: string | null;
@@ -22,3 +24,6 @@ export interface Compra {
   updatedAt: string;
   itens: CompraItem[];
 }
+
+// Categorias padrão do sistema
+export const CATEGORIAS_DESPESA_PADRAO = ["Produtos Pets", "Contas Pessoais", "Marketing"];

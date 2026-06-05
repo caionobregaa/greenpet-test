@@ -52,7 +52,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
       margemImposto: produto?.margemImposto ?? 0,
       margemOperacao: produto?.margemOperacao ?? 0,
       margemLucro: produto?.margemLucro ?? 0,
-      diasRecompra: produto?.diasRecompra ?? undefined,
+
       descricao: produto?.descricao ?? "",
       imagemUrl: produto?.imagemUrl ?? null,
     },

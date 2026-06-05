@@ -10,13 +10,19 @@ const CompraItemSchema = z.object({
 export const CreateCompraSchema = z.object({
   fornecedor: z.string().min(1),
   dataPedido: z.string().date().optional().transform((v) => v ? new Date(v) : undefined),
+  categoria: z.string().min(1).default('Produtos Pets'),
+  descricaoSimples: z.string().optional(),
+  totalManual: z.number().min(0).optional(),
   obs: z.string().optional(),
-  itens: z.array(CompraItemSchema).min(1),
+  itens: z.array(CompraItemSchema).default([]),
 })
 
 export const UpdateCompraSchema = z.object({
   fornecedor: z.string().min(1).optional(),
   dataPedido: z.string().date().optional().transform((v) => v ? new Date(v) : undefined),
+  categoria: z.string().min(1).optional(),
+  descricaoSimples: z.string().optional(),
+  totalManual: z.number().min(0).optional(),
   obs: z.string().optional(),
   itens: z.array(CompraItemSchema).optional(),
 })
@@ -27,6 +33,7 @@ export const UpdateCompraStatusSchema = z.object({
 
 export const ListComprasQuerySchema = z.object({
   status: z.enum(['pendente', 'confirmado', 'recebido', 'cancelado']).optional(),
+  categoria: z.string().optional(),
   fornecedor: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),

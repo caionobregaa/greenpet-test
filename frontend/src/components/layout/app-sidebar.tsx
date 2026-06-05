@@ -9,11 +9,12 @@ import {
   Package,
   ClipboardList,
   FileText,
-  Truck,
   RefreshCw,
   ShoppingCart,
   ChevronLeft,
   ChevronRight,
+  Warehouse,
+  Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -30,9 +31,10 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/clientes", label: "Clientes", icon: Users },
   { href: "/animais", label: "Animais", icon: PawPrint },
   { href: "/produtos", label: "Produtos", icon: Package },
+  { href: "/estoque", label: "Estoque", icon: Warehouse },
   { href: "/vendas", label: "Histórico de Vendas", icon: ClipboardList },
   { href: "/orcamentos", label: "Orçamentos", icon: FileText },
-  { href: "/compras", label: "Compras", icon: Truck },
+  { href: "/compras", label: "Despesas", icon: Receipt },
   { href: "/recompra", label: "Controle Recompra", icon: RefreshCw },
 ];
 

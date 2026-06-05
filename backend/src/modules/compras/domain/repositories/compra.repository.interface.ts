@@ -4,6 +4,7 @@ export interface ICompraRepository {
   findById(id: string): Promise<Compra | null>
   findMany(params: {
     status?: string
+    categoria?: string
     fornecedor?: string
     page: number
     limit: number

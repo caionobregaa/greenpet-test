@@ -126,6 +126,9 @@ function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChan
             control={control as unknown as Parameters<typeof ItensTable>[0]["control"]}
             setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
           />
+          {(errors.itens as { message?: string } | undefined)?.message && (
+            <p className="text-xs text-destructive">{(errors.itens as { message?: string }).message}</p>
+          )}
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" disabled={create.isPending}>
@@ -201,6 +204,9 @@ function EditarOrcamentoDialog({
             control={control as unknown as Parameters<typeof ItensTable>[0]["control"]}
             setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
           />
+          {(errors.itens as { message?: string } | undefined)?.message && (
+            <p className="text-xs text-destructive">{(errors.itens as { message?: string }).message}</p>
+          )}
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" disabled={update.isPending}>

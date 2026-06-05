@@ -33,11 +33,12 @@ import { ListAnimaisUseCase } from './modules/animais/application/use-cases/list
 import { AnimaisController } from './modules/animais/infrastructure/http/animais.controller.js'
 import { registerAnimaisRoutes } from './modules/animais/infrastructure/http/animais.routes.js'
 
-// Produtos, Vendas, Orcamentos, Compras, Recompra, Dashboard (use route factories)
+// Produtos, Vendas, Orcamentos, Compras, Estoque, Recompra, Dashboard (use route factories)
 import { registerProdutosRoutes } from './modules/produtos/infrastructure/http/produtos.routes.js'
 import { registerVendasRoutes } from './modules/vendas/infrastructure/http/vendas.routes.js'
 import { registerOrcamentosRoutes } from './modules/orcamentos/infrastructure/http/orcamentos.routes.js'
 import { registerComprasRoutes } from './modules/compras/infrastructure/http/compras.routes.js'
+import { registerEstoqueRoutes } from './modules/estoque/infrastructure/http/estoque.routes.js'
 import { registerRecompraRoutes } from './modules/recompra/infrastructure/http/recompra.routes.js'
 import { registerDashboardRoutes } from './modules/dashboard/infrastructure/http/dashboard.routes.js'
 
@@ -82,6 +83,7 @@ async function bootstrap(): Promise<void> {
   registerVendasRoutes(app, prisma)
   registerOrcamentosRoutes(app, prisma)
   registerComprasRoutes(app, prisma)
+  registerEstoqueRoutes(app, prisma)
   registerRecompraRoutes(app, prisma)
   registerDashboardRoutes(app, prisma)
 

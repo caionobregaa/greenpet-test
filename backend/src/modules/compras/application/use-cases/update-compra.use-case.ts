@@ -7,6 +7,9 @@ export interface UpdateCompraInput {
   fornecedor?: string
   obs?: string
   dataPedido?: Date
+  categoria?: string
+  descricaoSimples?: string
+  totalManual?: number
   itens?: CompraItemData[]
 }
 

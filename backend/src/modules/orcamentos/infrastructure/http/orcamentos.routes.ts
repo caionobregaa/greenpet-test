@@ -20,7 +20,7 @@ import {
 import { ValidationError } from '@/shared/errors/validation.error.js'
 import type { Orcamento } from '../../domain/entities/orcamento.entity.js'
 
-function toResponse(o: Orcamento) {
+function toResponse(o: Orcamento, extra?: { clienteNome?: string | null; animalNome?: string | null }) {
   return {
     id: o.id,
     clienteId: o.clienteId,
@@ -33,6 +33,8 @@ function toResponse(o: Orcamento) {
     obs: o.obs,
     vendaId: o.vendaId,
     itens: o.itens,
+    cliente: extra?.clienteNome ? { nome: extra.clienteNome } : undefined,
+    animal: extra?.animalNome ? { nome: extra.animalNome } : undefined,
     createdAt: o.createdAt,
     updatedAt: o.updatedAt,
   }
@@ -55,7 +57,23 @@ export function registerOrcamentosRoutes(app: FastifyInstance, prisma: PrismaCli
     const q = ListOrcamentosQuerySchema.safeParse(req.query)
     if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.errors[0].message)
     const result = await listUC.execute(q.data)
-    rep.send({ data: result.orcamentos.map(toResponse), meta: { page: q.data.page, limit: q.data.limit, total: result.total } })
+
+    // Fetch cliente/animal data in one batch query
+    const ids = result.orcamentos.map((o) => o.id)
+    const rows = await prisma.orcamento.findMany({
+      where: { id: { in: ids } },
+      select: {
+        id: true,
+        cliente: { select: { nome: true } },
+        animal: { select: { nome: true } },
+      },
+    })
+    const extraMap = new Map(rows.map((r) => [r.id, { clienteNome: r.cliente?.nome, animalNome: r.animal?.nome }]))
+
+    rep.send({
+      data: result.orcamentos.map((o) => toResponse(o, extraMap.get(o.id))),
+      meta: { page: q.data.page, limit: q.data.limit, total: result.total },
+    })
   })
 
   app.post('/api/v1/orcamentos', async (req, rep) => {
@@ -68,7 +86,14 @@ export function registerOrcamentosRoutes(app: FastifyInstance, prisma: PrismaCli
   app.get('/api/v1/orcamentos/:id', async (req, rep) => {
     const { id } = req.params as { id: string }
     const o = await getUC.execute({ id })
-    rep.send({ data: toResponse(o) })
+    const row = await prisma.orcamento.findUnique({
+      where: { id },
+      select: {
+        cliente: { select: { nome: true } },
+        animal: { select: { nome: true } },
+      },
+    })
+    rep.send({ data: toResponse(o, { clienteNome: row?.cliente?.nome, animalNome: row?.animal?.nome }) })
   })
 
   app.patch('/api/v1/orcamentos/:id/status', async (req, rep) => {

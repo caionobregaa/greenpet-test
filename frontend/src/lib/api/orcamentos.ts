@@ -48,8 +48,8 @@ export const apiOrcamentos = {
     return data.data;
   },
 
-  converter: async (id: string, input: ConverterOrcamentoInput): Promise<Venda> => {
-    const { data } = await api.post<ApiResponse<Venda>>(`/orcamentos/${id}/converter`, input);
+  converter: async (id: string, input: ConverterOrcamentoInput): Promise<{ vendaId: string }> => {
+    const { data } = await api.post<ApiResponse<{ vendaId: string }>>(`/orcamentos/${id}/converter`, input);
     return data.data;
   },
 

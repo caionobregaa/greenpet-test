@@ -14,7 +14,6 @@ export const CreateProdutoSchema = z.object({
   margemImposto: z.number().min(0).max(100).optional(),
   margemOperacao: z.number().min(0).max(100).optional(),
   margemLucro: z.number().min(0).max(100).optional(),
-  diasRecompra: z.number().int().min(1).optional(),
   descricao: z.string().optional().or(z.literal("")),
 });
 

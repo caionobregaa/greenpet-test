@@ -99,10 +99,10 @@ export default function ProdutosPage() {
                             <img
                               src={p.imagemUrl}
                               alt={p.nome}
-                              className="w-16 h-16 rounded-lg object-cover border border-border shrink-0"
+                              className="w-24 h-24 rounded-xl object-cover border border-border shrink-0 shadow-sm"
                             />
                           ) : (
-                            <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center text-2xl shrink-0">
+                            <div className="w-24 h-24 rounded-xl bg-muted border border-border flex items-center justify-center text-3xl shrink-0">
                               📦
                             </div>
                           )}

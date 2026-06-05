@@ -8,15 +8,21 @@ export const CompraItemSchema = z.object({
 });
 
 export const CreateCompraSchema = z.object({
-  fornecedor: z.string().min(1, "Fornecedor é obrigatório"),
+  fornecedor: z.string().optional().or(z.literal("")),
   dataPedido: z.string().date().optional().or(z.literal("")),
+  categoria: z.string().min(1, "Categoria é obrigatória"),
+  descricaoSimples: z.string().optional().or(z.literal("")),
+  totalManual: z.number().min(0).optional(),
   obs: z.string().optional().or(z.literal("")),
-  itens: z.array(CompraItemSchema).min(1, "Adicione pelo menos um item"),
+  itens: z.array(CompraItemSchema).default([]),
 });
 
 export const UpdateCompraSchema = z.object({
   fornecedor: z.string().min(1).optional(),
   dataPedido: z.string().date().optional().or(z.literal("")),
+  categoria: z.string().min(1).optional(),
+  descricaoSimples: z.string().optional().or(z.literal("")),
+  totalManual: z.number().min(0).optional(),
   obs: z.string().optional().or(z.literal("")),
   itens: z.array(CompraItemSchema).optional(),
 });

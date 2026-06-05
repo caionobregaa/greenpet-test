@@ -25,6 +25,8 @@ interface CompraProps {
   fornecedor: string
   dataPedido: Date
   dataRecebimento?: Date
+  categoria: string
+  descricaoSimples?: string
   status: CompraStatus
   total: Money
   obs?: string
@@ -37,9 +39,12 @@ export class Compra extends AggregateRoot<CompraProps> {
     fornecedor: string
     dataPedido?: Date
     dataRecebimento?: Date
+    categoria?: string
+    descricaoSimples?: string
     status?: CompraStatus
     obs?: string
     itens: CompraItemData[]
+    totalManual?: number
   }): Compra {
     const itens: CompraItemReadOnly[] = data.itens.map((item) => ({
       id: item.id ?? crypto.randomUUID(),
@@ -50,13 +55,17 @@ export class Compra extends AggregateRoot<CompraProps> {
       total: Money.create(item.valorUnitario).multiply(item.qtd).value,
     }))
 
-    const totalValue = itens.reduce((s, i) => s + i.total, 0)
+    const totalValue = itens.length > 0
+      ? itens.reduce((s, i) => s + i.total, 0)
+      : (data.totalManual ?? 0)
 
     return new Compra(
       {
         fornecedor: data.fornecedor,
         dataPedido: data.dataPedido ?? new Date(),
         dataRecebimento: data.dataRecebimento,
+        categoria: data.categoria ?? 'Produtos Pets',
+        descricaoSimples: data.descricaoSimples,
         status: data.status ?? 'pendente',
         total: Money.create(totalValue),
         obs: data.obs,
@@ -69,6 +78,8 @@ export class Compra extends AggregateRoot<CompraProps> {
   get fornecedor(): string { return this.props.fornecedor }
   get dataPedido(): Date { return this.props.dataPedido }
   get dataRecebimento(): Date | undefined { return this.props.dataRecebimento }
+  get categoria(): string { return this.props.categoria }
+  get descricaoSimples(): string | undefined { return this.props.descricaoSimples }
   get status(): CompraStatus { return this.props.status }
   get total(): number { return this.props.total.value }
   get obs(): string | undefined { return this.props.obs }
@@ -105,11 +116,16 @@ export class Compra extends AggregateRoot<CompraProps> {
     this.updatedAt = new Date()
   }
 
-  update(fields: { fornecedor?: string; obs?: string; dataPedido?: Date; itens?: CompraItemData[] }): void {
+  update(fields: { fornecedor?: string; obs?: string; dataPedido?: Date; categoria?: string; descricaoSimples?: string; totalManual?: number; itens?: CompraItemData[] }): void {
     this.assertEditavel()
     if (fields.fornecedor !== undefined) this.props.fornecedor = fields.fornecedor
     if (fields.obs !== undefined) this.props.obs = fields.obs
     if (fields.dataPedido !== undefined) this.props.dataPedido = fields.dataPedido
+    if (fields.categoria !== undefined) this.props.categoria = fields.categoria
+    if (fields.descricaoSimples !== undefined) this.props.descricaoSimples = fields.descricaoSimples
+    if (fields.totalManual !== undefined && (fields.itens === undefined || fields.itens.length === 0)) {
+      this.props.total = Money.create(fields.totalManual)
+    }
     if (fields.itens !== undefined) {
       this.props.itens = fields.itens.map((item) => ({
         id: item.id ?? crypto.randomUUID(),

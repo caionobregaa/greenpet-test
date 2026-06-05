@@ -4,6 +4,9 @@ import { Compra, type CompraItemData } from '../../domain/entities/compra.entity
 export interface CreateCompraInput {
   fornecedor: string
   dataPedido?: Date
+  categoria?: string
+  descricaoSimples?: string
+  totalManual?: number
   obs?: string
   itens: CompraItemData[]
 }

@@ -16,12 +16,42 @@ import { StatusPill } from "@/components/shared/status-pill";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { FormaPagSelect } from "@/components/vendas/forma-pag-select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDate, formatBRL } from "@/lib/utils/format";
 import { Loader2 } from "lucide-react";
 import { apiClientes } from "@/lib/api/clientes";
 import { apiAnimais } from "@/lib/api/animais";
 import { gerarOrcamentoPDF } from "@/lib/utils/orcamento-pdf";
+
+// ── Taxas de cartão ────────────────────────────────────────────────────────────
+const TAXAS = {
+  "link-1x":       { label: "Link de Pagamento — 1x",       pct: 4.2  },
+  "link-2x":       { label: "Link de Pagamento — 2x+",      pct: 6.09 },
+  "maquininha-1x": { label: "Maquininha / INFINITETAP — 1x", pct: 3.15 },
+  "maquininha-2x": { label: "Maquininha / INFINITETAP — 2x+", pct: 5.39 },
+} as const;
+
+type TaxaKey = keyof typeof TAXAS;
+
+type FormaPagBackend = "Pix" | "Dinheiro" | "Cartão Crédito" | "Cartão Débito" | "Boleto";
+
+interface OpcaoPagamento {
+  value: string;
+  label: string;
+  backend: FormaPagBackend;
+  taxaKey?: TaxaKey;
+}
+
+const OPCOES_PAG: OpcaoPagamento[] = [
+  { value: "pix",          label: "PIX",                         backend: "Pix" },
+  { value: "dinheiro",     label: "Dinheiro",                    backend: "Dinheiro" },
+  { value: "link-1x",      label: "Cartão — Link 1x (4,2%)",    backend: "Cartão Crédito", taxaKey: "link-1x" },
+  { value: "link-2x",      label: "Cartão — Link 2x+ (6,09%)",  backend: "Cartão Crédito", taxaKey: "link-2x" },
+  { value: "maquininha-1x", label: "Cartão — Maquininha 1x (3,15%)",  backend: "Cartão Crédito", taxaKey: "maquininha-1x" },
+  { value: "maquininha-2x", label: "Cartão — Maquininha 2x+ (5,39%)", backend: "Cartão Crédito", taxaKey: "maquininha-2x" },
+  { value: "cartao-debito", label: "Cartão Débito",               backend: "Cartão Débito" },
+  { value: "boleto",        label: "Boleto",                       backend: "Boleto" },
+];
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -38,8 +68,15 @@ export default function OrcamentoDetailPage({ params }: Props) {
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [converterOpen, setConverterOpen] = useState(false);
-  const [formaPag, setFormaPag] = useState("");
+  const [pagamento, setPagamento] = useState("");
   const [pdfLoading, setPdfLoading] = useState(false);
+
+  const opcaoSelecionada = OPCOES_PAG.find((o) => o.value === pagamento);
+  const taxaKey = opcaoSelecionada?.taxaKey;
+  const taxa = taxaKey ? TAXAS[taxaKey] : null;
+  const totalBruto = orcamento?.total ?? 0;
+  const valorTaxa = taxa ? (totalBruto * taxa.pct) / 100 : 0;
+  const lucroLiquido = totalBruto - valorTaxa;
 
   async function handleStatus(acao: "aprovar" | "recusar" | "reabrir") {
     try {
@@ -51,11 +88,13 @@ export default function OrcamentoDetailPage({ params }: Props) {
   }
 
   async function handleConverter() {
-    if (!formaPag) { toast.error("Selecione a forma de pagamento."); return; }
+    if (!pagamento) { toast.error("Selecione a forma de pagamento."); return; }
+    const opcao = OPCOES_PAG.find((o) => o.value === pagamento);
+    if (!opcao) return;
     try {
-      const venda = await converter.mutateAsync({ id, input: { formaPag: formaPag as never } });
+      const result = await converter.mutateAsync({ id, input: { formaPag: opcao.backend } });
       toast.success("Orçamento convertido em venda!");
-      router.push(`/vendas/${venda.id}`);
+      router.push(`/vendas/${result.vendaId}`);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
       toast.error("Erro ao converter", { description: msg });
@@ -184,20 +223,58 @@ export default function OrcamentoDetailPage({ params }: Props) {
       </div>
 
       {/* Converter Dialog */}
-      <Dialog open={converterOpen} onOpenChange={setConverterOpen}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>Converter em Venda</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Selecione a forma de pagamento para criar a venda correspondente.</p>
+      <Dialog open={converterOpen} onOpenChange={(o) => { setConverterOpen(o); if (!o) setPagamento(""); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Fechar Venda</DialogTitle></DialogHeader>
+          <div className="space-y-5">
+            <p className="text-sm text-muted-foreground">Selecione como o cliente vai pagar para calcular a taxa e registrar a venda.</p>
+
             <div className="space-y-1.5">
               <Label>Forma de Pagamento *</Label>
-              <FormaPagSelect value={formaPag} onValueChange={setFormaPag} />
+              <Select value={pagamento} onValueChange={setPagamento}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {OPCOES_PAG.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+
+            {pagamento && (
+              <div className="rounded-xl border border-border bg-accent/30 p-4 space-y-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Resumo financeiro</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Total bruto</span>
+                  <span className="font-mono font-semibold">{formatBRL(totalBruto)}</span>
+                </div>
+                {taxa ? (
+                  <>
+                    <div className="flex justify-between items-center text-destructive">
+                      <span className="text-sm">Taxa {taxa.label} ({taxa.pct}%)</span>
+                      <span className="font-mono font-semibold">− {formatBRL(valorTaxa)}</span>
+                    </div>
+                    <div className="border-t border-border pt-3 flex justify-between items-center">
+                      <span className="text-sm font-semibold">Lucro líquido</span>
+                      <span className="font-mono font-bold text-primary text-lg">{formatBRL(lucroLiquido)}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="border-t border-border pt-3 flex justify-between items-center">
+                    <span className="text-sm font-semibold">Lucro líquido (sem taxa)</span>
+                    <span className="font-mono font-bold text-primary text-lg">{formatBRL(totalBruto)}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setConverterOpen(false)}>Cancelar</Button>
-              <Button onClick={handleConverter} disabled={converter.isPending || !formaPag}>
+              <Button onClick={handleConverter} disabled={converter.isPending || !pagamento}>
                 {converter.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                Converter
+                Confirmar Venda
               </Button>
             </div>
           </div>

@@ -22,6 +22,8 @@ function toResponse(c: Compra) {
     fornecedor: c.fornecedor,
     dataPedido: c.dataPedido,
     dataRecebimento: c.dataRecebimento,
+    categoria: c.categoria,
+    descricaoSimples: c.descricaoSimples,
     status: c.status,
     total: c.total,
     obs: c.obs,
@@ -29,6 +31,26 @@ function toResponse(c: Compra) {
     createdAt: c.createdAt,
     updatedAt: c.updatedAt,
   }
+}
+
+async function autoImportarEstoque(prisma: PrismaClient, compra: Compra) {
+  if (compra.categoria !== 'Produtos Pets' || compra.itens.length === 0) return
+  await Promise.all(
+    compra.itens
+      .filter((i) => i.produtoId)
+      .map((i) =>
+        prisma.estoqueItem.create({
+          data: {
+            id: crypto.randomUUID(),
+            produtoId: i.produtoId!,
+            quantidade: i.qtd,
+            validade: null,
+            lote: null,
+            obs: `Importado da despesa`,
+          },
+        }),
+      ),
+  )
 }
 
 export function registerComprasRoutes(app: FastifyInstance, prisma: PrismaClient): void {
@@ -51,6 +73,9 @@ export function registerComprasRoutes(app: FastifyInstance, prisma: PrismaClient
     const body = CreateCompraSchema.safeParse(req.body)
     if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
     const compra = await createUC.execute(body.data)
+    if (compra.categoria === 'Produtos Pets') {
+      await autoImportarEstoque(prisma, compra)
+    }
     rep.status(201).send({ data: toResponse(compra) })
   })
 
