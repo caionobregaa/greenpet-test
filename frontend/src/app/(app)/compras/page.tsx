@@ -184,7 +184,8 @@ function NovaDespesaDialog({
     }
   }, [create, reset, onOpenChange, isProdutos, categoria]);
 
-  function handleCategoriaChange(val: string) {
+  function handleCategoriaChange(val: string | null) {
+    if (!val) return;
     setCategoria(val);
     setValue("categoria", val);
     setValue("itens", []);
