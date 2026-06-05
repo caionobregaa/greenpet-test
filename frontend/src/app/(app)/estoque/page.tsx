@@ -82,7 +82,7 @@ function AdicionarLoteDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <Label>Produto *</Label>
-            <Select value={produtoId} onValueChange={setProdutoId}>
+            <Select value={produtoId} onValueChange={(v) => { if (v) setProdutoId(v); }}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione um produto..." />
               </SelectTrigger>

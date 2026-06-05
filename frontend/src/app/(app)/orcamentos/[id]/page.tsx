@@ -231,7 +231,7 @@ export default function OrcamentoDetailPage({ params }: Props) {
 
             <div className="space-y-1.5">
               <Label>Forma de Pagamento *</Label>
-              <Select value={pagamento} onValueChange={setPagamento}>
+              <Select value={pagamento} onValueChange={(v) => { if (v) setPagamento(v); }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione..." />
                 </SelectTrigger>
