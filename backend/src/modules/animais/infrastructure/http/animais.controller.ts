@@ -45,7 +45,7 @@ export class AnimaisController {
   async list(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     const query = ListAnimaisQuerySchema.safeParse(request.query)
     if (!query.success) throw new ValidationError('VALIDATION_ERROR', query.error.errors[0].message)
-    const result = await this.listUseCase.execute(query.data)
+    const result = await this.listUseCase.execute({ ...query.data })
     reply.status(200).send({
       data: result.animais.map((a) => toResponse(a, result.clienteNomes[a.id])),
       meta: { page: query.data.page, limit: query.data.limit, total: result.total },

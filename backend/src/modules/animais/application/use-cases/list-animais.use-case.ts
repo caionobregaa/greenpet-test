@@ -6,11 +6,13 @@ export class ListAnimaisUseCase {
 
   async execute(params: {
     clienteId?: string
+    q?: string
     page?: number
     limit?: number
   }): Promise<{ animais: Animal[]; clienteNomes: Record<string, string>; total: number }> {
     return this.repo.findMany({
       clienteId: params.clienteId,
+      q: params.q,
       page: params.page ?? 1,
       limit: params.limit ?? 20,
     })
