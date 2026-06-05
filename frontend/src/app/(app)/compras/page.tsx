@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateCompraSchema, type CreateCompraInput } from "@/lib/schemas/compra.schema";
 import { ItensTable } from "@/components/vendas/itens-table";
@@ -232,11 +232,6 @@ function NovaDespesaDialog({
                 <Label htmlFor="obs">Observações</Label>
                 <Textarea {...register("obs")} rows={2} />
               </div>
-              <Controller
-                control={control}
-                name="categoria"
-                render={() => null}
-              />
               <ItensTable
                 control={control as unknown as Parameters<typeof ItensTable>[0]["control"]}
                 setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
