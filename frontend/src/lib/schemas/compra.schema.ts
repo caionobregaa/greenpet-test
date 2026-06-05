@@ -14,7 +14,7 @@ export const CreateCompraSchema = z.object({
   descricaoSimples: z.string().optional().or(z.literal("")),
   totalManual: z.number().min(0).optional(),
   obs: z.string().optional().or(z.literal("")),
-  itens: z.array(CompraItemSchema).default([]),
+  itens: z.array(CompraItemSchema).optional(),
 });
 
 export const UpdateCompraSchema = z.object({
