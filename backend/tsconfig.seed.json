@@ -4,5 +4,5 @@
     "outDir": "./dist/prisma",
     "rootDir": "./prisma"
   },
-  "include": ["prisma/seed.ts"]
+  "include": ["prisma/seed.ts", "prisma/seed-import-clientes.ts"]
 }
