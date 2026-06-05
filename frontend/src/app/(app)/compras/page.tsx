@@ -235,6 +235,7 @@ function NovaDespesaDialog({
               <ItensTable
                 control={control as unknown as Parameters<typeof ItensTable>[0]["control"]}
                 setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
+                errors={errors.itens as Parameters<typeof ItensTable>[0]["errors"]}
               />
               {(errors.itens as { message?: string } | undefined)?.message && (
                 <p className="text-xs text-destructive">{(errors.itens as { message?: string }).message}</p>
