@@ -83,7 +83,9 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(docker exec *)",
+      "Bash(docker cp *)"
     ]
   }
 }
