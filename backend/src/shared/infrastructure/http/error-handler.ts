@@ -1,12 +1,32 @@
 import type { FastifyError, FastifyReply, FastifyRequest } from 'fastify'
 import { DomainError } from '../../errors/domain-error.js'
 
+type MaybeDomainError = {
+  code?: string
+  statusCode?: number
+  fields?: Record<string, string>
+  message: string
+}
+
+function isDomainError(error: unknown): error is MaybeDomainError & { code: string; statusCode: number } {
+  const e = error as MaybeDomainError
+  return (
+    error instanceof DomainError ||
+    (typeof e.code === 'string' &&
+      typeof e.statusCode === 'number' &&
+      e.statusCode >= 400 &&
+      e.statusCode < 600 &&
+      !e.code.startsWith('P') &&
+      !e.code.startsWith('FST_'))
+  )
+}
+
 export function errorHandler(
   error: FastifyError | Error,
   _request: FastifyRequest,
   reply: FastifyReply,
 ): void {
-  if (error instanceof DomainError) {
+  if (isDomainError(error)) {
     reply.status(error.statusCode).send({
       error: {
         code: error.code,
