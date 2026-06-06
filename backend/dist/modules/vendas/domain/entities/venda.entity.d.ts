@@ -1,5 +1,5 @@
-import { AggregateRoot } from '@/shared/domain/aggregate-root.base.js';
-import { Money } from '@/shared/domain/value-objects/money.vo.js';
+import { AggregateRoot } from '../../../../src/shared/domain/aggregate-root.base.js';
+import { Money } from '../../../../src/shared/domain/value-objects/money.vo.js';
 declare const FORMAS_PAGAMENTO: readonly ["Pix", "Dinheiro", "Cartão Crédito", "Cartão Débito", "Boleto"];
 type FormaPag = (typeof FORMAS_PAGAMENTO)[number];
 export interface VendaItemData {

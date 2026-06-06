@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateProdutoUseCase = void 0;
-const not_found_error_js_1 = require("@/shared/errors/not-found.error.js");
-const conflict_error_js_1 = require("@/shared/errors/conflict.error.js");
+const not_found_error_js_1 = require("../../../../src/shared/errors/not-found.error.js");
+const conflict_error_js_1 = require("../../../../src/shared/errors/conflict.error.js");
 class UpdateProdutoUseCase {
     repo;
     constructor(repo) {

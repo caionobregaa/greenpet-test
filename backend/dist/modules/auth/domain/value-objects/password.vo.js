@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Password = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const validation_error_js_1 = require("@/shared/errors/validation.error.js");
+const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
 class Password {
     _hash;
     constructor(_hash) {

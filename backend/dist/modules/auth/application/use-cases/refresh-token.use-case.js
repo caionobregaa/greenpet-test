@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RefreshTokenUseCase = void 0;
-const unauthorized_error_js_1 = require("@/shared/errors/unauthorized.error.js");
+const unauthorized_error_js_1 = require("../../../../src/shared/errors/unauthorized.error.js");
 class RefreshTokenUseCase {
     userRepo;
     refreshRepo;

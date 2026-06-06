@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClientesController = void 0;
 const clientes_schema_js_1 = require("./clientes.schema.js");
-const validation_error_js_1 = require("@/shared/errors/validation.error.js");
+const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
 function toResponse(c) {
     return {
         id: c.id,

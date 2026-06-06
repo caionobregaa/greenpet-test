@@ -1,5 +1,5 @@
 import type { IAnimalRepository } from '../../domain/repositories/animal.repository.interface.js';
-import type { IClienteRepository } from '@/modules/clientes/domain/repositories/cliente.repository.interface.js';
+import type { IClienteRepository } from '../../../../src/modules/clientes/domain/repositories/cliente.repository.interface.js';
 import { Animal } from '../../domain/entities/animal.entity.js';
 export interface CreateAnimalInput {
     nome: string;

@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConverterOrcamentoUseCase = void 0;
-const venda_entity_js_1 = require("@/modules/vendas/domain/entities/venda.entity.js");
-const not_found_error_js_1 = require("@/shared/errors/not-found.error.js");
-const unprocessable_error_js_1 = require("@/shared/errors/unprocessable.error.js");
+const venda_entity_js_1 = require("../../../../src/modules/vendas/domain/entities/venda.entity.js");
+const not_found_error_js_1 = require("../../../../src/shared/errors/not-found.error.js");
+const unprocessable_error_js_1 = require("../../../../src/shared/errors/unprocessable.error.js");
 class ConverterOrcamentoUseCase {
     orcamentoRepo;
     vendaRepo;

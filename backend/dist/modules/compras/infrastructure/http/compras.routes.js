@@ -9,13 +9,15 @@ const update_compra_use_case_js_1 = require("../../application/use-cases/update-
 const update_compra_status_use_case_js_1 = require("../../application/use-cases/update-compra-status.use-case.js");
 const delete_compra_use_case_js_1 = require("../../application/use-cases/delete-compra.use-case.js");
 const compras_schema_js_1 = require("./compras.schema.js");
-const validation_error_js_1 = require("@/shared/errors/validation.error.js");
+const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
 function toResponse(c) {
     return {
         id: c.id,
         fornecedor: c.fornecedor,
         dataPedido: c.dataPedido,
         dataRecebimento: c.dataRecebimento,
+        categoria: c.categoria,
+        descricaoSimples: c.descricaoSimples,
         status: c.status,
         total: c.total,
         obs: c.obs,
@@ -23,6 +25,22 @@ function toResponse(c) {
         createdAt: c.createdAt,
         updatedAt: c.updatedAt,
     };
+}
+async function autoImportarEstoque(prisma, compra) {
+    if (compra.categoria !== 'Produtos Pets' || compra.itens.length === 0)
+        return;
+    await Promise.all(compra.itens
+        .filter((i) => i.produtoId)
+        .map((i) => prisma.estoqueItem.create({
+        data: {
+            id: crypto.randomUUID(),
+            produtoId: i.produtoId,
+            quantidade: i.qtd,
+            validade: null,
+            lote: null,
+            obs: `Importado da despesa`,
+        },
+    })));
 }
 function registerComprasRoutes(app, prisma) {
     const repo = new prisma_compra_repository_js_1.PrismaCompraRepository(prisma);
@@ -44,6 +62,9 @@ function registerComprasRoutes(app, prisma) {
         if (!body.success)
             throw new validation_error_js_1.ValidationError('VALIDATION_ERROR', body.error.errors[0].message);
         const compra = await createUC.execute(body.data);
+        if (compra.categoria === 'Produtos Pets') {
+            await autoImportarEstoque(prisma, compra);
+        }
         rep.status(201).send({ data: toResponse(compra) });
     });
     app.get('/api/v1/compras/:id', async (req, rep) => {

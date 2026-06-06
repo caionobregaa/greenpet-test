@@ -1,4 +1,4 @@
-import { AggregateRoot } from '@/shared/domain/aggregate-root.base.js';
+import { AggregateRoot } from '../../../../src/shared/domain/aggregate-root.base.js';
 declare const ESPECIES_VALIDAS: readonly ["Cão", "Gato"];
 declare const SEXOS_VALIDOS: readonly ["M", "F", "Indefinido"];
 type Especie = (typeof ESPECIES_VALIDAS)[number];

@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeleteCompraUseCase = void 0;
-const not_found_error_js_1 = require("@/shared/errors/not-found.error.js");
-const unprocessable_error_js_1 = require("@/shared/errors/unprocessable.error.js");
+const not_found_error_js_1 = require("../../../../src/shared/errors/not-found.error.js");
+const unprocessable_error_js_1 = require("../../../../src/shared/errors/unprocessable.error.js");
 class DeleteCompraUseCase {
     repo;
     constructor(repo) {

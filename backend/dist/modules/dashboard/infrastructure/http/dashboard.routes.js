@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerDashboardRoutes = registerDashboardRoutes;
 const prisma_dashboard_repository_js_1 = require("../repositories/prisma-dashboard.repository.js");
 const zod_1 = require("zod");
-const validation_error_js_1 = require("@/shared/errors/validation.error.js");
+const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
 const QuerySchema = zod_1.z.object({
     inicio: zod_1.z.string().date().default(() => {
         const d = new Date();

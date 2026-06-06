@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateOrcamentoUseCase = void 0;
 const orcamento_entity_js_1 = require("../../domain/entities/orcamento.entity.js");
-const not_found_error_js_1 = require("@/shared/errors/not-found.error.js");
+const not_found_error_js_1 = require("../../../../src/shared/errors/not-found.error.js");
 class CreateOrcamentoUseCase {
     orcamentoRepo;
     clienteRepo;

@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateCompraStatusUseCase = void 0;
-const not_found_error_js_1 = require("@/shared/errors/not-found.error.js");
-const validation_error_js_1 = require("@/shared/errors/validation.error.js");
+const not_found_error_js_1 = require("../../../../src/shared/errors/not-found.error.js");
+const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
 class UpdateCompraStatusUseCase {
     repo;
     constructor(repo) {

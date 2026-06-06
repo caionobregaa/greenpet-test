@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateProdutoUseCase = void 0;
 const produto_entity_js_1 = require("../../domain/entities/produto.entity.js");
-const conflict_error_js_1 = require("@/shared/errors/conflict.error.js");
+const conflict_error_js_1 = require("../../../../src/shared/errors/conflict.error.js");
 class CreateProdutoUseCase {
     repo;
     constructor(repo) {

@@ -1,9 +1,9 @@
 import type { IClienteRepository } from '../../domain/repositories/cliente.repository.interface.js';
-import type { IAnimalRepository } from '@/modules/animais/domain/repositories/animal.repository.interface.js';
-import type { IVendaRepository } from '@/modules/vendas/domain/repositories/venda.repository.interface.js';
+import type { IAnimalRepository } from '../../../../src/modules/animais/domain/repositories/animal.repository.interface.js';
+import type { IVendaRepository } from '../../../../src/modules/vendas/domain/repositories/venda.repository.interface.js';
 import type { Cliente } from '../../domain/entities/cliente.entity.js';
-import type { Animal } from '@/modules/animais/domain/entities/animal.entity.js';
-import type { Venda } from '@/modules/vendas/domain/entities/venda.entity.js';
+import type { Animal } from '../../../../src/modules/animais/domain/entities/animal.entity.js';
+import type { Venda } from '../../../../src/modules/vendas/domain/entities/venda.entity.js';
 export interface ClienteDetailOutput {
     cliente: Cliente;
     animais: Animal[];

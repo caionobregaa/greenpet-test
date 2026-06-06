@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Cliente = void 0;
-const aggregate_root_base_js_1 = require("@/shared/domain/aggregate-root.base.js");
-const cpf_vo_js_1 = require("@/shared/domain/value-objects/cpf.vo.js");
-const email_vo_js_1 = require("@/shared/domain/value-objects/email.vo.js");
-const phone_vo_js_1 = require("@/shared/domain/value-objects/phone.vo.js");
-const validation_error_js_1 = require("@/shared/errors/validation.error.js");
+const aggregate_root_base_js_1 = require("../../../../src/shared/domain/aggregate-root.base.js");
+const cpf_vo_js_1 = require("../../../../src/shared/domain/value-objects/cpf.vo.js");
+const email_vo_js_1 = require("../../../../src/shared/domain/value-objects/email.vo.js");
+const phone_vo_js_1 = require("../../../../src/shared/domain/value-objects/phone.vo.js");
+const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
 class Cliente extends aggregate_root_base_js_1.AggregateRoot {
     static create(data) {
         if (!data.nome || data.nome.trim().length < 3) {
@@ -14,6 +14,21 @@ class Cliente extends aggregate_root_base_js_1.AggregateRoot {
         return new Cliente({
             nome: data.nome.trim(),
             telefone: phone_vo_js_1.Phone.create(data.telefone),
+            email: data.email ? email_vo_js_1.Email.create(data.email) : undefined,
+            cpf: data.cpf ? cpf_vo_js_1.CPF.create(data.cpf) : undefined,
+            endereco: data.endereco,
+            bairro: data.bairro,
+            cidade: data.cidade ?? 'Manaus',
+            obs: data.obs,
+            deletedAt: data.deletedAt,
+            numeroDeAnimais: data.numeroDeAnimais,
+        }, data.id);
+    }
+    /** Reconstitui uma entidade a partir de dados do banco, sem revalidar o telefone. */
+    static fromPersistence(data) {
+        return new Cliente({
+            nome: data.nome,
+            telefone: phone_vo_js_1.Phone.fromRaw(data.telefone),
             email: data.email ? email_vo_js_1.Email.create(data.email) : undefined,
             cpf: data.cpf ? cpf_vo_js_1.CPF.create(data.cpf) : undefined,
             endereco: data.endereco,

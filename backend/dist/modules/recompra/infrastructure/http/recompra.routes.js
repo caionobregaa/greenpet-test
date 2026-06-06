@@ -4,7 +4,7 @@ exports.registerRecompraRoutes = registerRecompraRoutes;
 const prisma_recompra_repository_js_1 = require("../repositories/prisma-recompra.repository.js");
 const list_recompra_alertas_use_case_js_1 = require("../../application/use-cases/list-recompra-alertas.use-case.js");
 const zod_1 = require("zod");
-const validation_error_js_1 = require("@/shared/errors/validation.error.js");
+const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
 const QuerySchema = zod_1.z.object({
     clienteId: zod_1.z.string().uuid().optional(),
     urgencia: zod_1.z.enum(['vencido', 'urgente', 'proximo', 'ok']).optional(),

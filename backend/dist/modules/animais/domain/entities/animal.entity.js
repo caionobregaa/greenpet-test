@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Animal = void 0;
-const aggregate_root_base_js_1 = require("@/shared/domain/aggregate-root.base.js");
-const validation_error_js_1 = require("@/shared/errors/validation.error.js");
+const aggregate_root_base_js_1 = require("../../../../src/shared/domain/aggregate-root.base.js");
+const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
 const ESPECIES_VALIDAS = ['Cão', 'Gato'];
 const SEXOS_VALIDOS = ['M', 'F', 'Indefinido'];
 class Animal extends aggregate_root_base_js_1.AggregateRoot {

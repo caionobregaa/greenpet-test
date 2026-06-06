@@ -1,4 +1,4 @@
-import { AggregateRoot } from '@/shared/domain/aggregate-root.base.js';
+import { AggregateRoot } from '../../../../src/shared/domain/aggregate-root.base.js';
 interface UserProps {
     nome: string;
     email: string;

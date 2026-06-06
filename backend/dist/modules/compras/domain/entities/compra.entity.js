@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Compra = void 0;
-const aggregate_root_base_js_1 = require("@/shared/domain/aggregate-root.base.js");
-const money_vo_js_1 = require("@/shared/domain/value-objects/money.vo.js");
-const validation_error_js_1 = require("@/shared/errors/validation.error.js");
+const aggregate_root_base_js_1 = require("../../../../src/shared/domain/aggregate-root.base.js");
+const money_vo_js_1 = require("../../../../src/shared/domain/value-objects/money.vo.js");
+const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
 class Compra extends aggregate_root_base_js_1.AggregateRoot {
     static create(data) {
         const itens = data.itens.map((item) => ({
@@ -14,11 +14,15 @@ class Compra extends aggregate_root_base_js_1.AggregateRoot {
             valorUnitario: item.valorUnitario,
             total: money_vo_js_1.Money.create(item.valorUnitario).multiply(item.qtd).value,
         }));
-        const totalValue = itens.reduce((s, i) => s + i.total, 0);
+        const totalValue = itens.length > 0
+            ? itens.reduce((s, i) => s + i.total, 0)
+            : (data.totalManual ?? 0);
         return new Compra({
             fornecedor: data.fornecedor,
             dataPedido: data.dataPedido ?? new Date(),
             dataRecebimento: data.dataRecebimento,
+            categoria: data.categoria ?? 'Produtos Pets',
+            descricaoSimples: data.descricaoSimples,
             status: data.status ?? 'pendente',
             total: money_vo_js_1.Money.create(totalValue),
             obs: data.obs,
@@ -28,6 +32,8 @@ class Compra extends aggregate_root_base_js_1.AggregateRoot {
     get fornecedor() { return this.props.fornecedor; }
     get dataPedido() { return this.props.dataPedido; }
     get dataRecebimento() { return this.props.dataRecebimento; }
+    get categoria() { return this.props.categoria; }
+    get descricaoSimples() { return this.props.descricaoSimples; }
     get status() { return this.props.status; }
     get total() { return this.props.total.value; }
     get obs() { return this.props.obs; }
@@ -67,6 +73,13 @@ class Compra extends aggregate_root_base_js_1.AggregateRoot {
             this.props.obs = fields.obs;
         if (fields.dataPedido !== undefined)
             this.props.dataPedido = fields.dataPedido;
+        if (fields.categoria !== undefined)
+            this.props.categoria = fields.categoria;
+        if (fields.descricaoSimples !== undefined)
+            this.props.descricaoSimples = fields.descricaoSimples;
+        if (fields.totalManual !== undefined && (fields.itens === undefined || fields.itens.length === 0)) {
+            this.props.total = money_vo_js_1.Money.create(fields.totalManual);
+        }
         if (fields.itens !== undefined) {
             this.props.itens = fields.itens.map((item) => ({
                 id: item.id ?? crypto.randomUUID(),

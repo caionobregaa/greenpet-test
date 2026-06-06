@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateClienteUseCase = void 0;
 const cliente_entity_js_1 = require("../../domain/entities/cliente.entity.js");
-const conflict_error_js_1 = require("@/shared/errors/conflict.error.js");
+const conflict_error_js_1 = require("../../../../src/shared/errors/conflict.error.js");
 class CreateClienteUseCase {
     repo;
     constructor(repo) {

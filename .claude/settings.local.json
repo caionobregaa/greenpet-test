@@ -87,7 +87,29 @@
       "Bash(docker exec *)",
       "Bash(docker cp *)",
       "Bash(npx tsc *)",
-      "Bash(npx vitest *)"
+      "Bash(npx vitest *)",
+      "Bash(curl -s -X POST http://localhost:3000/api/v1/auth/login -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"admin@greenpet.com\\\\\",\\\\\"password\\\\\":\\\\\"admin123\\\\\"}\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/v1/clientes -H 'Content-Type: application/json' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhN2QxNjgxNS00MWQzLTRlZDItODQxZC0xY2QzNTcyNzVjNjkiLCJlbWFpbCI6ImFkbWluQGdyZWVucGV0LmNvbSIsInBhcGVsIjoiYWRtaW4iLCJpYXQiOjE3ODA3MTI5NTAsImV4cCI6MTc4MDc0MTc1MH0.QliwyRciiWw_SjxwkBhTMQCtNyC2623DBzUEDNvW15g' -d '{\"nome\":\"Cliente Teste\",\"telefone\":\"92987654321\",\"email\":\"teste@greenpet.com\",\"cpf\":\"12345678901\",\"endereco\":\"Rua Teste, 123\",\"bairro\":\"Centro\",\"cidade\":\"Manaus\",\"obs\":\"Cliente criado para teste\"}')",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s 'http://localhost:3000/api/v1/clientes?page=1&limit=20' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhN2QxNjgxNS00MWQzLTRlZDItODQxZC0xY2QzNTcyNzVjNjkiLCJlbWFpbCI6ImFkbWluQGdyZWVucGV0LmNvbSIsInBhcGVsIjoiYWRtaW4iLCJpYXQiOjE3ODA3MTI5NTAsImV4cCI6MTc4MDc0MTc1MH0.QliwyRciiWw_SjxwkBhTMQCtNyC2623DBzUEDNvW15g')",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\)['data']; print\\(f'Nome atualizado: {d[\\\\\"nome\\\\\"]}, Obs: {d[\\\\\"obs\\\\\"]}'\\)\")",
+      "Bash(cat docker-compose.yml)",
+      "Bash(cat docker-compose.yaml)",
+      "Bash(ls *.yml *.yaml)",
+      "Bash(docker build *)",
+      "Bash(docker restart *)",
+      "Bash(curl -s http://localhost:3000/api/v1/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"admin@greenpet.com\",\"password\":\"admin123\"}')",
+      "Bash(npm run *)",
+      "Bash(npx prisma *)",
+      "Bash(./node_modules/.bin/tsc-alias -p tsconfig.build.json)",
+      "Bash(docker start *)",
+      "Bash(npm install *)",
+      "Bash(npx tsc-alias *)",
+      "Bash(curl -s -X POST http://localhost:3000/api/v1/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"admin@greenpet.com\",\"password\":\"admin123\"}')",
+      "Bash(python -c ' *)",
+      "Bash(python test_api4.py)",
+      "Bash(Get-ChildItem \"C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\\\\prisma\\\\migrations\")",
+      "Bash(dir dist *)"
     ]
   }
 }

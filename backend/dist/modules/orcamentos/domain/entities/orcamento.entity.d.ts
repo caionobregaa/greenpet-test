@@ -1,5 +1,5 @@
-import { AggregateRoot } from '@/shared/domain/aggregate-root.base.js';
-import { Money } from '@/shared/domain/value-objects/money.vo.js';
+import { AggregateRoot } from '../../../../src/shared/domain/aggregate-root.base.js';
+import { Money } from '../../../../src/shared/domain/value-objects/money.vo.js';
 export type OrcamentoStatus = 'pendente' | 'aprovado' | 'recusado';
 export interface OrcamentoItemData {
     id?: string;

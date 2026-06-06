@@ -1,5 +1,5 @@
-import { AggregateRoot } from '@/shared/domain/aggregate-root.base.js';
-import { Money } from '@/shared/domain/value-objects/money.vo.js';
+import { AggregateRoot } from '../../../../src/shared/domain/aggregate-root.base.js';
+import { Money } from '../../../../src/shared/domain/value-objects/money.vo.js';
 declare const CATEGORIAS_VALIDAS: readonly ["Ração", "Petisco", "Medicamento", "Acessório", "Higiene", "Serviço"];
 type Categoria = (typeof CATEGORIAS_VALIDAS)[number];
 interface ProdutoProps {

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AnimaisController = void 0;
 const animais_schema_js_1 = require("./animais.schema.js");
-const validation_error_js_1 = require("@/shared/errors/validation.error.js");
+const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
 function toResponse(a, clienteNome) {
     return {
         id: a.id,
@@ -44,7 +44,7 @@ class AnimaisController {
         const query = animais_schema_js_1.ListAnimaisQuerySchema.safeParse(request.query);
         if (!query.success)
             throw new validation_error_js_1.ValidationError('VALIDATION_ERROR', query.error.errors[0].message);
-        const result = await this.listUseCase.execute(query.data);
+        const result = await this.listUseCase.execute({ ...query.data });
         reply.status(200).send({
             data: result.animais.map((a) => toResponse(a, result.clienteNomes[a.id])),
             meta: { page: query.data.page, limit: query.data.limit, total: result.total },

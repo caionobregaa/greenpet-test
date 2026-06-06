@@ -2,8 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.errorHandler = errorHandler;
 const domain_error_js_1 = require("../../errors/domain-error.js");
+function isDomainError(error) {
+    const e = error;
+    return (error instanceof domain_error_js_1.DomainError ||
+        (typeof e.code === 'string' &&
+            typeof e.statusCode === 'number' &&
+            e.statusCode >= 400 &&
+            e.statusCode < 600 &&
+            !e.code.startsWith('P') &&
+            !e.code.startsWith('FST_')));
+}
 function errorHandler(error, _request, reply) {
-    if (error instanceof domain_error_js_1.DomainError) {
+    if (isDomainError(error)) {
         reply.status(error.statusCode).send({
             error: {
                 code: error.code,

@@ -1,5 +1,5 @@
 import type { IOrcamentoRepository } from '../../domain/repositories/orcamento.repository.interface.js';
-import type { IClienteRepository } from '@/modules/clientes/domain/repositories/cliente.repository.interface.js';
+import type { IClienteRepository } from '../../../../src/modules/clientes/domain/repositories/cliente.repository.interface.js';
 import { Orcamento, type OrcamentoItemData } from '../../domain/entities/orcamento.entity.js';
 export interface CreateOrcamentoInput {
     clienteId?: string;

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LoginUseCase = void 0;
 const password_vo_js_1 = require("../../domain/value-objects/password.vo.js");
-const unauthorized_error_js_1 = require("@/shared/errors/unauthorized.error.js");
+const unauthorized_error_js_1 = require("../../../../src/shared/errors/unauthorized.error.js");
 class LoginUseCase {
     userRepo;
     refreshRepo;

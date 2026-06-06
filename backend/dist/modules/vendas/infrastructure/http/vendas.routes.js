@@ -2,13 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerVendasRoutes = registerVendasRoutes;
 const prisma_venda_repository_js_1 = require("../repositories/prisma-venda.repository.js");
-const prisma_cliente_repository_js_1 = require("@/modules/clientes/infrastructure/repositories/prisma-cliente.repository.js");
+const prisma_cliente_repository_js_1 = require("../../../../src/modules/clientes/infrastructure/repositories/prisma-cliente.repository.js");
 const create_venda_use_case_js_1 = require("../../application/use-cases/create-venda.use-case.js");
 const get_venda_use_case_js_1 = require("../../application/use-cases/get-venda.use-case.js");
 const list_vendas_use_case_js_1 = require("../../application/use-cases/list-vendas.use-case.js");
 const delete_venda_use_case_js_1 = require("../../application/use-cases/delete-venda.use-case.js");
 const vendas_schema_js_1 = require("./vendas.schema.js");
-const validation_error_js_1 = require("@/shared/errors/validation.error.js");
+const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
 function toResponse(v) {
     return {
         id: v.id,

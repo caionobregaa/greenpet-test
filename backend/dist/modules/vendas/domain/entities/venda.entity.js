@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Venda = void 0;
-const aggregate_root_base_js_1 = require("@/shared/domain/aggregate-root.base.js");
-const money_vo_js_1 = require("@/shared/domain/value-objects/money.vo.js");
-const validation_error_js_1 = require("@/shared/errors/validation.error.js");
+const aggregate_root_base_js_1 = require("../../../../src/shared/domain/aggregate-root.base.js");
+const money_vo_js_1 = require("../../../../src/shared/domain/value-objects/money.vo.js");
+const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
 const FORMAS_PAGAMENTO = ['Pix', 'Dinheiro', 'Cartão Crédito', 'Cartão Débito', 'Boleto'];
 class Venda extends aggregate_root_base_js_1.AggregateRoot {
     static create(data) {

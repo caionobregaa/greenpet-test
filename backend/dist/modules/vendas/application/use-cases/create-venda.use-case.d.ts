@@ -1,5 +1,5 @@
 import type { IVendaRepository } from '../../domain/repositories/venda.repository.interface.js';
-import type { IClienteRepository } from '@/modules/clientes/domain/repositories/cliente.repository.interface.js';
+import type { IClienteRepository } from '../../../../src/modules/clientes/domain/repositories/cliente.repository.interface.js';
 import { Venda, type VendaItemData } from '../../domain/entities/venda.entity.js';
 export interface CreateVendaInput {
     clienteId: string;

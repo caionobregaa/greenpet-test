@@ -8,7 +8,7 @@ const delete_produto_use_case_js_1 = require("../../application/use-cases/delete
 const get_produto_use_case_js_1 = require("../../application/use-cases/get-produto.use-case.js");
 const list_produtos_use_case_js_1 = require("../../application/use-cases/list-produtos.use-case.js");
 const produtos_schema_js_1 = require("./produtos.schema.js");
-const validation_error_js_1 = require("@/shared/errors/validation.error.js");
+const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
 function toResponse(p) {
     return {
         id: p.id,
