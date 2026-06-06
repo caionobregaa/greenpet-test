@@ -51,6 +51,37 @@ export class Cliente extends AggregateRoot<ClienteProps> {
     )
   }
 
+  /** Reconstitui uma entidade a partir de dados do banco, sem revalidar o telefone. */
+  static fromPersistence(data: {
+    id: string
+    nome: string
+    telefone: string
+    email?: string
+    cpf?: string
+    endereco?: string
+    bairro?: string
+    cidade?: string
+    obs?: string
+    deletedAt?: Date
+    numeroDeAnimais?: number
+  }): Cliente {
+    return new Cliente(
+      {
+        nome: data.nome,
+        telefone: Phone.fromRaw(data.telefone),
+        email: data.email ? Email.create(data.email) : undefined,
+        cpf: data.cpf ? CPF.create(data.cpf) : undefined,
+        endereco: data.endereco,
+        bairro: data.bairro,
+        cidade: data.cidade ?? 'Manaus',
+        obs: data.obs,
+        deletedAt: data.deletedAt,
+        numeroDeAnimais: data.numeroDeAnimais,
+      },
+      data.id,
+    )
+  }
+
   get nome(): string { return this.props.nome }
   get telefone(): string { return this.props.telefone.value }
   get email(): string | undefined { return this.props.email?.value }

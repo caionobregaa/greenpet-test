@@ -27,6 +27,11 @@ export class Phone extends ValueObject<PhoneProps> {
     return new Phone({ value: formatted })
   }
 
+  /** Reconstitui a partir do banco sem validação — aceita qualquer formato já armazenado. */
+  static fromRaw(value: string): Phone {
+    return new Phone({ value: value.trim() })
+  }
+
   toString(): string {
     return this.props.value
   }

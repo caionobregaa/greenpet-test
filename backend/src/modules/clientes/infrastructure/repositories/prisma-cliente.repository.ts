@@ -86,7 +86,7 @@ export class PrismaClienteRepository implements IClienteRepository {
     deletedAt: Date | null
     _count?: { animais: number }
   }): Cliente {
-    return Cliente.create({
+    return Cliente.fromPersistence({
       id: row.id,
       nome: row.nome,
       telefone: row.telefone,
