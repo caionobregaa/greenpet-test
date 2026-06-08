@@ -129,7 +129,18 @@
       "PowerShell(Get-NetTCPConnection -State Listen | Where-Object {$_.LocalPort -eq 3001} | Select-Object LocalPort, OwningProcess)",
       "PowerShell($proc = Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty OwningProcess; if \\($proc\\) { Stop-Process -Id $proc -Force; Write-Host \"Killed PID $proc\" } else { Write-Host \"Not running\" })",
       "Bash(echo \"Started PID: $!\")",
-      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" http://localhost:3001/)"
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" http://localhost:3001/)",
+      "Bash(pm2 list *)",
+      "Bash(pm2 env *)",
+      "PowerShell(Get-NetTCPConnection -State Listen | Where-Object {$_.LocalPort -notin @\\(135,445,139,3000,5432,49152..65535\\)} | Select-Object LocalPort, OwningProcess | Sort-Object LocalPort | ForEach-Object { $p = Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue; [PSCustomObject]@{Port=$_.LocalPort; PID=$_.OwningProcess; Process=$p.ProcessName} })",
+      "PowerShell(Get-NetTCPConnection -State Listen | Select-Object LocalPort, OwningProcess | Sort-Object LocalPort | ForEach-Object { $p = Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue; \"$\\($_.LocalPort\\) | $\\($_.OwningProcess\\) | $\\($p.ProcessName\\)\" } | Select-Object -First 30)",
+      "PowerShell(Get-Service -Name nginx -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-Process -Name nginx -ErrorAction SilentlyContinue)",
+      "Bash(nginx -t)",
+      "Read(//etc/nginx/**)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\)[0]; env=d['Config']['Env']; [print\\(e\\) for e in env if 'URL' in e.upper\\(\\) or 'PORT' in e.upper\\(\\) or 'HOST' in e.upper\\(\\)]\")",
+      "Bash(cat .gitmodules)",
+      "Bash(git submodule *)"
     ]
   }
 }
