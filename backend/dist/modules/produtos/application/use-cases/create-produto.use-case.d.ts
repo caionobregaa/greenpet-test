@@ -16,6 +16,7 @@ export interface CreateProdutoInput {
     margemLucro?: number;
     diasRecompra?: number;
     descricao?: string;
+    imagemUrl?: string | null;
 }
 export declare class CreateProdutoUseCase {
     private readonly repo;

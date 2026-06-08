@@ -50,6 +50,7 @@ class PrismaProdutoRepository {
             margemLucro: produto.margemLucro,
             diasRecompra: produto.diasRecompra ?? null,
             descricao: produto.descricao ?? null,
+            imagemUrl: produto.imagemUrl ?? null,
             deletedAt: produto.deletedAt ?? null,
         };
         await this.prisma.produto.upsert({
@@ -76,6 +77,7 @@ class PrismaProdutoRepository {
             margemLucro: Number(row.margemLucro),
             diasRecompra: row.diasRecompra ?? undefined,
             descricao: row.descricao ?? undefined,
+            imagemUrl: row.imagemUrl ?? undefined,
             deletedAt: row.deletedAt ?? undefined,
         });
     }

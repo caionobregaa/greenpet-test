@@ -18,7 +18,7 @@ exports.CreateProdutoSchema = zod_1.z.object({
     margemLucro: zod_1.z.number().min(0).default(0),
     diasRecompra: zod_1.z.number().int().positive().optional(),
     descricao: zod_1.z.string().optional(),
-    imagemUrl: zod_1.z.string().url().optional().or(zod_1.z.literal('')),
+    imagemUrl: zod_1.z.string().optional().nullable(),
 });
 exports.UpdateProdutoSchema = exports.CreateProdutoSchema.partial();
 exports.ListProdutosQuerySchema = zod_1.z.object({

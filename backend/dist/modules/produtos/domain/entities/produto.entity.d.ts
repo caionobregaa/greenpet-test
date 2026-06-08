@@ -18,6 +18,7 @@ interface ProdutoProps {
     margemLucro: number;
     diasRecompra?: number;
     descricao?: string;
+    imagemUrl?: string;
     deletedAt?: Date;
 }
 export declare class Produto extends AggregateRoot<ProdutoProps> {
@@ -38,6 +39,7 @@ export declare class Produto extends AggregateRoot<ProdutoProps> {
         margemLucro?: number;
         diasRecompra?: number;
         descricao?: string;
+        imagemUrl?: string;
         deletedAt?: Date;
     }): Produto;
     get nome(): string;
@@ -55,6 +57,7 @@ export declare class Produto extends AggregateRoot<ProdutoProps> {
     get margemLucro(): number;
     get diasRecompra(): number | undefined;
     get descricao(): string | undefined;
+    get imagemUrl(): string | undefined;
     get deletedAt(): Date | undefined;
     get isActive(): boolean;
     get margemCalculada(): number;
@@ -75,6 +78,7 @@ export declare class Produto extends AggregateRoot<ProdutoProps> {
         margemLucro: number;
         diasRecompra: number;
         descricao: string;
+        imagemUrl: string | null;
     }>): void;
 }
 export {};

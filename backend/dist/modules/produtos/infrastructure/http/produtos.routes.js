@@ -28,6 +28,7 @@ function toResponse(p) {
         margemLucro: p.margemLucro,
         diasRecompra: p.diasRecompra,
         descricao: p.descricao,
+        imagemUrl: p.imagemUrl ?? null,
         createdAt: p.createdAt,
         updatedAt: p.updatedAt,
     };

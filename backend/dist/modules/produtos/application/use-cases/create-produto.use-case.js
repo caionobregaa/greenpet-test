@@ -12,7 +12,7 @@ class CreateProdutoUseCase {
         const existing = await this.repo.findByNome(input.nome);
         if (existing)
             throw new conflict_error_js_1.ConflictError('NOME_ALREADY_EXISTS', 'Produto com este nome já existe');
-        const produto = produto_entity_js_1.Produto.create(input);
+        const produto = produto_entity_js_1.Produto.create({ ...input, imagemUrl: input.imagemUrl ?? undefined });
         await this.repo.save(produto);
         return produto;
     }

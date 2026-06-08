@@ -15,7 +15,7 @@ export declare const CreateProdutoSchema: z.ZodObject<{
     margemLucro: z.ZodDefault<z.ZodNumber>;
     diasRecompra: z.ZodOptional<z.ZodNumber>;
     descricao: z.ZodOptional<z.ZodString>;
-    imagemUrl: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+    imagemUrl: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, "strip", z.ZodTypeAny, {
     nome: string;
     categoria: "Ração" | "Petisco" | "Medicamento" | "Acessório" | "Higiene" | "Serviço";
@@ -32,7 +32,7 @@ export declare const CreateProdutoSchema: z.ZodObject<{
     pesoEmbalagem?: number | undefined;
     diasRecompra?: number | undefined;
     descricao?: string | undefined;
-    imagemUrl?: string | undefined;
+    imagemUrl?: string | null | undefined;
 }, {
     nome: string;
     categoria: "Ração" | "Petisco" | "Medicamento" | "Acessório" | "Higiene" | "Serviço";
@@ -49,7 +49,7 @@ export declare const CreateProdutoSchema: z.ZodObject<{
     margemLucro?: number | undefined;
     diasRecompra?: number | undefined;
     descricao?: string | undefined;
-    imagemUrl?: string | undefined;
+    imagemUrl?: string | null | undefined;
 }>;
 export declare const UpdateProdutoSchema: z.ZodObject<{
     nome: z.ZodOptional<z.ZodString>;
@@ -67,7 +67,7 @@ export declare const UpdateProdutoSchema: z.ZodObject<{
     margemLucro: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
     diasRecompra: z.ZodOptional<z.ZodOptional<z.ZodNumber>>;
     descricao: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    imagemUrl: z.ZodOptional<z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>>;
+    imagemUrl: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
 }, "strip", z.ZodTypeAny, {
     nome?: string | undefined;
     especie?: "Cão" | "Gato" | "Ambos" | undefined;
@@ -84,7 +84,7 @@ export declare const UpdateProdutoSchema: z.ZodObject<{
     margemLucro?: number | undefined;
     diasRecompra?: number | undefined;
     descricao?: string | undefined;
-    imagemUrl?: string | undefined;
+    imagemUrl?: string | null | undefined;
 }, {
     nome?: string | undefined;
     especie?: "Cão" | "Gato" | "Ambos" | undefined;
@@ -101,7 +101,7 @@ export declare const UpdateProdutoSchema: z.ZodObject<{
     margemLucro?: number | undefined;
     diasRecompra?: number | undefined;
     descricao?: string | undefined;
-    imagemUrl?: string | undefined;
+    imagemUrl?: string | null | undefined;
 }>;
 export declare const ListProdutosQuerySchema: z.ZodObject<{
     q: z.ZodOptional<z.ZodString>;

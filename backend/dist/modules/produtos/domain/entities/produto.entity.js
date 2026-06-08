@@ -26,6 +26,7 @@ class Produto extends aggregate_root_base_js_1.AggregateRoot {
             margemLucro: data.margemLucro ?? 0,
             diasRecompra: data.diasRecompra,
             descricao: data.descricao,
+            imagemUrl: data.imagemUrl,
             deletedAt: data.deletedAt,
         }, data.id);
     }
@@ -44,6 +45,7 @@ class Produto extends aggregate_root_base_js_1.AggregateRoot {
     get margemLucro() { return this.props.margemLucro; }
     get diasRecompra() { return this.props.diasRecompra; }
     get descricao() { return this.props.descricao; }
+    get imagemUrl() { return this.props.imagemUrl; }
     get deletedAt() { return this.props.deletedAt; }
     get isActive() { return !this.props.deletedAt; }
     get margemCalculada() {
@@ -93,6 +95,8 @@ class Produto extends aggregate_root_base_js_1.AggregateRoot {
             this.props.diasRecompra = fields.diasRecompra;
         if (fields.descricao !== undefined)
             this.props.descricao = fields.descricao;
+        if (fields.imagemUrl !== undefined)
+            this.props.imagemUrl = fields.imagemUrl ?? undefined;
         this.updatedAt = new Date();
     }
 }
