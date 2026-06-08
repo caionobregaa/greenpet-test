@@ -118,7 +118,18 @@
       "Bash(cd /c/Users/Administrator/Documents/GitHub/greenpet-test/frontend && grep -r \"jsPDF\\\\|pdfmake\\\\|html2canvas\\\\|@react-pdf\\\\|window.print\" --include=\"*.ts\" --include=\"*.tsx\" src/ 2>/dev/null | head -50)",
       "Read(//c/c/Users/Administrator/Documents/GitHub/greenpet-test/frontend/**)",
       "Bash(python cadastrar_nd.py)",
-      "Bash(pip install *)"
+      "Bash(pip install *)",
+      "Bash(python3 -c ' *)",
+      "Bash(npx next *)",
+      "Bash(curl -s http://localhost:3001)",
+      "Bash(curl -s http://localhost:3000/api/v1/produtos)",
+      "Bash(tasklist)",
+      "PowerShell(Get-NetTCPConnection -State Listen | Where-Object {$_.LocalPort -in @\\(3000,3001,3002,4000,8080,8000,80\\)} | Select-Object LocalPort,OwningProcess | Sort-Object LocalPort)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3001)",
+      "PowerShell(Get-NetTCPConnection -State Listen | Where-Object {$_.LocalPort -eq 3001} | Select-Object LocalPort, OwningProcess)",
+      "PowerShell($proc = Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty OwningProcess; if \\($proc\\) { Stop-Process -Id $proc -Force; Write-Host \"Killed PID $proc\" } else { Write-Host \"Not running\" })",
+      "Bash(echo \"Started PID: $!\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" http://localhost:3001/)"
     ]
   }
 }

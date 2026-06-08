@@ -29,7 +29,10 @@ export function useCreateCompra() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateCompraInput) => apiCompras.create(input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["compras"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["compras"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
+    },
   });
 }
 

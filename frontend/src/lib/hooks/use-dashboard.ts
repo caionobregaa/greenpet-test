@@ -14,5 +14,7 @@ export function useDashboard(inicio?: string, fim?: string) {
   return useQuery({
     queryKey: ["dashboard", { inicio: start, fim: end }],
     queryFn: () => apiDashboard.getKPIs(start, end),
+    refetchInterval: 60_000,
+    staleTime: 30_000,
   });
 }

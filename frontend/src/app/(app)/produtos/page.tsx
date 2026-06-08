@@ -23,7 +23,7 @@ export default function ProdutosPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [infoProduto, setInfoProduto] = useState<Produto | null>(null);
 
-  const { data, isLoading } = useProdutos({ q: search || undefined, page, limit: 20 });
+  const { data, isLoading, isError } = useProdutos({ q: search || undefined, page, limit: 20 });
   const deleteProduto = useDeleteProduto();
 
   async function handleDelete() {
@@ -83,6 +83,8 @@ export default function ProdutosPage() {
                     ))}
                   </tr>
                 ))
+              ) : isError ? (
+                <tr><td colSpan={7}><EmptyState message="Erro ao carregar produtos" description="Verifique a conexão com o servidor." /></td></tr>
               ) : data?.data.length === 0 ? (
                 <tr><td colSpan={7}><EmptyState message="Nenhum produto encontrado" /></td></tr>
               ) : (

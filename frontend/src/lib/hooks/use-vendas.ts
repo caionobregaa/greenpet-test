@@ -28,7 +28,11 @@ export function useCreateVenda() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateVendaInput) => apiVendas.create(input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["vendas"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["vendas"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: ["recompra"] });
+    },
   });
 }
 
@@ -36,6 +40,9 @@ export function useDeleteVenda() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => apiVendas.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["vendas"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["vendas"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
+    },
   });
 }
