@@ -45,7 +45,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
       await this.prisma.orcamento.create({
         data: {
           id: orcamento.id,
-          clienteId: orcamento.clienteId,
+          clienteId: orcamento.clienteId ?? null,
           animalId: orcamento.animalId ?? null,
           data: orcamento.data,
           validade: orcamento.validade,
