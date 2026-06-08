@@ -215,6 +215,20 @@ model Compra {
   @@map("compras")
 }
 
+// ─────────────── RECOMPRA DISMISSALS ───────────────
+
+model RecompraDismissal {
+  id        String   @id @default(uuid())
+  produtoId String
+  clienteId String
+  animalId  String
+  reason    String   // "ok" | "cancelado"
+  createdAt DateTime @default(now())
+
+  @@unique([produtoId, clienteId, animalId])
+  @@map("recompra_dismissals")
+}
+
 model CompraItem {
   id            String   @id @default(uuid())
   compraId      String

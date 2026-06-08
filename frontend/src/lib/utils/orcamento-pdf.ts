@@ -32,6 +32,27 @@ const EMPRESA = {
   pix:      "65788498000144",
 };
 
+// Margens padrão para impressão A4 (20mm = ~0.79in — compatível com todas as impressoras)
+const PAGE_W = 210;
+const PAGE_H = 297;
+const MARGIN = 20;         // margem lateral e superior
+const FOOTER_H = 14;       // altura reservada para o rodapé
+const SAFE_BOTTOM = PAGE_H - MARGIN - FOOTER_H; // limite inferior do conteúdo
+const SIG_H = 32;          // altura do bloco de assinatura
+
+function drawFooter(doc: jsPDF, pageNum: number, totalPages: number): void {
+  const y = PAGE_H - MARGIN + 4;
+  doc.setDrawColor(210, 210, 210);
+  doc.setLineWidth(0.2);
+  doc.line(MARGIN, PAGE_H - MARGIN + 1, PAGE_W - MARGIN, PAGE_H - MARGIN + 1);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(130, 130, 130);
+  doc.text("GreenPET — Sistema de Gestão para Pet Shop", MARGIN, y);
+  doc.text(`Página ${pageNum}/${totalPages}`, PAGE_W / 2, y, { align: "center" });
+  doc.text(`Emitido em ${new Date().toLocaleDateString("pt-BR")}`, PAGE_W - MARGIN, y, { align: "right" });
+}
+
 export function gerarOrcamentoPDF(
   orcamento: Orcamento,
   cliente: Cliente,
@@ -39,8 +60,8 @@ export function gerarOrcamentoPDF(
   produtoImages?: Record<string, string>,
 ): void {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
-  const W = doc.internal.pageSize.getWidth();
-  const M = 14; // margin
+  const W = PAGE_W;
+  const M = MARGIN;
   let y = M;
 
   // ── 1. Cabeçalho: Empresa (esquerda) + Contato (direita) ────────────
@@ -215,6 +236,9 @@ export function gerarOrcamentoPDF(
   y = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
 
   // ── 7. Linha de total ────────────────────────────────────────────────
+  // Se não cabe na página atual, adiciona nova página
+  if (y + 10 > SAFE_BOTTOM) { doc.addPage(); y = M; }
+
   doc.setFillColor(...GREEN);
   doc.rect(M, y, W - M * 2, 10, "F");
   doc.setFont("helvetica", "bold");
@@ -225,6 +249,8 @@ export function gerarOrcamentoPDF(
   y += 16;
 
   // ── 8. Pagamento ─────────────────────────────────────────────────────
+  if (y + 30 > SAFE_BOTTOM) { doc.addPage(); y = M; }
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(...DARK);
@@ -244,9 +270,9 @@ export function gerarOrcamentoPDF(
   doc.setFontSize(8);
   doc.setTextColor(...GRAY);
   const metodos =
-    "Boleto, transferência bancária, dinheiro, cheque,\n" +
-    "cartão de crédito, cartão de débito, pix,\n" +
-    "picpay ou link de pagamento.";
+    "Boleto, transferência bancária, dinheiro,\n" +
+    "cheque, cartão de crédito, cartão de débito,\n" +
+    "pix, picpay ou link de pagamento.";
   const metodoLines = doc.splitTextToSize(metodos, midX - M - 4) as string[];
   doc.text(metodoLines, M, y);
 
@@ -259,6 +285,7 @@ export function gerarOrcamentoPDF(
 
   // ── 9. Observações ────────────────────────────────────────────────────
   if (orcamento.obs) {
+    if (y + 20 > SAFE_BOTTOM) { doc.addPage(); y = M; }
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(...DARK);
@@ -269,39 +296,37 @@ export function gerarOrcamentoPDF(
     doc.setTextColor(...GRAY);
     const lines = doc.splitTextToSize(orcamento.obs, W - M * 2) as string[];
     doc.text(lines, M, y);
-    y += lines.length * 4 + 8;
+    y += lines.length * 4 + 6;
   }
 
-  // ── 10. Assinatura ────────────────────────────────────────────────────
-  const pageH = doc.internal.pageSize.getHeight();
-  const sigY = Math.max(y + 10, pageH - 38);
+  // ── 10. Assinatura — sempre na última página, dentro das margens ──────
+  // Se a assinatura não cabe com margem segura, adiciona nova página
+  if (y + SIG_H > SAFE_BOTTOM) { doc.addPage(); y = M; }
+
+  // Centraliza a assinatura na área restante da página
+  const sigY = Math.max(y + 6, SAFE_BOTTOM - SIG_H);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...DARK);
   doc.text(`Manaus, ${new Date().toLocaleDateString("pt-BR")}`, W / 2, sigY, { align: "center" });
 
-  // Linha de assinatura
   doc.setDrawColor(...GRAY);
   doc.setLineWidth(0.3);
   const lineW = 72;
   doc.line((W - lineW) / 2, sigY + 13, (W + lineW) / 2, sigY + 13);
 
-  // Nome da empresa sob a linha
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(...DARK);
   doc.text(EMPRESA.nome, W / 2, sigY + 19, { align: "center" });
 
-  // ── 11. Rodapé ────────────────────────────────────────────────────────
-  doc.setDrawColor(220, 220, 220);
-  doc.setLineWidth(0.2);
-  doc.line(M, pageH - 8, W - M, pageH - 8);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
-  doc.setTextColor(...GRAY);
-  doc.text("GreenPET — Sistema de Gestão para Pet Shop", M, pageH - 4);
-  doc.text(`Emitido em ${new Date().toLocaleDateString("pt-BR")}`, W - M, pageH - 4, { align: "right" });
+  // ── 11. Rodapé em todas as páginas ────────────────────────────────────
+  const totalPages = (doc as jsPDF & { internal: { pages: unknown[] } }).internal.pages.length - 1;
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    drawFooter(doc, p, totalPages);
+  }
 
   // ── 12. Salvar ────────────────────────────────────────────────────────
   doc.save(`orcamento-${pedidoNum}.pdf`);

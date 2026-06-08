@@ -70,7 +70,20 @@ export class PrismaRecompraRepository {
       })
     }
 
-    let alertas = Array.from(seen.values())
+    // Filter out dismissed alerts where the dismissal is more recent than the last purchase
+    const dismissals = await this.prisma.recompraDismissal.findMany()
+    const dismissMap = new Map(
+      dismissals.map((d) => [`${d.produtoId}:${d.clienteId}:${d.animalId}`, d.createdAt]),
+    )
+
+    let alertas = Array.from(seen.values()).filter((a) => {
+      const key = `${a.produtoId}:${a.clienteId}:${a.animalId ?? ''}`
+      const dismissedAt = dismissMap.get(key)
+      if (!dismissedAt) return true
+      // Reappear if a new purchase happened after the dismissal
+      return a.ultimaCompra > dismissedAt
+    })
+
     if (params.urgencia) {
       alertas = alertas.filter((a) => a.urgencia === params.urgencia)
     }

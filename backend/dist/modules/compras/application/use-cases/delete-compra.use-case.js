@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeleteCompraUseCase = void 0;
 const not_found_error_js_1 = require("../../../../src/shared/errors/not-found.error.js");
-const unprocessable_error_js_1 = require("../../../../src/shared/errors/unprocessable.error.js");
 class DeleteCompraUseCase {
     repo;
     constructor(repo) {
@@ -12,9 +11,6 @@ class DeleteCompraUseCase {
         const compra = await this.repo.findById(id);
         if (!compra)
             throw new not_found_error_js_1.NotFoundError('NOT_FOUND', 'Compra não encontrada');
-        if (compra.status !== 'pendente') {
-            throw new unprocessable_error_js_1.UnprocessableError('CANNOT_DELETE', 'Apenas compras pendentes podem ser removidas');
-        }
         await this.repo.delete(id);
     }
 }

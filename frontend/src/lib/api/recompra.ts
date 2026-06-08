@@ -14,4 +14,13 @@ export const apiRecompra = {
     const { data } = await api.get<{ data: RecompraAlerta[]; meta: ApiMeta }>("/recompra", { params });
     return data;
   },
+
+  dismiss: async (params: {
+    produtoId: string;
+    clienteId: string;
+    animalId: string;
+    reason: "ok" | "cancelado";
+  }): Promise<void> => {
+    await api.post("/recompra/dismiss", params);
+  },
 };
