@@ -10,16 +10,19 @@ import { CreateVendaSchema, ListVendasQuerySchema } from './vendas.schema.js'
 import { ValidationError } from '@/shared/errors/validation.error.js'
 import type { Venda } from '../../domain/entities/venda.entity.js'
 
-function toResponse(v: Venda) {
+function toResponse(v: Venda, extra?: { clienteNome?: string | null; animalNome?: string | null }) {
   return {
     id: v.id,
     clienteId: v.clienteId,
     animalId: v.animalId,
     data: v.data,
     formaPag: v.formaPag,
+    taxaCartao: v.taxaCartao,
     total: v.total,
     obs: v.obs,
     itens: v.itens,
+    cliente: extra?.clienteNome ? { nome: extra.clienteNome } : undefined,
+    animal: extra?.animalNome ? { nome: extra.animalNome } : undefined,
     createdAt: v.createdAt,
   }
 }
@@ -36,7 +39,22 @@ export function registerVendasRoutes(app: FastifyInstance, prisma: PrismaClient)
     const q = ListVendasQuerySchema.safeParse(req.query)
     if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.errors[0].message)
     const result = await listUC.execute(q.data)
-    rep.send({ data: result.vendas.map(toResponse), meta: { page: q.data.page, limit: q.data.limit, total: result.total } })
+
+    const ids = result.vendas.map((v) => v.id)
+    const rows = await prisma.venda.findMany({
+      where: { id: { in: ids } },
+      select: {
+        id: true,
+        cliente: { select: { nome: true } },
+        animal: { select: { nome: true } },
+      },
+    })
+    const extraMap = new Map(rows.map((r) => [r.id, { clienteNome: r.cliente?.nome, animalNome: r.animal?.nome }]))
+
+    rep.send({
+      data: result.vendas.map((v) => toResponse(v, extraMap.get(v.id))),
+      meta: { page: q.data.page, limit: q.data.limit, total: result.total },
+    })
   })
 
   app.post('/api/v1/vendas', async (req, rep) => {
@@ -49,7 +67,14 @@ export function registerVendasRoutes(app: FastifyInstance, prisma: PrismaClient)
   app.get('/api/v1/vendas/:id', async (req, rep) => {
     const { id } = req.params as { id: string }
     const venda = await getUC.execute({ id })
-    rep.send({ data: toResponse(venda) })
+    const row = await prisma.venda.findUnique({
+      where: { id },
+      select: {
+        cliente: { select: { nome: true } },
+        animal: { select: { nome: true } },
+      },
+    })
+    rep.send({ data: toResponse(venda, { clienteNome: row?.cliente?.nome, animalNome: row?.animal?.nome }) })
   })
 
   app.delete('/api/v1/vendas/:id', async (req, rep) => {

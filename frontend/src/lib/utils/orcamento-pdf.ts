@@ -28,8 +28,8 @@ const EMPRESA = {
   bairro:   "Praça 14 de Janeiro, Manaus-AM",
   cep:      "CEP 69020-141",
   email:    "greenpet.am@gmail.com",
-  telefone: "+55 (92) 9458-5478",
-  pix:      "65788498000144",
+  telefone: "(92) 98127-7831",
+  pix:      "(92) 98127-7831",
 };
 
 // Margens padrão para impressão A4 (20mm = ~0.79in — compatível com todas as impressoras)
@@ -55,7 +55,7 @@ function drawFooter(doc: jsPDF, pageNum: number, totalPages: number): void {
 
 export function gerarOrcamentoPDF(
   orcamento: Orcamento,
-  cliente: Cliente,
+  cliente: Cliente | null,
   animal: Animal | null,
   produtoImages?: Record<string, string>,
 ): void {
@@ -88,7 +88,9 @@ export function gerarOrcamentoPDF(
   doc.setFontSize(8);
   doc.setTextColor(...GRAY);
   doc.text(`✉  ${EMPRESA.email}`, colR, M + 6, { align: "right" });
-  doc.text(`☎  ${EMPRESA.telefone}`, colR, M + 11, { align: "right" });
+  doc.setTextColor(37, 211, 102); // WhatsApp green
+  doc.text(`WhatsApp  ${EMPRESA.telefone}`, colR, M + 11, { align: "right" });
+  doc.setTextColor(...GRAY);
 
   y += 9;
 
@@ -99,7 +101,9 @@ export function gerarOrcamentoPDF(
   y += 7;
 
   // ── 3. Número do pedido (destaque) ──────────────────────────────────
-  const pedidoNum = orcamento.id.slice(-6).toUpperCase();
+  const pedidoNum = orcamento.numero
+    ? orcamento.numero.toString().padStart(3, "0")
+    : orcamento.id.slice(-6).toUpperCase();
   doc.setFillColor(...GREEN);
   doc.roundedRect(M, y, W - M * 2, 11, 2, 2, "F");
   doc.setFont("helvetica", "bold");
@@ -109,20 +113,18 @@ export function gerarOrcamentoPDF(
   y += 17;
 
   // ── 4. Dados do cliente ──────────────────────────────────────────────
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.5);
-  doc.setTextColor(...DARK);
-  doc.text(`Cliente: ${cliente.nome}`, M, y);
-  y += 5;
+  if (cliente) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.5);
+    doc.setTextColor(...DARK);
+    doc.text(`Cliente: ${cliente.nome}`, M, y);
+    y += 5;
+  }
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.setTextColor(...GRAY);
 
-  if (cliente.telefone) {
-    doc.text(`☎  ${cliente.telefone}`, M, y);
-    y += 4;
-  }
   if (animal) {
     doc.text(
       `Animal: ${animal.nome} — ${animal.especie ?? ""}${animal.raca ? ` · ${animal.raca}` : ""}`,
@@ -133,10 +135,11 @@ export function gerarOrcamentoPDF(
 
   // Datas na direita
   doc.setFontSize(8);
+  doc.setTextColor(...GRAY);
   doc.text(
     `Emissão: ${fmtDate(orcamento.data)}     Validade: ${fmtDate(orcamento.validade)}`,
     W - M,
-    y - (animal ? 9 : cliente.telefone ? 5 : 1),
+    cliente ? y - (animal ? 9 : 1) : y,
     { align: "right" },
   );
 
@@ -259,27 +262,33 @@ export function gerarOrcamentoPDF(
 
   const midX = M + (W - M * 2) / 2 + 4;
 
+  // Determine which payment methods to show
+  const formasPag = orcamento.formasPag && orcamento.formasPag.length > 0
+    ? orcamento.formasPag
+    : ["Cartão de Crédito", "Cartão de Débito", "PIX", "Dinheiro"];
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
   doc.setTextColor(...DARK);
-  doc.text("Meios de pagamento", M, y);
+  doc.text("Formas de pagamento aceitas", M, y);
   doc.text("PIX", midX, y);
   y += 4;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...GRAY);
-  const metodos =
-    "Boleto, transferência bancária, dinheiro,\n" +
-    "cheque, cartão de crédito, cartão de débito,\n" +
-    "pix, picpay ou link de pagamento.";
-  const metodoLines = doc.splitTextToSize(metodos, midX - M - 4) as string[];
+  const metodoLines = doc.splitTextToSize(formasPag.join(", "), midX - M - 4) as string[];
   doc.text(metodoLines, M, y);
 
-  doc.setFont("helvetica", "normal");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(...DARK);
   doc.text(EMPRESA.pix, midX, y);
+  y += 4;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...GRAY);
+  doc.text("(mesmo número do WhatsApp)", midX, y);
 
   y += metodoLines.length * 4 + 8;
 

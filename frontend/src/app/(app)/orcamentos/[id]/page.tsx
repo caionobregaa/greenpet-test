@@ -92,8 +92,9 @@ export default function OrcamentoDetailPage({ params }: Props) {
     if (!pagamento) { toast.error("Selecione a forma de pagamento."); return; }
     const opcao = OPCOES_PAG.find((o) => o.value === pagamento);
     if (!opcao) return;
+    const taxaPct = opcao.taxaKey ? TAXAS[opcao.taxaKey].pct : 0;
     try {
-      const result = await converter.mutateAsync({ id, input: { formaPag: opcao.backend } });
+      const result = await converter.mutateAsync({ id, input: { formaPag: opcao.backend, taxaCartao: taxaPct } });
       toast.success("Orçamento convertido em venda!");
       router.push(`/vendas/${result.vendaId}`);
     } catch (err: unknown) {
@@ -108,13 +109,13 @@ export default function OrcamentoDetailPage({ params }: Props) {
   }
 
   async function handleDownloadPDF() {
-    if (!orcamento || !orcamento.clienteId) return;
+    if (!orcamento) return;
     setPdfLoading(true);
     try {
       const produtoIds = [...new Set(orcamento.itens.filter((i) => i.produtoId).map((i) => i.produtoId!))];
 
       const [cliente, animal, ...produtos] = await Promise.all([
-        apiClientes.get(orcamento.clienteId),
+        orcamento.clienteId ? apiClientes.get(orcamento.clienteId) : Promise.resolve(null),
         orcamento.animalId ? apiAnimais.get(orcamento.animalId) : Promise.resolve(null),
         ...produtoIds.map((pid) => apiProdutos.get(pid).catch(() => null)),
       ]);
@@ -143,7 +144,7 @@ export default function OrcamentoDetailPage({ params }: Props) {
       <div className="flex items-center gap-3 mb-6">
         <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => router.back()}><ArrowLeft className="w-4 h-4" /></Button>
         <div className="flex-1">
-          <h1 className="text-xl font-bold">Orçamento #{id.slice(-6).toUpperCase()}</h1>
+          <h1 className="text-xl font-bold">Orçamento #{orcamento.numero ? String(orcamento.numero).padStart(3, "0") : id.slice(-6).toUpperCase()}</h1>
           <p className="text-sm text-muted-foreground">{formatDate(orcamento.data)}</p>
         </div>
         <StatusPill status={orcamento.status} />

@@ -14,6 +14,7 @@ export const CreateVendaSchema = z.object({
   formaPag: z.enum(["Pix", "Dinheiro", "Cartão Crédito", "Cartão Débito", "Boleto"], {
     message: "Selecione a forma de pagamento",
   }),
+  taxaCartao: z.number().min(0).max(100).optional().default(0),
   obs: z.string().optional().or(z.literal("")),
   itens: z.array(VendaItemSchema).min(1, "Adicione pelo menos um item"),
 });

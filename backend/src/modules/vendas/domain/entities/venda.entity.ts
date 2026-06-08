@@ -27,6 +27,7 @@ interface VendaProps {
   animalId?: string
   data: Date
   formaPag: FormaPag
+  taxaCartao: number
   total: Money
   obs?: string
   itens: VendaItemReadOnly[]
@@ -39,6 +40,7 @@ export class Venda extends AggregateRoot<VendaProps> {
     animalId?: string
     data?: Date
     formaPag: string
+    taxaCartao?: number
     obs?: string
     itens: VendaItemData[]
   }): Venda {
@@ -72,6 +74,7 @@ export class Venda extends AggregateRoot<VendaProps> {
         animalId: data.animalId,
         data: data.data ?? new Date(),
         formaPag: data.formaPag as FormaPag,
+        taxaCartao: data.taxaCartao ?? 0,
         total: Money.create(totalValue),
         obs: data.obs,
         itens,
@@ -84,6 +87,7 @@ export class Venda extends AggregateRoot<VendaProps> {
   get animalId(): string | undefined { return this.props.animalId }
   get data(): Date { return this.props.data }
   get formaPag(): string { return this.props.formaPag }
+  get taxaCartao(): number { return this.props.taxaCartao }
   get total(): number { return this.props.total.value }
   get obs(): string | undefined { return this.props.obs }
   get itens(): VendaItemReadOnly[] { return this.props.itens }

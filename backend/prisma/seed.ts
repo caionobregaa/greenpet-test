@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import { seedProdutos } from './seed-produtos'
 
 const prisma = new PrismaClient()
 
@@ -17,8 +18,9 @@ async function main(): Promise<void> {
       papel: 'admin',
     },
   })
-
   console.log('✅ Usuário admin criado: admin@greenpet.com / admin123')
+
+  await seedProdutos(prisma)
   console.log('✅ Seed concluído.')
 }
 

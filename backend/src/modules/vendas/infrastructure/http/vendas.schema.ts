@@ -12,6 +12,7 @@ export const CreateVendaSchema = z.object({
   animalId: z.string().uuid().optional(),
   data: z.string().date().optional().transform((v) => v ? new Date(v) : undefined),
   formaPag: z.enum(['Pix', 'Dinheiro', 'Cartão Crédito', 'Cartão Débito', 'Boleto']),
+  taxaCartao: z.number().min(0).max(100).optional().default(0),
   obs: z.string().optional(),
   itens: z.array(VendaItemSchema).min(1),
 })

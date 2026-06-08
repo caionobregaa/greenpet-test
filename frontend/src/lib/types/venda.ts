@@ -17,6 +17,7 @@ export interface Venda {
   animalId: string | null;
   animal?: { nome: string } | null;
   formaPag: FormaPag;
+  taxaCartao: number;
   total: number;
   obs: string | null;
   createdAt: string;

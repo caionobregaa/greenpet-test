@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Plus, Eye, Trash2, Pencil } from "lucide-react";
+import { Plus, Eye, Trash2, Pencil, CreditCard, Banknote, QrCode, Wallet, Loader2 } from "lucide-react";
 import { useOrcamentos, useDeleteOrcamento, useCreateOrcamento, useUpdateOrcamento } from "@/lib/hooks/use-orcamentos";
 import { useClientes } from "@/lib/hooks/use-clientes";
 import { useAnimais } from "@/lib/hooks/use-animais";
@@ -27,8 +27,45 @@ import {
 } from "@/lib/schemas/orcamento.schema";
 import { ItensTable } from "@/components/vendas/itens-table";
 import { formatDate, formatBRL, todayISO, todayPlusDaysISO } from "@/lib/utils/format";
-import { Loader2 } from "lucide-react";
 import type { Orcamento } from "@/lib/types/orcamento";
+
+// ── Payment method toggle ────────────────────────────────────────────────────
+
+const FORMAS_ICONS = [
+  { key: "Cartão Crédito", label: "Crédito",  Icon: CreditCard },
+  { key: "Cartão Débito",  label: "Débito",   Icon: Wallet },
+  { key: "PIX",            label: "PIX",      Icon: QrCode },
+  { key: "Dinheiro",       label: "Dinheiro", Icon: Banknote },
+];
+
+function FormasPagSelector({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
+  function toggle(key: string) {
+    onChange(value.includes(key) ? value.filter((k) => k !== key) : [...value, key]);
+  }
+  return (
+    <div className="flex gap-2 flex-wrap">
+      {FORMAS_ICONS.map(({ key, label, Icon }) => {
+        const active = value.includes(key);
+        return (
+          <button
+            key={key}
+            type="button"
+            onClick={() => toggle(key)}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-all",
+              active
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-background border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+            )}
+          >
+            <Icon className="w-3.5 h-3.5" />
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 // ── Dialog: Novo Orçamento ───────────────────────────────────────────────────
 
@@ -38,10 +75,12 @@ function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   const { data: clientesData } = useClientes({ limit: 100 });
   const { data: animaisData } = useAnimais({ clienteId: clienteId || undefined, limit: 50 });
 
-  const { register, handleSubmit, control, setValue, formState: { errors }, reset } = useForm<CreateOrcamentoInput>({
+  const { register, handleSubmit, control, setValue, watch: watchNovo, formState: { errors }, reset } = useForm<CreateOrcamentoInput>({
     resolver: zodResolver(CreateOrcamentoSchema),
-    defaultValues: { data: todayISO(), validade: todayPlusDaysISO(7), itens: [] },
+    defaultValues: { data: todayISO(), validade: todayPlusDaysISO(7), itens: [], formasPag: [] },
   });
+
+  const formasPagWatch = watchNovo("formasPag") ?? [];
 
   async function onSubmit(data: CreateOrcamentoInput) {
     try {
@@ -120,6 +159,10 @@ function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChan
             <div className="space-y-1.5 col-span-2">
               <Label>Observações</Label>
               <Textarea {...register("obs")} rows={2} placeholder="Observações opcionais..." />
+            </div>
+            <div className="space-y-2 col-span-2">
+              <Label>Formas de pagamento aceitas <span className="text-muted-foreground font-normal text-xs">(opcional — aparece no PDF)</span></Label>
+              <FormasPagSelector value={formasPagWatch} onChange={(v) => setValue("formasPag", v)} />
             </div>
           </div>
           <ItensTable
@@ -255,6 +298,7 @@ export default function OrcamentosPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-muted/50">
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Nº</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Data</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Cliente</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden md:table-cell">Validade</th>
@@ -266,12 +310,13 @@ export default function OrcamentosPage() {
             <tbody>
               {isLoading ? Array.from({ length: 5 }).map((_, i) => (
                 <tr key={i} className="border-t border-border">
-                  {Array.from({ length: 6 }).map((_, j) => <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-full" /></td>)}
+                  {Array.from({ length: 7 }).map((_, j) => <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-full" /></td>)}
                 </tr>
               )) : data?.data.length === 0 ? (
-                <tr><td colSpan={6}><EmptyState message="Nenhum orçamento encontrado" /></td></tr>
+                <tr><td colSpan={7}><EmptyState message="Nenhum orçamento encontrado" /></td></tr>
               ) : data?.data.map((o) => (
                 <tr key={o.id} className="border-t border-border hover:bg-accent/30 transition-colors">
+                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{o.numero ? String(o.numero).padStart(3, "0") : "—"}</td>
                   <td className="px-4 py-3">{formatDate(o.data)}</td>
                   <td className="px-4 py-3 font-medium">{o.cliente?.nome ?? <span className="text-muted-foreground">—</span>}</td>
                   <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{formatDate(o.validade)}</td>

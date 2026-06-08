@@ -11,6 +11,7 @@ export interface OrcamentoItem {
 
 export interface Orcamento {
   id: string;
+  numero: number;
   data: string;
   validade: string;
   clienteId?: string | null;
@@ -21,6 +22,7 @@ export interface Orcamento {
   total: number;
   obs: string | null;
   vendaId: string | null;
+  formasPag: string[];
   createdAt: string;
   updatedAt: string;
   itens: OrcamentoItem[];

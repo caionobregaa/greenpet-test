@@ -91,9 +91,25 @@ export default function VendaDetailPage({ params }: Props) {
           </tbody>
           <tfoot>
             <tr className="border-t-2 border-border bg-accent/30">
-              <td colSpan={3} className="px-4 py-3 text-right font-semibold text-sm">Total Geral</td>
+              <td colSpan={3} className="px-4 py-3 text-right font-semibold text-sm">Total Bruto</td>
               <td className="px-4 py-3 text-right font-bold text-primary font-mono text-lg">{formatBRL(venda.total)}</td>
             </tr>
+            {venda.taxaCartao > 0 && (
+              <>
+                <tr className="border-t border-border/60">
+                  <td colSpan={3} className="px-4 py-2 text-right text-xs text-destructive">
+                    Taxa {venda.formaPag} ({venda.taxaCartao}%)
+                  </td>
+                  <td className="px-4 py-2 text-right text-xs text-destructive font-mono">
+                    − {formatBRL(venda.total * venda.taxaCartao / 100)}
+                  </td>
+                </tr>
+                <tr className="border-t border-border bg-primary/5">
+                  <td colSpan={3} className="px-4 py-2.5 text-right font-semibold text-sm">Líquido estimado</td>
+                  <td className="px-4 py-2.5 text-right font-bold text-primary font-mono">{formatBRL(venda.total * (1 - venda.taxaCartao / 100))}</td>
+                </tr>
+              </>
+            )}
           </tfoot>
         </table>
       </div>

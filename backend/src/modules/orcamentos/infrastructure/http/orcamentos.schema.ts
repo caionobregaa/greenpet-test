@@ -19,6 +19,7 @@ export const CreateOrcamentoSchema = z.object({
   data: z.string().date().optional().transform((v) => v ? new Date(v) : undefined),
   validade: z.string().date().transform((v) => new Date(v)),
   obs: z.string().optional(),
+  formasPag: z.array(z.string()).optional().default([]),
   itens: z.array(OrcamentoItemSchema).min(1),
 })
 
@@ -28,6 +29,7 @@ export const UpdateOrcamentoStatusSchema = z.object({
 
 export const ConverterOrcamentoSchema = z.object({
   formaPag: z.enum(['Pix', 'Dinheiro', 'Cartão Crédito', 'Cartão Débito', 'Boleto']),
+  taxaCartao: z.number().min(0).max(100).optional().default(0),
 })
 
 export const ListOrcamentosQuerySchema = z.object({

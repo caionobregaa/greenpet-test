@@ -28,6 +28,7 @@ export const apiOrcamentos = {
       animalId: input.animalId || undefined,
       obs: input.obs || undefined,
       data: input.data || undefined,
+      formasPag: input.formasPag ?? [],
     };
     const { data } = await api.post<ApiResponse<Orcamento>>("/orcamentos", payload);
     return data.data;

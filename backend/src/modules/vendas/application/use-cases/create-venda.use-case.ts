@@ -8,6 +8,7 @@ export interface CreateVendaInput {
   animalId?: string
   data?: Date
   formaPag: string
+  taxaCartao?: number
   obs?: string
   itens: VendaItemData[]
 }

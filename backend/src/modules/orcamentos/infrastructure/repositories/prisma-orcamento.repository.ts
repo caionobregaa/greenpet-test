@@ -6,7 +6,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async findById(id: string): Promise<Orcamento | null> {
-    const row = await this.prisma.orcamento.findUnique({ where: { id }, include: { itens: true } })
+    const row = await this.prisma.orcamento.findUnique({ where: { id }, include: { itens: true, } })
     return row ? this.toDomain(row) : null
   }
 
@@ -39,10 +39,11 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
           obs: orcamento.obs ?? null,
           vendaId: orcamento.vendaId ?? null,
           total: orcamento.total,
+          formasPag: orcamento.formasPag,
         },
       })
     } else {
-      await this.prisma.orcamento.create({
+      const created = await this.prisma.orcamento.create({
         data: {
           id: orcamento.id,
           clienteId: orcamento.clienteId ?? null,
@@ -53,6 +54,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
           total: orcamento.total,
           obs: orcamento.obs ?? null,
           vendaId: orcamento.vendaId ?? null,
+          formasPag: orcamento.formasPag,
           itens: {
             create: orcamento.itens.map((i) => ({
               id: i.id,
@@ -64,7 +66,9 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
             })),
           },
         },
+        select: { numero: true },
       })
+      orcamento.applyNumero(created.numero)
     }
   }
 
@@ -74,6 +78,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
 
   private toDomain(row: {
     id: string
+    numero: number
     clienteId: string | null
     animalId: string | null
     data: Date
@@ -82,6 +87,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
     total: unknown
     obs: string | null
     vendaId: string | null
+    formasPag: string[]
     itens: Array<{
       id: string
       produtoId: string | null
@@ -91,7 +97,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
       total: unknown
     }>
   }): Orcamento {
-    return Orcamento.create({
+    const entity = Orcamento.create({
       id: row.id,
       clienteId: row.clienteId ?? undefined,
       animalId: row.animalId ?? undefined,
@@ -100,6 +106,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
       status: row.status as OrcamentoStatus,
       obs: row.obs ?? undefined,
       vendaId: row.vendaId ?? undefined,
+      formasPag: row.formasPag ?? [],
       itens: row.itens.map((i) => ({
         id: i.id,
         produtoId: i.produtoId ?? undefined,
@@ -108,5 +115,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
         valorUnitario: Number(i.valorUnitario),
       })),
     })
+    entity.applyNumero(row.numero)
+    return entity
   }
 }

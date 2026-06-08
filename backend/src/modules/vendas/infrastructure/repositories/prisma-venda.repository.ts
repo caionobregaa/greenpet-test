@@ -37,6 +37,7 @@ export class PrismaVendaRepository implements IVendaRepository {
         clienteId: venda.clienteId,
         animalId: venda.animalId ?? null,
         formaPag: venda.formaPag,
+        taxaCartao: venda.taxaCartao,
         total: venda.total,
         obs: venda.obs ?? null,
         itens: {
@@ -64,6 +65,7 @@ export class PrismaVendaRepository implements IVendaRepository {
     clienteId: string
     animalId: string | null
     formaPag: string
+    taxaCartao: number
     total: unknown
     obs: string | null
     createdAt: Date
@@ -82,6 +84,7 @@ export class PrismaVendaRepository implements IVendaRepository {
       animalId: row.animalId ?? undefined,
       data: row.data,
       formaPag: row.formaPag,
+      taxaCartao: row.taxaCartao ?? 0,
       obs: row.obs ?? undefined,
       itens: row.itens.map((i) => ({
         id: i.id,

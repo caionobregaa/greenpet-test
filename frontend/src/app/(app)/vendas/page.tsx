@@ -75,7 +75,14 @@ export default function VendasPage() {
                     <td className="px-4 py-3 font-medium">{v.cliente?.nome ?? "—"}</td>
                     <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{v.animal?.nome ?? "—"}</td>
                     <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{v.formaPag}</td>
-                    <td className="px-4 py-3 text-right font-bold text-primary font-mono">{formatBRL(v.total)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <span className="font-bold text-primary font-mono block">{formatBRL(v.total)}</span>
+                      {v.taxaCartao > 0 && (
+                        <span className="text-[10px] text-muted-foreground font-mono block">
+                          liq. {formatBRL(v.total * (1 - v.taxaCartao / 100))}
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
                         <Link href={`/vendas/${v.id}`} className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-8 w-8 p-0")}>

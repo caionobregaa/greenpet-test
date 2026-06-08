@@ -30,10 +30,16 @@ interface OrcamentoProps {
   total: Money
   obs?: string
   vendaId?: string
+  formasPag: string[]
   itens: OrcamentoItemReadOnly[]
 }
 
 export class Orcamento extends AggregateRoot<OrcamentoProps> {
+  private _numero: number = 0
+
+  applyNumero(n: number): void { this._numero = n }
+  get numero(): number { return this._numero }
+
   static create(data: {
     id?: string
     clienteId?: string
@@ -43,6 +49,7 @@ export class Orcamento extends AggregateRoot<OrcamentoProps> {
     status?: OrcamentoStatus
     obs?: string
     vendaId?: string
+    formasPag?: string[]
     itens: OrcamentoItemData[]
   }): Orcamento {
     const itens: OrcamentoItemReadOnly[] = data.itens.map((item) => ({
@@ -66,6 +73,7 @@ export class Orcamento extends AggregateRoot<OrcamentoProps> {
         total: Money.create(totalValue),
         obs: data.obs,
         vendaId: data.vendaId,
+        formasPag: data.formasPag ?? [],
         itens,
       },
       data.id,
@@ -80,6 +88,7 @@ export class Orcamento extends AggregateRoot<OrcamentoProps> {
   get total(): number { return this.props.total.value }
   get obs(): string | undefined { return this.props.obs }
   get vendaId(): string | undefined { return this.props.vendaId }
+  get formasPag(): string[] { return this.props.formasPag }
   get itens(): OrcamentoItemReadOnly[] { return this.props.itens }
 
   get vencido(): boolean {

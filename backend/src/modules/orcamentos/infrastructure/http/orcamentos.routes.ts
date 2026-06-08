@@ -23,6 +23,7 @@ import type { Orcamento } from '../../domain/entities/orcamento.entity.js'
 function toResponse(o: Orcamento, extra?: { clienteNome?: string | null; animalNome?: string | null }) {
   return {
     id: o.id,
+    numero: o.numero,
     clienteId: o.clienteId,
     animalId: o.animalId,
     data: o.data,
@@ -32,6 +33,7 @@ function toResponse(o: Orcamento, extra?: { clienteNome?: string | null; animalN
     total: o.total,
     obs: o.obs,
     vendaId: o.vendaId,
+    formasPag: o.formasPag,
     itens: o.itens,
     cliente: extra?.clienteNome ? { nome: extra.clienteNome } : undefined,
     animal: extra?.animalNome ? { nome: extra.animalNome } : undefined,
@@ -108,7 +110,7 @@ export function registerOrcamentosRoutes(app: FastifyInstance, prisma: PrismaCli
     const { id } = req.params as { id: string }
     const body = ConverterOrcamentoSchema.safeParse(req.body)
     if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
-    const venda = await converterUC.execute({ id, formaPag: body.data.formaPag })
+    const venda = await converterUC.execute({ id, formaPag: body.data.formaPag, taxaCartao: body.data.taxaCartao })
     rep.status(201).send({ data: { vendaId: venda.id } })
   })
 

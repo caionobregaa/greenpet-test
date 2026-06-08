@@ -20,6 +20,7 @@ export const CreateOrcamentoSchema = z.object({
   data: z.string().date().optional(),
   validade: z.string().date({ message: "Data de validade é obrigatória" }),
   obs: z.string().optional().or(z.literal("")),
+  formasPag: z.array(z.string()).optional().default([]),
   itens: z.array(OrcamentoItemSchema).min(1, "Adicione pelo menos um item"),
 });
 
@@ -29,6 +30,7 @@ export const UpdateOrcamentoStatusSchema = z.object({
 
 export const ConverterOrcamentoSchema = z.object({
   formaPag: z.enum(["Pix", "Dinheiro", "Cartão Crédito", "Cartão Débito", "Boleto"]),
+  taxaCartao: z.number().min(0).max(100).optional().default(0),
 });
 
 export type OrcamentoItemInput = z.infer<typeof OrcamentoItemSchema>;
