@@ -20,7 +20,7 @@ export const CreateOrcamentoSchema = z.object({
   data: z.string().date().optional(),
   validade: z.string().date({ message: "Data de validade é obrigatória" }),
   obs: z.string().optional().or(z.literal("")),
-  formasPag: z.array(z.string()).optional().default([]),
+  formasPag: z.array(z.string()).default([]),
   itens: z.array(OrcamentoItemSchema).min(1, "Adicione pelo menos um item"),
 });
 
