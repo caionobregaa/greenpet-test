@@ -97,6 +97,7 @@ export default function CompraDetailPage({ params }: Props) {
         {[
           ["Categoria", compra.categoria ?? "—"],
           ["Fornecedor / Fonte", compra.fornecedor],
+          ["Forma de Pagamento", compra.formaPag ?? "—"],
           ["Data", formatDate(compra.dataPedido)],
           ["Recebimento", formatDate(compra.dataRecebimento)],
         ].map(([label, value]) => (
@@ -132,6 +133,7 @@ export default function CompraDetailPage({ params }: Props) {
               <tr className="bg-muted/50">
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Produto</th>
                 <th className="text-center px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Qtd</th>
+                <th className="text-center px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden sm:table-cell">Peso (kg)</th>
                 <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Custo Unit.</th>
                 <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Total</th>
               </tr>
@@ -141,6 +143,9 @@ export default function CompraDetailPage({ params }: Props) {
                 <tr key={item.id} className="border-t border-border">
                   <td className="px-4 py-3">{item.nome}</td>
                   <td className="px-4 py-3 text-center text-muted-foreground">{item.qtd}</td>
+                  <td className="px-4 py-3 text-center text-muted-foreground hidden sm:table-cell">
+                    {item.pesoKg != null ? `${item.pesoKg} kg` : "—"}
+                  </td>
                   <td className="px-4 py-3 text-right font-mono text-muted-foreground">{formatBRL(item.valorUnitario)}</td>
                   <td className="px-4 py-3 text-right font-mono font-semibold">{formatBRL(item.total)}</td>
                 </tr>
@@ -148,7 +153,7 @@ export default function CompraDetailPage({ params }: Props) {
             </tbody>
             <tfoot>
               <tr className="border-t-2 border-border bg-accent/30">
-                <td colSpan={3} className="px-4 py-3 text-right font-semibold text-sm">Total</td>
+                <td colSpan={4} className="px-4 py-3 text-right font-semibold text-sm">Total</td>
                 <td className="px-4 py-3 text-right font-bold text-primary font-mono text-lg">{formatBRL(compra.total)}</td>
               </tr>
             </tfoot>

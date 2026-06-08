@@ -18,10 +18,11 @@ function toResponse(c) {
         dataRecebimento: c.dataRecebimento,
         categoria: c.categoria,
         descricaoSimples: c.descricaoSimples,
+        formaPag: c.formaPag ?? null,
         status: c.status,
         total: c.total,
         obs: c.obs,
-        itens: c.itens,
+        itens: c.itens.map((i) => ({ ...i, pesoKg: i.pesoKg ?? null })),
         createdAt: c.createdAt,
         updatedAt: c.updatedAt,
     };
@@ -62,10 +63,27 @@ function registerComprasRoutes(app, prisma) {
         if (!body.success)
             throw new validation_error_js_1.ValidationError('VALIDATION_ERROR', body.error.errors[0].message);
         const compra = await createUC.execute(body.data);
-        if (compra.categoria === 'Produtos Pets') {
-            await autoImportarEstoque(prisma, compra);
-        }
         rep.status(201).send({ data: toResponse(compra) });
+    });
+    app.post('/api/v1/compras/:id/importar-estoque', async (req, rep) => {
+        const { id } = req.params;
+        const compra = await getUC.execute({ id });
+        const itens = compra.itens.filter((i) => i.produtoId);
+        if (itens.length === 0) {
+            rep.send({ data: { importados: 0 } });
+            return;
+        }
+        await Promise.all(itens.map((i) => prisma.estoqueItem.create({
+            data: {
+                id: crypto.randomUUID(),
+                produtoId: i.produtoId,
+                quantidade: i.qtd,
+                validade: null,
+                lote: null,
+                obs: `Importado da despesa`,
+            },
+        })));
+        rep.send({ data: { importados: itens.length } });
     });
     app.get('/api/v1/compras/:id', async (req, rep) => {
         const { id } = req.params;

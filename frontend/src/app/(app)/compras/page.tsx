@@ -3,8 +3,9 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Plus, Eye, Trash2, Settings2, X, Tag } from "lucide-react";
-import { useCompras, useDeleteCompra, useCreateCompra } from "@/lib/hooks/use-compras";
+import { Plus, Eye, Trash2, Settings2, X, Tag, PackagePlus, PackageX } from "lucide-react";
+import { useCompras, useDeleteCompra, useCreateCompra, useImportarEstoque } from "@/lib/hooks/use-compras";
+import type { Compra } from "@/lib/types/compra";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateCompraSchema, type CreateCompraInput } from "@/lib/schemas/compra.schema";
+import { CreateCompraSchema, FORMAS_PAG, type CreateCompraInput } from "@/lib/schemas/compra.schema";
 import { ItensTable } from "@/components/vendas/itens-table";
 import { formatDate, formatBRL, todayISO } from "@/lib/utils/format";
 import { Loader2 } from "lucide-react";
@@ -130,10 +131,12 @@ function NovaDespesaDialog({
   open,
   onOpenChange,
   categorias,
+  onCreated,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   categorias: string[];
+  onCreated?: (compra: Compra) => void;
 }) {
   const create = useCreateCompra();
   const [categoria, setCategoria] = useState("Produtos Pets");
@@ -147,6 +150,7 @@ function NovaDespesaDialog({
       dataPedido: todayISO(),
       categoria: "Produtos Pets",
       descricaoSimples: "",
+      formaPag: undefined,
       totalManual: undefined,
       itens: [],
     },
@@ -173,16 +177,16 @@ function NovaDespesaDialog({
         descricaoSimples: data.descricaoSimples || undefined,
         categoria,
       };
-      await create.mutateAsync(payload);
-      toast.success("Despesa registrada com sucesso!");
-      reset({ fornecedor: "", dataPedido: todayISO(), categoria: "Produtos Pets", itens: [] });
+      const compra = await create.mutateAsync(payload);
+      reset({ fornecedor: "", dataPedido: todayISO(), categoria: "Produtos Pets", formaPag: undefined, itens: [] });
       setCategoria("Produtos Pets");
       onOpenChange(false);
+      onCreated?.(compra);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
       toast.error("Erro ao registrar despesa", { description: msg });
     }
-  }, [create, reset, onOpenChange, isProdutos, categoria]);
+  }, [create, reset, onOpenChange, isProdutos, categoria, onCreated]);
 
   function handleCategoriaChange(val: string | null) {
     if (!val) return;
@@ -199,7 +203,7 @@ function NovaDespesaDialog({
           <DialogTitle>Nova Despesa</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Categoria */}
+          {/* Categoria + Data + Forma de Pagamento */}
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-1.5">
               <Label>Categoria *</Label>
@@ -220,6 +224,21 @@ function NovaDespesaDialog({
             </div>
           </div>
 
+          {/* Forma de pagamento */}
+          <div className="space-y-1.5">
+            <Label>Forma de Pagamento</Label>
+            <Select onValueChange={(v) => setValue("formaPag", v as typeof FORMAS_PAG[number])}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione..." />
+              </SelectTrigger>
+              <SelectContent>
+                {FORMAS_PAG.map((f) => (
+                  <SelectItem key={f} value={f}>{f}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Campos específicos por categoria */}
           {isProdutos ? (
             <>
@@ -236,6 +255,7 @@ function NovaDespesaDialog({
                 control={control as unknown as Parameters<typeof ItensTable>[0]["control"]}
                 setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
                 errors={errors.itens as Parameters<typeof ItensTable>[0]["errors"]}
+                showPesoKg
               />
               {(errors.itens as { message?: string } | undefined)?.message && (
                 <p className="text-xs text-destructive">{(errors.itens as { message?: string }).message}</p>
@@ -293,6 +313,87 @@ function NovaDespesaDialog({
   );
 }
 
+// ── Dialog: Importar para o Estoque ───────────────────────────────────────────
+
+function ImportarEstoqueDialog({
+  compra,
+  onClose,
+}: {
+  compra: Compra | null;
+  onClose: () => void;
+}) {
+  const importar = useImportarEstoque();
+  const itensComProduto = compra?.itens.filter((i) => i.produtoId) ?? [];
+  const open = !!compra;
+
+  async function handleImportar() {
+    if (!compra) return;
+    try {
+      const result = await importar.mutateAsync(compra.id);
+      toast.success(`${result.importados} ${result.importados === 1 ? "item importado" : "itens importados"} para o estoque!`);
+    } catch {
+      toast.error("Erro ao importar para o estoque.");
+    } finally {
+      onClose();
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <PackagePlus className="w-5 h-5 text-primary" />
+            Importar para o Estoque?
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Deseja lançar automaticamente os produtos desta despesa no estoque físico da loja?
+          </p>
+
+          {itensComProduto.length > 0 ? (
+            <div className="rounded-md border border-border/60 overflow-hidden">
+              <div className="bg-muted/40 px-3 py-2 border-b border-border/60">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  {itensComProduto.length} {itensComProduto.length === 1 ? "produto" : "produtos"} serão adicionados ao estoque
+                </p>
+              </div>
+              <ul className="divide-y divide-border/40">
+                {itensComProduto.map((item) => (
+                  <li key={item.id} className="flex items-center justify-between px-3 py-2.5 text-sm">
+                    <span className="font-medium">{item.nome}</span>
+                    <span className="text-muted-foreground tabular-nums">
+                      +{item.qtd} {item.qtd === 1 ? "unidade" : "unidades"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div className="rounded-md bg-muted/30 border border-border/50 px-4 py-3 text-sm text-muted-foreground">
+              Nenhum item desta despesa está vinculado a um produto do catálogo. Nada será importado.
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={onClose} className="gap-1.5">
+              <PackageX className="w-4 h-4" />
+              Não, obrigado
+            </Button>
+            <Button onClick={handleImportar} disabled={importar.isPending || itensComProduto.length === 0} className="gap-1.5">
+              {importar.isPending
+                ? <><Loader2 className="w-4 h-4 animate-spin" />Importando...</>
+                : <><PackagePlus className="w-4 h-4" />Sim, importar para o estoque</>
+              }
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ── Página principal ──────────────────────────────────────────────────────────
 
 export default function DespesasPage() {
@@ -300,10 +401,18 @@ export default function DespesasPage() {
   const [newOpen, setNewOpen] = useState(false);
   const [gerenciarOpen, setGerenciarOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [importarCompra, setImportarCompra] = useState<Compra | null>(null);
   const [categorias, setCategorias] = useState<string[]>(loadCategorias);
 
   const { data, isLoading } = useCompras({ page, limit: 20 });
   const deleteCompra = useDeleteCompra();
+
+  function handleCreated(compra: Compra) {
+    toast.success("Despesa registrada com sucesso!");
+    if (compra.categoria === "Produtos Pets" && compra.itens.some((i) => i.produtoId)) {
+      setImportarCompra(compra);
+    }
+  }
 
   async function handleDelete() {
     if (!deleteId) return;
@@ -383,7 +492,8 @@ export default function DespesasPage() {
         {data?.meta && <div className="px-4 pb-4"><PaginationBar meta={data.meta} onPageChange={setPage} /></div>}
       </div>
 
-      <NovaDespesaDialog open={newOpen} onOpenChange={setNewOpen} categorias={categorias} />
+      <NovaDespesaDialog open={newOpen} onOpenChange={setNewOpen} categorias={categorias} onCreated={handleCreated} />
+      <ImportarEstoqueDialog compra={importarCompra} onClose={() => setImportarCompra(null)} />
       <GerenciarCategoriasDialog
         open={gerenciarOpen}
         onOpenChange={setGerenciarOpen}

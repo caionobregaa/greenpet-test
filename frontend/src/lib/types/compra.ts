@@ -6,6 +6,7 @@ export interface CompraItem {
   produtoId: string | null;
   nome: string;
   qtd: number;
+  pesoKg: number | null;
   valorUnitario: number;
   total: number;
 }
@@ -17,6 +18,7 @@ export interface Compra {
   fornecedor: string;
   categoria: string;
   descricaoSimples: string | null;
+  formaPag: string | null;
   status: CompraStatus;
   total: number;
   obs: string | null;

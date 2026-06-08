@@ -47,4 +47,9 @@ export const apiCompras = {
   delete: async (id: string): Promise<void> => {
     await api.delete(`/compras/${id}`);
   },
+
+  importarEstoque: async (id: string): Promise<{ importados: number }> => {
+    const { data } = await api.post<{ data: { importados: number } }>(`/compras/${id}/importar-estoque`);
+    return data.data;
+  },
 };

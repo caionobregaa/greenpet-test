@@ -58,3 +58,11 @@ export function useDeleteCompra() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["compras"] }),
   });
 }
+
+export function useImportarEstoque() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiCompras.importarEstoque(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["estoque"] }),
+  });
+}

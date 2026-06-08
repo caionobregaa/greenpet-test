@@ -111,7 +111,12 @@
       "Bash(Get-ChildItem \"C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\\\\prisma\\\\migrations\")",
       "Bash(dir dist *)",
       "Bash(xargs grep -l \"imagemUrl\\\\|imagem\\\\|upload\\\\|image\")",
-      "Bash(Start-Process \"C:\\\\Program Files\\\\Docker\\\\Docker\\\\Docker Desktop.exe\")"
+      "Bash(Start-Process \"C:\\\\Program Files\\\\Docker\\\\Docker\\\\Docker Desktop.exe\")",
+      "Bash(Start-Sleep -Seconds 3)",
+      "Bash(curl -s -X POST http://localhost:3000/api/v1/compras -H \"Content-Type: application/json\" -d \"{\\\\\"fornecedor\\\\\":\\\\\"Teste Fornecedor\\\\\",\\\\\"categoria\\\\\":\\\\\"Produtos Pets\\\\\",\\\\\"formaPag\\\\\":\\\\\"Pix\\\\\",\\\\\"itens\\\\\":[{\\\\\"nome\\\\\":\\\\\"Ração Golden\\\\\",\\\\\"qtd\\\\\":2,\\\\\"pesoKg\\\\\":15.5,\\\\\"valorUnitario\\\\\":89.90}]}\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/v1/auth/login -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"admin@greenpet.com\\\\\",\\\\\"senha\\\\\":\\\\\"admin123\\\\\"}\")",
+      "Bash(cd /c/Users/Administrator/Documents/GitHub/greenpet-test/frontend && grep -r \"jsPDF\\\\|pdfmake\\\\|html2canvas\\\\|@react-pdf\\\\|window.print\" --include=\"*.ts\" --include=\"*.tsx\" src/ 2>/dev/null | head -50)",
+      "Read(//c/c/Users/Administrator/Documents/GitHub/greenpet-test/frontend/**)"
     ]
   }
 }

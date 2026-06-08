@@ -9,6 +9,7 @@ export interface CompraItemData {
   produtoId?: string
   nome: string
   qtd: number
+  pesoKg?: number
   valorUnitario: number
 }
 
@@ -17,6 +18,7 @@ export interface CompraItemReadOnly {
   produtoId?: string
   nome: string
   qtd: number
+  pesoKg?: number
   valorUnitario: number
   total: number
 }
@@ -27,6 +29,7 @@ interface CompraProps {
   dataRecebimento?: Date
   categoria: string
   descricaoSimples?: string
+  formaPag?: string
   status: CompraStatus
   total: Money
   obs?: string
@@ -41,6 +44,7 @@ export class Compra extends AggregateRoot<CompraProps> {
     dataRecebimento?: Date
     categoria?: string
     descricaoSimples?: string
+    formaPag?: string
     status?: CompraStatus
     obs?: string
     itens: CompraItemData[]
@@ -51,6 +55,7 @@ export class Compra extends AggregateRoot<CompraProps> {
       produtoId: item.produtoId,
       nome: item.nome,
       qtd: item.qtd,
+      pesoKg: item.pesoKg,
       valorUnitario: item.valorUnitario,
       total: Money.create(item.valorUnitario).multiply(item.qtd).value,
     }))
@@ -66,6 +71,7 @@ export class Compra extends AggregateRoot<CompraProps> {
         dataRecebimento: data.dataRecebimento,
         categoria: data.categoria ?? 'Produtos Pets',
         descricaoSimples: data.descricaoSimples,
+        formaPag: data.formaPag,
         status: data.status ?? 'pendente',
         total: Money.create(totalValue),
         obs: data.obs,
@@ -80,6 +86,7 @@ export class Compra extends AggregateRoot<CompraProps> {
   get dataRecebimento(): Date | undefined { return this.props.dataRecebimento }
   get categoria(): string { return this.props.categoria }
   get descricaoSimples(): string | undefined { return this.props.descricaoSimples }
+  get formaPag(): string | undefined { return this.props.formaPag }
   get status(): CompraStatus { return this.props.status }
   get total(): number { return this.props.total.value }
   get obs(): string | undefined { return this.props.obs }
@@ -116,13 +123,14 @@ export class Compra extends AggregateRoot<CompraProps> {
     this.updatedAt = new Date()
   }
 
-  update(fields: { fornecedor?: string; obs?: string; dataPedido?: Date; categoria?: string; descricaoSimples?: string; totalManual?: number; itens?: CompraItemData[] }): void {
+  update(fields: { fornecedor?: string; obs?: string; dataPedido?: Date; categoria?: string; descricaoSimples?: string; formaPag?: string; totalManual?: number; itens?: CompraItemData[] }): void {
     this.assertEditavel()
     if (fields.fornecedor !== undefined) this.props.fornecedor = fields.fornecedor
     if (fields.obs !== undefined) this.props.obs = fields.obs
     if (fields.dataPedido !== undefined) this.props.dataPedido = fields.dataPedido
     if (fields.categoria !== undefined) this.props.categoria = fields.categoria
     if (fields.descricaoSimples !== undefined) this.props.descricaoSimples = fields.descricaoSimples
+    if (fields.formaPag !== undefined) this.props.formaPag = fields.formaPag
     if (fields.totalManual !== undefined && (fields.itens === undefined || fields.itens.length === 0)) {
       this.props.total = Money.create(fields.totalManual)
     }
@@ -132,6 +140,7 @@ export class Compra extends AggregateRoot<CompraProps> {
         produtoId: item.produtoId,
         nome: item.nome,
         qtd: item.qtd,
+        pesoKg: item.pesoKg,
         valorUnitario: item.valorUnitario,
         total: Money.create(item.valorUnitario).multiply(item.qtd).value,
       }))

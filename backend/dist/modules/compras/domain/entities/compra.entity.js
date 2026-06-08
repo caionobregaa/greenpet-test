@@ -11,6 +11,7 @@ class Compra extends aggregate_root_base_js_1.AggregateRoot {
             produtoId: item.produtoId,
             nome: item.nome,
             qtd: item.qtd,
+            pesoKg: item.pesoKg,
             valorUnitario: item.valorUnitario,
             total: money_vo_js_1.Money.create(item.valorUnitario).multiply(item.qtd).value,
         }));
@@ -23,6 +24,7 @@ class Compra extends aggregate_root_base_js_1.AggregateRoot {
             dataRecebimento: data.dataRecebimento,
             categoria: data.categoria ?? 'Produtos Pets',
             descricaoSimples: data.descricaoSimples,
+            formaPag: data.formaPag,
             status: data.status ?? 'pendente',
             total: money_vo_js_1.Money.create(totalValue),
             obs: data.obs,
@@ -34,6 +36,7 @@ class Compra extends aggregate_root_base_js_1.AggregateRoot {
     get dataRecebimento() { return this.props.dataRecebimento; }
     get categoria() { return this.props.categoria; }
     get descricaoSimples() { return this.props.descricaoSimples; }
+    get formaPag() { return this.props.formaPag; }
     get status() { return this.props.status; }
     get total() { return this.props.total.value; }
     get obs() { return this.props.obs; }
@@ -77,6 +80,8 @@ class Compra extends aggregate_root_base_js_1.AggregateRoot {
             this.props.categoria = fields.categoria;
         if (fields.descricaoSimples !== undefined)
             this.props.descricaoSimples = fields.descricaoSimples;
+        if (fields.formaPag !== undefined)
+            this.props.formaPag = fields.formaPag;
         if (fields.totalManual !== undefined && (fields.itens === undefined || fields.itens.length === 0)) {
             this.props.total = money_vo_js_1.Money.create(fields.totalManual);
         }
@@ -86,6 +91,7 @@ class Compra extends aggregate_root_base_js_1.AggregateRoot {
                 produtoId: item.produtoId,
                 nome: item.nome,
                 qtd: item.qtd,
+                pesoKg: item.pesoKg,
                 valorUnitario: item.valorUnitario,
                 total: money_vo_js_1.Money.create(item.valorUnitario).multiply(item.qtd).value,
             }));

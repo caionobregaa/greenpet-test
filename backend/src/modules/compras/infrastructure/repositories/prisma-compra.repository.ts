@@ -38,6 +38,7 @@ export class PrismaCompraRepository implements ICompraRepository {
           fornecedor: compra.fornecedor,
           categoria: compra.categoria,
           descricaoSimples: compra.descricaoSimples ?? null,
+          formaPag: compra.formaPag ?? null,
           status: compra.status,
           obs: compra.obs ?? null,
           total: compra.total,
@@ -54,6 +55,7 @@ export class PrismaCompraRepository implements ICompraRepository {
           dataRecebimento: compra.dataRecebimento ?? null,
           categoria: compra.categoria,
           descricaoSimples: compra.descricaoSimples ?? null,
+          formaPag: compra.formaPag ?? null,
           status: compra.status,
           total: compra.total,
           obs: compra.obs ?? null,
@@ -63,6 +65,7 @@ export class PrismaCompraRepository implements ICompraRepository {
               produtoId: i.produtoId ?? null,
               nome: i.nome,
               qtd: i.qtd,
+              pesoKg: i.pesoKg ?? null,
               valorUnitario: i.valorUnitario,
               total: i.total,
             })),
@@ -83,6 +86,7 @@ export class PrismaCompraRepository implements ICompraRepository {
     dataRecebimento: Date | null
     categoria: string
     descricaoSimples: string | null
+    formaPag?: string | null
     status: string
     total: unknown
     obs: string | null
@@ -91,6 +95,7 @@ export class PrismaCompraRepository implements ICompraRepository {
       produtoId: string | null
       nome: string
       qtd: number
+      pesoKg?: unknown
       valorUnitario: unknown
       total: unknown
     }>
@@ -102,6 +107,7 @@ export class PrismaCompraRepository implements ICompraRepository {
       dataRecebimento: row.dataRecebimento ?? undefined,
       categoria: row.categoria,
       descricaoSimples: row.descricaoSimples ?? undefined,
+      formaPag: row.formaPag ?? undefined,
       status: row.status as CompraStatus,
       obs: row.obs ?? undefined,
       itens: row.itens.map((i) => ({
@@ -109,6 +115,7 @@ export class PrismaCompraRepository implements ICompraRepository {
         produtoId: i.produtoId ?? undefined,
         nome: i.nome,
         qtd: i.qtd,
+        pesoKg: i.pesoKg != null ? Number(i.pesoKg) : undefined,
         valorUnitario: Number(i.valorUnitario),
       })),
     })

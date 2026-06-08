@@ -6,6 +6,7 @@ export interface CompraItemData {
     produtoId?: string;
     nome: string;
     qtd: number;
+    pesoKg?: number;
     valorUnitario: number;
 }
 export interface CompraItemReadOnly {
@@ -13,6 +14,7 @@ export interface CompraItemReadOnly {
     produtoId?: string;
     nome: string;
     qtd: number;
+    pesoKg?: number;
     valorUnitario: number;
     total: number;
 }
@@ -22,6 +24,7 @@ interface CompraProps {
     dataRecebimento?: Date;
     categoria: string;
     descricaoSimples?: string;
+    formaPag?: string;
     status: CompraStatus;
     total: Money;
     obs?: string;
@@ -35,6 +38,7 @@ export declare class Compra extends AggregateRoot<CompraProps> {
         dataRecebimento?: Date;
         categoria?: string;
         descricaoSimples?: string;
+        formaPag?: string;
         status?: CompraStatus;
         obs?: string;
         itens: CompraItemData[];
@@ -45,6 +49,7 @@ export declare class Compra extends AggregateRoot<CompraProps> {
     get dataRecebimento(): Date | undefined;
     get categoria(): string;
     get descricaoSimples(): string | undefined;
+    get formaPag(): string | undefined;
     get status(): CompraStatus;
     get total(): number;
     get obs(): string | undefined;
@@ -59,6 +64,7 @@ export declare class Compra extends AggregateRoot<CompraProps> {
         dataPedido?: Date;
         categoria?: string;
         descricaoSimples?: string;
+        formaPag?: string;
         totalManual?: number;
         itens?: CompraItemData[];
     }): void;

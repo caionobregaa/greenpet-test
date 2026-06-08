@@ -13,6 +13,7 @@ interface ItemRow {
   produtoId?: string | null;
   nome: string;
   qtd: number;
+  pesoKg?: number | null;
   valorUnitario: number;
 }
 
@@ -20,6 +21,7 @@ interface ItensTableProps {
   control: Control<{ itens: ItemRow[] } & Record<string, unknown>>;
   setValue: UseFormSetValue<{ itens: ItemRow[] } & Record<string, unknown>>;
   errors?: Array<{ nome?: { message?: string }; qtd?: { message?: string }; valorUnitario?: { message?: string } } | undefined>;
+  showPesoKg?: boolean;
 }
 
 const ProdutoSearch = memo(function ProdutoSearch({
@@ -84,7 +86,7 @@ const ProdutoSearch = memo(function ProdutoSearch({
   );
 });
 
-export function ItensTable({ control, setValue, errors }: ItensTableProps) {
+export function ItensTable({ control, setValue, errors, showPesoKg = false }: ItensTableProps) {
   const { fields, append, remove } = useFieldArray({ control, name: "itens" as never });
   const itens = useWatch({ control, name: "itens" as never }) as unknown as ItemRow[];
 
@@ -93,7 +95,7 @@ export function ItensTable({ control, setValue, errors }: ItensTableProps) {
   }, 0);
 
   function addEmpty() {
-    append({ produtoId: null, nome: "", qtd: 1, valorUnitario: 0 } as never);
+    append({ produtoId: null, nome: "", qtd: 1, pesoKg: null, valorUnitario: 0 } as never);
   }
 
   function selectProduto(index: number, p: Produto) {
@@ -149,6 +151,20 @@ export function ItensTable({ control, setValue, errors }: ItensTableProps) {
                   )}
                 </div>
               </div>
+
+              {/* Row 1b — Peso (kg) — only for despesas/ração */}
+              {showPesoKg && (
+                <div className="space-y-1.5 max-w-[160px]">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Peso (kg)</p>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    {...control.register(`itens.${index}.pesoKg` as never, { valueAsNumber: true })}
+                    placeholder="ex: 15.00"
+                  />
+                </div>
+              )}
 
               {/* Row 2 — Qty, Unit price, Subtotal, Delete */}
               <div className="flex items-end gap-3 flex-wrap">

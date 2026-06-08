@@ -204,6 +204,7 @@ model Compra {
   fornecedor       String
   categoria        String       @default("Produtos Pets")
   descricaoSimples String?
+  formaPag         String?
   status           String       @default("pendente")
   total            Decimal      @db.Decimal(10, 2)
   obs              String?
@@ -222,6 +223,7 @@ model CompraItem {
   produto       Produto? @relation(fields: [produtoId], references: [id])
   nome          String
   qtd           Int
+  pesoKg        Decimal? @db.Decimal(8, 2)
   valorUnitario Decimal  @db.Decimal(10, 2)
   total         Decimal  @db.Decimal(10, 2)
 

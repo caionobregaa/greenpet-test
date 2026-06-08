@@ -21,6 +21,7 @@ import { formatDate, formatBRL } from "@/lib/utils/format";
 import { Loader2 } from "lucide-react";
 import { apiClientes } from "@/lib/api/clientes";
 import { apiAnimais } from "@/lib/api/animais";
+import { apiProdutos } from "@/lib/api/produtos";
 import { gerarOrcamentoPDF } from "@/lib/utils/orcamento-pdf";
 
 // ── Taxas de cartão ────────────────────────────────────────────────────────────
@@ -110,11 +111,22 @@ export default function OrcamentoDetailPage({ params }: Props) {
     if (!orcamento || !orcamento.clienteId) return;
     setPdfLoading(true);
     try {
-      const [cliente, animal] = await Promise.all([
+      const produtoIds = [...new Set(orcamento.itens.filter((i) => i.produtoId).map((i) => i.produtoId!))];
+
+      const [cliente, animal, ...produtos] = await Promise.all([
         apiClientes.get(orcamento.clienteId),
         orcamento.animalId ? apiAnimais.get(orcamento.animalId) : Promise.resolve(null),
+        ...produtoIds.map((pid) => apiProdutos.get(pid).catch(() => null)),
       ]);
-      gerarOrcamentoPDF(orcamento, cliente, animal);
+
+      const produtoImages: Record<string, string> = {};
+      produtos.forEach((p) => {
+        if (p && p.imagemUrl?.startsWith("data:image")) {
+          produtoImages[p.id] = p.imagemUrl;
+        }
+      });
+
+      gerarOrcamentoPDF(orcamento, cliente, animal, produtoImages);
       toast.success("PDF gerado com sucesso!");
     } catch {
       toast.error("Erro ao gerar o PDF.");

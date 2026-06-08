@@ -1,9 +1,12 @@
 import { z } from 'zod'
 
+const FORMAS_PAG = ['Pix', 'Dinheiro', 'Cartão Crédito', 'Cartão Débito', 'Boleto'] as const
+
 const CompraItemSchema = z.object({
   produtoId: z.string().uuid().nullish().transform((v) => v ?? undefined),
   nome: z.string().min(1),
   qtd: z.number().int().positive(),
+  pesoKg: z.number().min(0).optional().nullable().transform((v) => v ?? undefined),
   valorUnitario: z.number().min(0),
 })
 
@@ -12,6 +15,7 @@ export const CreateCompraSchema = z.object({
   dataPedido: z.string().date().optional().transform((v) => v ? new Date(v) : undefined),
   categoria: z.string().min(1).default('Produtos Pets'),
   descricaoSimples: z.string().optional(),
+  formaPag: z.enum(FORMAS_PAG).optional(),
   totalManual: z.number().min(0).optional(),
   obs: z.string().optional(),
   itens: z.array(CompraItemSchema).default([]),
@@ -22,6 +26,7 @@ export const UpdateCompraSchema = z.object({
   dataPedido: z.string().date().optional().transform((v) => v ? new Date(v) : undefined),
   categoria: z.string().min(1).optional(),
   descricaoSimples: z.string().optional(),
+  formaPag: z.enum(FORMAS_PAG).optional(),
   totalManual: z.number().min(0).optional(),
   obs: z.string().optional(),
   itens: z.array(CompraItemSchema).optional(),
