@@ -51,6 +51,7 @@ export class PrismaProdutoRepository implements IProdutoRepository {
       margemLucro: produto.margemLucro,
       diasRecompra: produto.diasRecompra ?? null,
       descricao: produto.descricao ?? null,
+      imagemUrl: produto.imagemUrl ?? null,
       deletedAt: produto.deletedAt ?? null,
     }
     await this.prisma.produto.upsert({
@@ -78,6 +79,7 @@ export class PrismaProdutoRepository implements IProdutoRepository {
       margemLucro: Number(row.margemLucro),
       diasRecompra: (row.diasRecompra as number | null) ?? undefined,
       descricao: (row.descricao as string | null) ?? undefined,
+      imagemUrl: (row.imagemUrl as string | null) ?? undefined,
       deletedAt: (row.deletedAt as Date | null) ?? undefined,
     })
   }

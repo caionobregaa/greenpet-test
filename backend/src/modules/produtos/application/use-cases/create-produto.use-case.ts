@@ -18,6 +18,7 @@ export interface CreateProdutoInput {
   margemLucro?: number
   diasRecompra?: number
   descricao?: string
+  imagemUrl?: string | null
 }
 
 export class CreateProdutoUseCase {
@@ -27,7 +28,7 @@ export class CreateProdutoUseCase {
     const existing = await this.repo.findByNome(input.nome)
     if (existing) throw new ConflictError('NOME_ALREADY_EXISTS', 'Produto com este nome já existe')
 
-    const produto = Produto.create(input)
+    const produto = Produto.create({ ...input, imagemUrl: input.imagemUrl ?? undefined })
     await this.repo.save(produto)
     return produto
   }

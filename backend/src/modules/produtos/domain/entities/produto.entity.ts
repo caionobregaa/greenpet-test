@@ -21,6 +21,7 @@ interface ProdutoProps {
   margemLucro: number
   diasRecompra?: number
   descricao?: string
+  imagemUrl?: string
   deletedAt?: Date
 }
 
@@ -42,6 +43,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     margemLucro?: number
     diasRecompra?: number
     descricao?: string
+    imagemUrl?: string
     deletedAt?: Date
   }): Produto {
     if (!CATEGORIAS_VALIDAS.includes(data.categoria as Categoria)) {
@@ -64,6 +66,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
         margemLucro: data.margemLucro ?? 0,
         diasRecompra: data.diasRecompra,
         descricao: data.descricao,
+        imagemUrl: data.imagemUrl,
         deletedAt: data.deletedAt,
       },
       data.id,
@@ -85,6 +88,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
   get margemLucro(): number { return this.props.margemLucro }
   get diasRecompra(): number | undefined { return this.props.diasRecompra }
   get descricao(): string | undefined { return this.props.descricao }
+  get imagemUrl(): string | undefined { return this.props.imagemUrl }
   get deletedAt(): Date | undefined { return this.props.deletedAt }
   get isActive(): boolean { return !this.props.deletedAt }
 
@@ -116,6 +120,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     margemLucro: number
     diasRecompra: number
     descricao: string
+    imagemUrl: string | null
   }>): void {
     if (fields.nome !== undefined) this.props.nome = fields.nome
     if (fields.categoria !== undefined) {
@@ -137,6 +142,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     if (fields.margemLucro !== undefined) this.props.margemLucro = fields.margemLucro
     if (fields.diasRecompra !== undefined) this.props.diasRecompra = fields.diasRecompra
     if (fields.descricao !== undefined) this.props.descricao = fields.descricao
+    if (fields.imagemUrl !== undefined) this.props.imagemUrl = fields.imagemUrl ?? undefined
     this.updatedAt = new Date()
   }
 }

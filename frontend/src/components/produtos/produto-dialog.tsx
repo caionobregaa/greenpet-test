@@ -21,7 +21,7 @@ export function ProdutoDialog({ open, onOpenChange, produto }: ProdutoDialogProp
   async function onSubmit(data: CreateProdutoInput & { imagemUrl?: string | null }) {
     try {
       const payload = Object.fromEntries(
-        Object.entries(data).filter(([, v]) => v !== "" && v !== undefined)
+        Object.entries(data).filter(([k, v]) => k === "imagemUrl" ? v !== undefined : v !== "" && v !== undefined)
       ) as CreateProdutoInput;
 
       if (produto) {

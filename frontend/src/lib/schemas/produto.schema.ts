@@ -15,6 +15,7 @@ export const CreateProdutoSchema = z.object({
   margemOperacao: z.number().min(0).max(100).optional(),
   margemLucro: z.number().min(0).max(100).optional(),
   descricao: z.string().optional().or(z.literal("")),
+  imagemUrl: z.string().nullable().optional(),
 });
 
 export const UpdateProdutoSchema = CreateProdutoSchema.partial();

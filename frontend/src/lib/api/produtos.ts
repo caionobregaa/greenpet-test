@@ -24,7 +24,7 @@ export const apiProdutos = {
 
   create: async (input: CreateProdutoInput): Promise<Produto> => {
     const payload = Object.fromEntries(
-      Object.entries(input).filter(([, v]) => v !== "" && v !== undefined)
+      Object.entries(input).filter(([k, v]) => k === "imagemUrl" ? v !== undefined : v !== "" && v !== undefined)
     );
     const { data } = await api.post<ApiResponse<Produto>>("/produtos", payload);
     return data.data;
@@ -32,7 +32,7 @@ export const apiProdutos = {
 
   update: async (id: string, input: UpdateProdutoInput): Promise<Produto> => {
     const payload = Object.fromEntries(
-      Object.entries(input).filter(([, v]) => v !== "" && v !== undefined)
+      Object.entries(input).filter(([k, v]) => k === "imagemUrl" ? v !== undefined : v !== "" && v !== undefined)
     );
     const { data } = await api.put<ApiResponse<Produto>>(`/produtos/${id}`, payload);
     return data.data;

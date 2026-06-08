@@ -34,6 +34,7 @@ function toResponse(p: Produto) {
     margemLucro: p.margemLucro,
     diasRecompra: p.diasRecompra,
     descricao: p.descricao,
+    imagemUrl: p.imagemUrl ?? null,
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
   }

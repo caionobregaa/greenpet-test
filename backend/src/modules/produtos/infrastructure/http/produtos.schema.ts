@@ -16,7 +16,7 @@ export const CreateProdutoSchema = z.object({
   margemLucro: z.number().min(0).default(0),
   diasRecompra: z.number().int().positive().optional(),
   descricao: z.string().optional(),
-  imagemUrl: z.string().url().optional().or(z.literal('')),
+  imagemUrl: z.string().optional().nullable(),
 })
 
 export const UpdateProdutoSchema = CreateProdutoSchema.partial()
