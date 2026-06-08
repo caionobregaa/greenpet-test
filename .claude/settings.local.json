@@ -109,7 +109,9 @@
       "Bash(python -c ' *)",
       "Bash(python test_api4.py)",
       "Bash(Get-ChildItem \"C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\backend\\\\prisma\\\\migrations\")",
-      "Bash(dir dist *)"
+      "Bash(dir dist *)",
+      "Bash(xargs grep -l \"imagemUrl\\\\|imagem\\\\|upload\\\\|image\")",
+      "Bash(Start-Process \"C:\\\\Program Files\\\\Docker\\\\Docker\\\\Docker Desktop.exe\")"
     ]
   }
 }
