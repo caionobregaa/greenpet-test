@@ -4,6 +4,8 @@ export interface IAnimalRepository {
   findById(id: string): Promise<Animal | null>
   findMany(params: {
     clienteId?: string
+    especie?: string
+    sexo?: string
     q?: string
     page: number
     limit: number

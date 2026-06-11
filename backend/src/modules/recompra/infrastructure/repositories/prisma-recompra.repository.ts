@@ -24,11 +24,13 @@ export class PrismaRecompraRepository {
     page: number
     limit: number
   }): Promise<{ alertas: RecompraAlerta[]; total: number }> {
-    // Find all venda items with products that have diasRecompra set
     const vendaItens = await this.prisma.vendaItem.findMany({
       where: {
         produtoId: { not: null },
-        produto: { diasRecompra: { not: null } },
+        OR: [
+          { produto: { diasRecompra: { not: null } } },
+          { consumoDiario: { not: null } },
+        ],
         venda: {
           cliente: { deletedAt: null },
           ...(params.clienteId ? { clienteId: params.clienteId } : {}),
@@ -41,36 +43,62 @@ export class PrismaRecompraRepository {
             animal: { select: { id: true, nome: true } },
           },
         },
-        produto: { select: { id: true, nome: true, diasRecompra: true } },
+        produto: { select: { id: true, nome: true, diasRecompra: true, pesoEmbalagem: true } },
       },
       orderBy: { venda: { data: 'desc' } },
     })
 
-    // Group by (clienteId, produtoId) and keep only the most recent sale per pair
+    // Collect all animalIds we need names for
+    const animalIdsToLookup = new Set<string>()
+    for (const item of vendaItens) {
+      if (item.itemAnimalId) animalIdsToLookup.add(item.itemAnimalId)
+      if (item.venda.animal?.id) animalIdsToLookup.add(item.venda.animal.id)
+    }
+    const animalRows = animalIdsToLookup.size > 0
+      ? await this.prisma.animal.findMany({
+          where: { id: { in: [...animalIdsToLookup] } },
+          select: { id: true, nome: true },
+        })
+      : []
+    const animalNameMap = new Map(animalRows.map((a) => [a.id, a.nome]))
+
+    // Group by (clienteId, produtoId, animalId) — keep only most recent sale per combination
     const seen = new Map<string, RecompraAlerta>()
     for (const item of vendaItens) {
-      if (!item.produtoId || !item.produto?.diasRecompra) continue
-      const key = `${item.venda.clienteId}:${item.produtoId}`
+      if (!item.produtoId) continue
+
+      // Compute diasRecompra: prefer consumoDiario-based calculation
+      let diasRecompra: number
+      if (item.consumoDiario && item.consumoDiario > 0 && item.produto?.pesoEmbalagem) {
+        diasRecompra = Math.round((Number(item.produto.pesoEmbalagem) * 1000) / item.consumoDiario)
+      } else if (item.produto?.diasRecompra) {
+        diasRecompra = item.produto.diasRecompra
+      } else {
+        continue
+      }
+
+      const animalId = item.itemAnimalId ?? item.venda.animal?.id ?? ''
+      const key = `${item.venda.clienteId}:${item.produtoId}:${animalId}`
       if (seen.has(key)) continue
 
-      const diasRestantes = calcDiasRestantes(item.venda.data, item.produto.diasRecompra)
+      const diasRestantes = calcDiasRestantes(item.venda.data, diasRecompra)
       const urgencia = classifyUrgency(diasRestantes)
 
       seen.set(key, {
         clienteId: item.venda.clienteId,
         clienteNome: item.venda.cliente.nome,
-        animalId: item.venda.animal?.id ?? '',
-        animalNome: item.venda.animal?.nome ?? '',
+        animalId,
+        animalNome: animalId ? (animalNameMap.get(animalId) ?? '') : '',
         produtoId: item.produtoId,
         produtoNome: item.produto.nome,
-        diasRecompra: item.produto.diasRecompra,
+        diasRecompra,
         ultimaCompra: item.venda.data,
         diasRestantes,
         urgencia,
       })
     }
 
-    // Filter out dismissed alerts where the dismissal is more recent than the last purchase
+    // Filter out dismissed alerts
     const dismissals = await this.prisma.recompraDismissal.findMany()
     const dismissMap = new Map(
       dismissals.map((d) => [`${d.produtoId}:${d.clienteId}:${d.animalId}`, d.createdAt]),
@@ -80,7 +108,6 @@ export class PrismaRecompraRepository {
       const key = `${a.produtoId}:${a.clienteId}:${a.animalId ?? ''}`
       const dismissedAt = dismissMap.get(key)
       if (!dismissedAt) return true
-      // Reappear if a new purchase happened after the dismissal
       return a.ultimaCompra > dismissedAt
     })
 
@@ -88,7 +115,6 @@ export class PrismaRecompraRepository {
       alertas = alertas.filter((a) => a.urgencia === params.urgencia)
     }
 
-    // Sort by urgência priority then diasRestantes
     const urgencyOrder: Record<string, number> = { vencido: 0, urgente: 1, proximo: 2, ok: 3 }
     alertas.sort((a, b) => {
       const urgDiff = urgencyOrder[a.urgencia] - urgencyOrder[b.urgencia]

@@ -49,6 +49,7 @@ export default function VendasPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-muted/50">
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden sm:table-cell">Cód.</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Data</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Cliente</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden md:table-cell">Animal</th>
@@ -67,10 +68,13 @@ export default function VendasPage() {
                   </tr>
                 ))
               ) : data?.data.length === 0 ? (
-                <tr><td colSpan={6}><EmptyState message="Nenhuma venda registrada" /></td></tr>
+                <tr><td colSpan={7}><EmptyState message="Nenhuma venda registrada" /></td></tr>
               ) : (
                 data?.data.map((v) => (
                   <tr key={v.id} className="border-t border-border hover:bg-accent/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground hidden sm:table-cell">
+                      {v.numero ? `V${String(v.numero).padStart(5, "0")}` : "—"}
+                    </td>
                     <td className="px-4 py-3">{formatDate(v.data)}</td>
                     <td className="px-4 py-3 font-medium">{v.cliente?.nome ?? "—"}</td>
                     <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{v.animal?.nome ?? "—"}</td>

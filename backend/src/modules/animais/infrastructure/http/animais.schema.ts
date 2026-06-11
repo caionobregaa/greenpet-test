@@ -15,6 +15,8 @@ export const UpdateAnimalSchema = CreateAnimalSchema.omit({ clienteId: true }).p
 
 export const ListAnimaisQuerySchema = z.object({
   clienteId: z.string().uuid().optional(),
+  especie: z.string().optional(),
+  sexo: z.string().optional(),
   q: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),

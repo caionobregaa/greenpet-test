@@ -27,6 +27,10 @@ export default function AnimaisPage() {
   const [editingAnimal, setEditingAnimal] = useState<Animal | undefined>();
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // Filtros
+  const [especieFiltro, setEspecieFiltro] = useState("");
+  const [sexoFiltro, setSexoFiltro] = useState("");
+
   // Filtro por cliente
   const [clienteSearch, setClienteSearch] = useState("");
   const [clienteOptions, setClienteOptions] = useState<Cliente[]>([]);
@@ -37,6 +41,8 @@ export default function AnimaisPage() {
   const { data, isLoading } = useAnimais({
     q: search || undefined,
     clienteId: clienteSelecionado?.id,
+    especie: especieFiltro || undefined,
+    sexo: sexoFiltro || undefined,
     page,
     limit: 20,
   });
@@ -104,13 +110,34 @@ export default function AnimaisPage() {
       </div>
 
       {/* Filtros */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row gap-3 mb-4 flex-wrap">
         <SearchInput
           value={search}
           onChange={(v) => { setSearch(v); setPage(1); }}
           placeholder="Buscar por nome ou raça..."
           className="max-w-sm"
         />
+
+        <select
+          value={especieFiltro}
+          onChange={(e) => { setEspecieFiltro(e.target.value); setPage(1); }}
+          className="h-10 px-3 rounded-md border border-input bg-background text-sm min-w-[140px]"
+        >
+          <option value="">Todas as espécies</option>
+          <option value="Cão">Cão</option>
+          <option value="Gato">Gato</option>
+        </select>
+
+        <select
+          value={sexoFiltro}
+          onChange={(e) => { setSexoFiltro(e.target.value); setPage(1); }}
+          className="h-10 px-3 rounded-md border border-input bg-background text-sm min-w-[130px]"
+        >
+          <option value="">Todos os sexos</option>
+          <option value="M">Macho</option>
+          <option value="F">Fêmea</option>
+          <option value="Indefinido">Indefinido</option>
+        </select>
 
         {/* Filtro por cliente */}
         <div className="relative max-w-sm w-full">

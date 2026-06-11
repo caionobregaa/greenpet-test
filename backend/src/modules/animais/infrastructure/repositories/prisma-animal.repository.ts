@@ -10,10 +10,12 @@ export class PrismaAnimalRepository implements IAnimalRepository {
     return row ? this.toDomain(row) : null
   }
 
-  async findMany(params: { clienteId?: string; q?: string; page: number; limit: number }) {
+  async findMany(params: { clienteId?: string; especie?: string; sexo?: string; q?: string; page: number; limit: number }) {
     const where = {
       deletedAt: null,
       ...(params.clienteId ? { clienteId: params.clienteId } : {}),
+      ...(params.especie ? { especie: params.especie } : {}),
+      ...(params.sexo ? { sexo: params.sexo } : {}),
       ...(params.q ? { nome: { contains: params.q, mode: 'insensitive' as const } } : {}),
     }
     const [rows, total] = await this.prisma.$transaction([

@@ -51,7 +51,7 @@ export function TopProdutosChart({ produtos }: TopProdutosChartProps) {
               tick={{ fontSize: 10, fill: "#6b6460" }}
               axisLine={false}
               tickLine={false}
-              tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`}
+              tickFormatter={(v) => `${v}`}
             />
             <YAxis
               type="category"
@@ -63,15 +63,15 @@ export function TopProdutosChart({ produtos }: TopProdutosChartProps) {
             />
             <Tooltip
               formatter={(value, name) =>
-                name === "totalVendido"
-                  ? [formatBRL(Number(value ?? 0)), "Receita"]
-                  : [value, "Qtd."]
+                name === "quantidade"
+                  ? [`${value} und.`, "Quantidade"]
+                  : [value, name]
               }
               labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? ""}
               labelStyle={{ color: "#1c1917", fontWeight: 600 }}
               contentStyle={{ borderColor: "#dbd5cc", borderRadius: 6, fontSize: 12, background: "#fefcf8" }}
             />
-            <Bar dataKey="totalVendido" radius={[0, 4, 4, 0]} maxBarSize={24}>
+            <Bar dataKey="quantidade" radius={[0, 4, 4, 0]} maxBarSize={24}>
               {data.map((_, i) => (
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatBRL } from "@/lib/utils/format";
 import { apiProdutos } from "@/lib/api/produtos";
+import { apiAnimais } from "@/lib/api/animais";
 import type { Produto } from "@/lib/types/produto";
 
 interface ProdutoSelect {
@@ -24,12 +25,13 @@ interface ItemRow {
   pesoKg?: number | null;
   valorUnitario: number;
   desconto?: number;
+  itemAnimalId?: string | null;
+  consumoDiario?: number | null;
 }
 
 interface ItemExtra {
   categoria?: string;
   pesoEmbalagem?: number | null;
-  consumoDiario?: number;
   qtdEmbalagem?: number;
 }
 
@@ -38,18 +40,19 @@ interface ItensTableProps {
   setValue: UseFormSetValue<{ itens: ItemRow[] } & Record<string, unknown>>;
   errors?: Array<{ nome?: { message?: string }; qtd?: { message?: string }; valorUnitario?: { message?: string } } | undefined>;
   showPesoKg?: boolean;
+  clienteId?: string;
 }
 
-function calcDuracao(extra: ItemExtra): { dias: number; semanas: number } | null {
-  if (!extra.consumoDiario || extra.consumoDiario <= 0) return null;
+function calcDuracao(consumoDiario: number | null | undefined, extra: ItemExtra): { dias: number; semanas: number } | null {
+  if (!consumoDiario || consumoDiario <= 0) return null;
   if (extra.categoria === "Ração") {
     if (!extra.pesoEmbalagem) return null;
-    const dias = Math.round((extra.pesoEmbalagem * 1000) / extra.consumoDiario);
+    const dias = Math.round((extra.pesoEmbalagem * 1000) / consumoDiario);
     return { dias, semanas: Math.round(dias / 7) };
   }
   if (extra.categoria === "Medicamento" || extra.categoria === "Suplemento") {
     if (!extra.qtdEmbalagem || extra.qtdEmbalagem <= 0) return null;
-    const dias = Math.round(extra.qtdEmbalagem / extra.consumoDiario);
+    const dias = Math.round(extra.qtdEmbalagem / consumoDiario);
     return { dias, semanas: Math.round(dias / 7) };
   }
   return null;
@@ -153,20 +156,26 @@ const ProdutoSearch = memo(function ProdutoSearch({
   );
 });
 
-export function ItensTable({ control, setValue, errors, showPesoKg = false }: ItensTableProps) {
+export function ItensTable({ control, setValue, errors, showPesoKg = false, clienteId }: ItensTableProps) {
   const { fields, append, remove } = useFieldArray({ control, name: "itens" as never });
   const itens = useWatch({ control, name: "itens" as never }) as unknown as ItemRow[];
   const [lastAddedIndex, setLastAddedIndex] = useState<number | null>(null);
   const [itemExtras, setItemExtras] = useState<Record<number, ItemExtra>>({});
+  const [clienteAnimais, setClienteAnimais] = useState<{ id: string; nome: string; especie: string }[]>([]);
+
+  useEffect(() => {
+    if (!clienteId) { setClienteAnimais([]); return; }
+    apiAnimais.list({ clienteId, limit: 50 }).then(({ data }) => setClienteAnimais(data)).catch(() => {});
+  }, [clienteId]);
 
   const total = (itens ?? []).reduce((acc, item) => {
-    const sub = Math.max(0, Number(item?.qtd ?? 0) * Number(item?.valorUnitario ?? 0) - Number(item?.desconto ?? 0));
+    const sub = Math.max(0, Number(item?.qtd ?? 0) * Number(item?.valorUnitario ?? 0) - (Number(item?.desconto) || 0));
     return acc + sub;
   }, 0);
 
   function addEmpty() {
     const newIndex = fields.length;
-    append({ produtoId: null, nome: "", qtd: 1, pesoKg: null, valorUnitario: 0 } as never);
+    append({ produtoId: null, nome: "", qtd: 1, pesoKg: null, valorUnitario: 0, desconto: 0, itemAnimalId: null, consumoDiario: null } as never);
     setLastAddedIndex(newIndex);
   }
 
@@ -176,7 +185,7 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false }: It
     setValue(`itens.${index}.valorUnitario` as never, p.valorVenda as never);
     setItemExtras((prev) => ({
       ...prev,
-      [index]: { categoria: p.categoria, pesoEmbalagem: p.pesoEmbalagem },
+      [index]: { ...prev[index], categoria: p.categoria, pesoEmbalagem: p.pesoEmbalagem },
     }));
   }
 
@@ -208,11 +217,13 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false }: It
       <div className="space-y-2">
         {fields.map((field, index) => {
           const item = (itens ?? [])[index] ?? {};
-          const subtotal = Math.max(0, Number(item.qtd ?? 0) * Number(item.valorUnitario ?? 0) - Number(item.desconto ?? 0));
+          const subtotal = Math.max(0, Number(item.qtd ?? 0) * Number(item.valorUnitario ?? 0) - (Number(item.desconto) || 0));
           const extra = itemExtras[index] ?? {};
-          const duracao = calcDuracao(extra);
           const isRacao = extra.categoria === "Ração";
           const isMedSupl = extra.categoria === "Medicamento" || extra.categoria === "Suplemento";
+          const consumoDiarioVal = Number(item.consumoDiario) > 0 ? Number(item.consumoDiario) : undefined;
+          const duracao = calcDuracao(consumoDiarioVal, extra);
+          const showConsumoSection = isRacao || isMedSupl || (consumoDiarioVal !== undefined);
 
           return (
             <div key={field.id} className="bg-muted/20 rounded-md border border-border/50 p-3.5 space-y-3">
@@ -255,7 +266,7 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false }: It
                 </div>
               )}
 
-              {/* Row 2 — Qty, Unit price, Subtotal, Delete */}
+              {/* Row 2 — Qty, Unit price, Discount, Subtotal, Delete */}
               <div className="flex items-end gap-3 flex-wrap">
                 <div className="space-y-1.5">
                   <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Qtd *</p>
@@ -298,7 +309,7 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false }: It
                   <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Subtotal</p>
                   <div className="flex items-center h-9">
                     <span className="text-[13px] font-bold text-primary tabular-nums">{formatBRL(subtotal)}</span>
-                    {Number(item.desconto ?? 0) > 0 && (
+                    {(Number(item.desconto) || 0) > 0 && (
                       <span className="ml-1 text-[10px] text-primary/60">−{formatBRL(Number(item.desconto))}</span>
                     )}
                   </div>
@@ -309,59 +320,94 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false }: It
                 </Button>
               </div>
 
-              {/* Previsibilidade de consumo */}
-              {(isRacao || isMedSupl) && (
-                <div className="flex flex-wrap items-end gap-3 pt-2.5 border-t border-border/30">
-                  {isRacao && (
-                    <div className="space-y-1.5">
+              {/* Row 3 — Animal + Consumo (conditional) */}
+              {(clienteAnimais.length > 0 || showConsumoSection) && (
+                <div className="pt-2.5 border-t border-border/30 space-y-3">
+
+                  {/* Animal select */}
+                  {clienteAnimais.length > 0 && (
+                    <div className="space-y-1.5 max-w-[200px]">
                       <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">
-                        Consumo diário (g) <span className="font-normal normal-case tracking-normal">— opcional</span>
+                        Animal <span className="font-normal normal-case tracking-normal">— opcional</span>
                       </p>
-                      <Input
-                        type="number" min="1" step="1"
-                        value={extra.consumoDiario ?? ""}
-                        onChange={(e) => updateExtra(index, { consumoDiario: Number(e.target.value) || undefined })}
-                        placeholder="ex: 250"
-                        className="w-32 h-8 text-sm"
-                      />
-                      {extra.pesoEmbalagem && (
-                        <p className="text-[10px] text-muted-foreground/60">Embalagem: {extra.pesoEmbalagem * 1000}g</p>
-                      )}
+                      <select
+                        {...control.register(`itens.${index}.itemAnimalId` as never)}
+                        className="h-9 w-full px-2 rounded-md border border-input bg-background text-sm"
+                      >
+                        <option value="">Nenhum</option>
+                        {clienteAnimais.map((a) => (
+                          <option key={a.id} value={a.id}>{a.nome}</option>
+                        ))}
+                      </select>
                     </div>
                   )}
-                  {isMedSupl && (
-                    <>
-                      <div className="space-y-1.5">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">
-                          Qtd na embalagem <span className="font-normal normal-case tracking-normal">— opcional</span>
-                        </p>
-                        <Input
-                          type="number" min="1" step="1"
-                          value={extra.qtdEmbalagem ?? ""}
-                          onChange={(e) => updateExtra(index, { qtdEmbalagem: Number(e.target.value) || undefined })}
-                          placeholder="ex: 30"
-                          className="w-28 h-8 text-sm"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">Doses por dia</p>
-                        <Input
-                          type="number" min="0.1" step="0.1"
-                          value={extra.consumoDiario ?? ""}
-                          onChange={(e) => updateExtra(index, { consumoDiario: Number(e.target.value) || undefined })}
-                          placeholder="ex: 1"
-                          className="w-28 h-8 text-sm"
-                        />
-                      </div>
-                    </>
-                  )}
-                  {duracao && (
-                    <div className="flex items-center gap-1.5 pb-0.5 text-primary">
-                      <Timer className="w-4 h-4 shrink-0" />
-                      <span className="text-sm font-semibold">
-                        ~{duracao.dias} dias
-                        {duracao.semanas >= 1 && <span className="text-xs font-normal text-muted-foreground ml-1">({duracao.semanas} sem.)</span>}
-                      </span>
+
+                  {/* Consumo section */}
+                  {showConsumoSection && (
+                    <div className="flex flex-wrap items-end gap-3">
+                      {isRacao && (
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">
+                            Consumo diário (g) <span className="font-normal normal-case tracking-normal">— opcional</span>
+                          </p>
+                          <Input
+                            type="number" min="1" step="1"
+                            {...control.register(`itens.${index}.consumoDiario` as never, { valueAsNumber: true })}
+                            placeholder="ex: 250"
+                            className="w-32 h-8 text-sm"
+                          />
+                          {extra.pesoEmbalagem && (
+                            <p className="text-[10px] text-muted-foreground/60">Embalagem: {extra.pesoEmbalagem * 1000}g</p>
+                          )}
+                        </div>
+                      )}
+                      {isMedSupl && (
+                        <>
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">
+                              Qtd na embalagem <span className="font-normal normal-case tracking-normal">— opcional</span>
+                            </p>
+                            <Input
+                              type="number" min="1" step="1"
+                              value={extra.qtdEmbalagem ?? ""}
+                              onChange={(e) => updateExtra(index, { qtdEmbalagem: Number(e.target.value) || undefined })}
+                              placeholder="ex: 30"
+                              className="w-28 h-8 text-sm"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">Doses por dia</p>
+                            <Input
+                              type="number" min="0.1" step="0.1"
+                              {...control.register(`itens.${index}.consumoDiario` as never, { valueAsNumber: true })}
+                              placeholder="ex: 1"
+                              className="w-28 h-8 text-sm"
+                            />
+                          </div>
+                        </>
+                      )}
+                      {!isRacao && !isMedSupl && consumoDiarioVal !== undefined && (
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">
+                            Consumo diário (g) <span className="font-normal normal-case tracking-normal">— opcional</span>
+                          </p>
+                          <Input
+                            type="number" min="1" step="1"
+                            {...control.register(`itens.${index}.consumoDiario` as never, { valueAsNumber: true })}
+                            placeholder="ex: 250"
+                            className="w-32 h-8 text-sm"
+                          />
+                        </div>
+                      )}
+                      {duracao && (
+                        <div className="flex items-center gap-1.5 pb-0.5 text-primary">
+                          <Timer className="w-4 h-4 shrink-0" />
+                          <span className="text-sm font-semibold">
+                            ~{duracao.dias} dias
+                            {duracao.semanas >= 1 && <span className="text-xs font-normal text-muted-foreground ml-1">({duracao.semanas} sem.)</span>}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

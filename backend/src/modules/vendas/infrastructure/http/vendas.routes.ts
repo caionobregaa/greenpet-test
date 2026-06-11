@@ -14,6 +14,7 @@ import type { Venda } from '../../domain/entities/venda.entity.js'
 function toResponse(v: Venda, extra?: { clienteNome?: string | null; animalNome?: string | null }) {
   return {
     id: v.id,
+    numero: v.numero,
     clienteId: v.clienteId,
     animalId: v.animalId,
     data: v.data,

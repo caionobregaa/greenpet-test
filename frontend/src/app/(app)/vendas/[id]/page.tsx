@@ -42,7 +42,9 @@ export default function VendaDetailPage({ params }: Props) {
           <ArrowLeft className="w-4 h-4" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-xl font-bold">Venda #{id.slice(-6).toUpperCase()}</h1>
+          <h1 className="text-xl font-bold">
+            {venda.numero ? `Venda V${String(venda.numero).padStart(5, "0")}` : `Venda #${id.slice(-6).toUpperCase()}`}
+          </h1>
           <p className="text-sm text-muted-foreground">{formatDate(venda.data)}</p>
         </div>
         <Link href={`/vendas/${id}/editar`} className={buttonVariants({ variant: "outline", size: "sm" })}>

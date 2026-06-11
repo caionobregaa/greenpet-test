@@ -650,6 +650,7 @@ export default function NovaVendaPage() {
                 control={control as unknown as Parameters<typeof ItensTable>[0]["control"]}
                 setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
                 errors={errors.itens as Parameters<typeof ItensTable>[0]["errors"]}
+                clienteId={clienteSelected?.id}
               />
               {errors.itens && typeof errors.itens.message === "string" && (
                 <p className="text-xs text-destructive mt-2">{errors.itens.message}</p>

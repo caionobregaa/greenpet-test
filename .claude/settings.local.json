@@ -147,7 +147,9 @@
       "Bash(node -e \"const p = require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.scripts, null, 2\\)\\)\")",
       "Bash(dir /B /S *.ts)",
       "Bash(findstr \"schema\\\\|produto\")",
-      "Bash(mkdir -p \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\frontend\\\\src\\\\app\\\\\\(app\\)\\\\vendas\\\\[id]\\\\editar\" 2>/dev/null; echo \"done\")"
+      "Bash(mkdir -p \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\frontend\\\\src\\\\app\\\\\\(app\\)\\\\vendas\\\\[id]\\\\editar\" 2>/dev/null; echo \"done\")",
+      "Bash(grep -v \".js$\")",
+      "Bash(xargs grep -l \"TopProdutos\\\\|animais\\\\|formatDate\\\\|Animals\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\Administrator\\Documents\\GitHub\\greenpet-test\\frontend\\src\\app\\(app)\\vendas\\[id]"

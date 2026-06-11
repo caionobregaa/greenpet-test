@@ -12,6 +12,8 @@ export interface VendaItemData {
   qtd: number
   valorUnitario: number
   desconto?: number
+  itemAnimalId?: string
+  consumoDiario?: number
 }
 
 export interface VendaItemReadOnly {
@@ -22,9 +24,12 @@ export interface VendaItemReadOnly {
   valorUnitario: number
   desconto: number
   total: number
+  itemAnimalId?: string
+  consumoDiario?: number
 }
 
 interface VendaProps {
+  numero?: number
   clienteId: string
   animalId?: string
   data: Date
@@ -40,6 +45,7 @@ interface VendaProps {
 export class Venda extends AggregateRoot<VendaProps> {
   static create(data: {
     id?: string
+    numero?: number
     clienteId: string
     animalId?: string
     data?: Date
@@ -71,6 +77,8 @@ export class Venda extends AggregateRoot<VendaProps> {
         valorUnitario: item.valorUnitario,
         desconto: itemDesconto,
         total: itemTotal,
+        itemAnimalId: item.itemAnimalId,
+        consumoDiario: item.consumoDiario,
       }
     })
 
@@ -80,6 +88,7 @@ export class Venda extends AggregateRoot<VendaProps> {
 
     return new Venda(
       {
+        numero: data.numero,
         clienteId: data.clienteId,
         animalId: data.animalId,
         data: data.data ?? new Date(),
@@ -95,6 +104,7 @@ export class Venda extends AggregateRoot<VendaProps> {
     )
   }
 
+  get numero(): number | undefined { return this.props.numero }
   get clienteId(): string { return this.props.clienteId }
   get animalId(): string | undefined { return this.props.animalId }
   get data(): Date { return this.props.data }

@@ -51,6 +51,8 @@ export class PrismaVendaRepository implements IVendaRepository {
             valorUnitario: i.valorUnitario,
             desconto: i.desconto,
             total: i.total,
+            itemAnimalId: i.itemAnimalId ?? null,
+            consumoDiario: i.consumoDiario ?? null,
           })),
         },
       },
@@ -74,6 +76,8 @@ export class PrismaVendaRepository implements IVendaRepository {
             valorUnitario: i.valorUnitario,
             desconto: i.desconto,
             total: i.total,
+            itemAnimalId: i.itemAnimalId ?? null,
+            consumoDiario: i.consumoDiario ?? null,
           })),
         },
       },
@@ -86,6 +90,7 @@ export class PrismaVendaRepository implements IVendaRepository {
 
   private toDomain(row: {
     id: string
+    numero: number
     data: Date
     clienteId: string
     animalId: string | null
@@ -104,10 +109,13 @@ export class PrismaVendaRepository implements IVendaRepository {
       valorUnitario: unknown
       desconto: number
       total: unknown
+      itemAnimalId: string | null
+      consumoDiario: number | null
     }>
   }): Venda {
     return Venda.create({
       id: row.id,
+      numero: row.numero,
       clienteId: row.clienteId,
       animalId: row.animalId ?? undefined,
       data: row.data,
@@ -123,6 +131,8 @@ export class PrismaVendaRepository implements IVendaRepository {
         qtd: i.qtd,
         valorUnitario: Number(i.valorUnitario),
         desconto: i.desconto ?? 0,
+        itemAnimalId: i.itemAnimalId ?? undefined,
+        consumoDiario: i.consumoDiario ?? undefined,
       })),
     })
   }

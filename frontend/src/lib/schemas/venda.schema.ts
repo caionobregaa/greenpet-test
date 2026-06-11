@@ -6,6 +6,11 @@ export const VendaItemSchema = z.object({
   qtd: z.number().int().min(1, "Quantidade mínima é 1"),
   valorUnitario: z.number().min(0, "Valor inválido"),
   desconto: z.number().min(0).optional(),
+  itemAnimalId: z.string().optional().nullable(),
+  consumoDiario: z.preprocess(
+    (v) => (typeof v === "number" && isNaN(v)) ? undefined : (v === "" ? undefined : v),
+    z.number().int().min(1).optional().nullable()
+  ),
 });
 
 export const CreateVendaSchema = z.object({

@@ -5,6 +5,7 @@ import type { CreateAnimalInput, UpdateAnimalInput } from "@/lib/schemas/animal.
 interface ListParams {
   clienteId?: string;
   especie?: string;
+  sexo?: string;
   q?: string;
   page?: number;
   limit?: number;

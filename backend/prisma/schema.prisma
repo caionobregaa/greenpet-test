@@ -115,6 +115,7 @@ model Produto {
 
 model Venda {
   id        String      @id @default(uuid())
+  numero    Int         @default(dbgenerated("nextval('venda_numero_seq'::regclass)"))
   data      DateTime
   clienteId String
   cliente   Cliente     @relation(fields: [clienteId], references: [id])
@@ -144,6 +145,8 @@ model VendaItem {
   valorUnitario Decimal  @db.Decimal(10, 2)
   desconto      Float    @default(0)
   total         Decimal  @db.Decimal(10, 2)
+  itemAnimalId  String?
+  consumoDiario Int?
 
   @@map("venda_itens")
 }

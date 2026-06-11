@@ -146,7 +146,7 @@ export default function EditarVendaPage({ params }: Props) {
       taxaCartao: venda.taxaCartao,
       taxaEntrega: venda.taxaEntrega,
       obs: venda.obs ?? "",
-      itens: venda.itens.map((i) => ({ produtoId: i.produtoId, nome: i.nome, qtd: i.qtd, valorUnitario: i.valorUnitario, desconto: i.desconto })),
+      itens: venda.itens.map((i) => ({ produtoId: i.produtoId, nome: i.nome, qtd: i.qtd, valorUnitario: i.valorUnitario, desconto: i.desconto, itemAnimalId: i.itemAnimalId ?? null, consumoDiario: i.consumoDiario ?? null })),
     });
     if (venda.animalId) {
       setAnimalSelected({ id: venda.animalId, nome: venda.animal?.nome ?? "", especie: "" } as unknown as Animal);
@@ -250,7 +250,9 @@ export default function EditarVendaPage({ params }: Props) {
           <ArrowLeft className="w-4 h-4" />
         </Button>
         <div>
-          <h1 className="text-xl font-bold">Editar Venda #{id.slice(-6).toUpperCase()}</h1>
+          <h1 className="text-xl font-bold">
+            {venda.numero ? `Editar Venda V${String(venda.numero).padStart(5, "0")}` : `Editar Venda #${id.slice(-6).toUpperCase()}`}
+          </h1>
           <p className="text-sm text-muted-foreground">Cliente: {venda.cliente?.nome ?? "—"}</p>
         </div>
       </div>
@@ -400,6 +402,7 @@ export default function EditarVendaPage({ params }: Props) {
             control={control as unknown as Parameters<typeof ItensTable>[0]["control"]}
             setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
             errors={errors.itens as Parameters<typeof ItensTable>[0]["errors"]}
+            clienteId={venda.clienteId}
           />
           {errors.itens && typeof errors.itens.message === "string" && (
             <p className="text-xs text-destructive mt-2">{errors.itens.message}</p>

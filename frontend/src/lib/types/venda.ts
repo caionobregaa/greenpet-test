@@ -8,10 +8,13 @@ export interface VendaItem {
   valorUnitario: number;
   desconto: number;
   total: number;
+  itemAnimalId?: string | null;
+  consumoDiario?: number | null;
 }
 
 export interface Venda {
   id: string;
+  numero?: number;
   data: string;
   clienteId: string;
   cliente?: { nome: string };
