@@ -5,9 +5,10 @@ export declare class ConverterOrcamentoUseCase {
     private readonly orcamentoRepo;
     private readonly vendaRepo;
     constructor(orcamentoRepo: IOrcamentoRepository, vendaRepo: IVendaRepository);
-    execute({ id, formaPag }: {
+    execute({ id, formaPag, taxaCartao }: {
         id: string;
         formaPag: string;
+        taxaCartao?: number;
     }): Promise<Venda>;
 }
 //# sourceMappingURL=converter-orcamento.use-case.d.ts.map

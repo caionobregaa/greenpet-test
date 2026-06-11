@@ -4,7 +4,7 @@ exports.Produto = void 0;
 const aggregate_root_base_js_1 = require("../../../../src/shared/domain/aggregate-root.base.js");
 const money_vo_js_1 = require("../../../../src/shared/domain/value-objects/money.vo.js");
 const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
-const CATEGORIAS_VALIDAS = ['Ração', 'Petisco', 'Medicamento', 'Acessório', 'Higiene', 'Serviço'];
+const CATEGORIAS_VALIDAS = ['Ração', 'Petisco', 'Suplemento', 'Medicamento', 'Acessório', 'Higiene', 'Serviço'];
 class Produto extends aggregate_root_base_js_1.AggregateRoot {
     static create(data) {
         if (!CATEGORIAS_VALIDAS.includes(data.categoria)) {

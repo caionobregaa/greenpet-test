@@ -16,6 +16,7 @@ const validation_error_js_1 = require("../../../../src/shared/errors/validation.
 function toResponse(o, extra) {
     return {
         id: o.id,
+        numero: o.numero,
         clienteId: o.clienteId,
         animalId: o.animalId,
         data: o.data,
@@ -25,6 +26,7 @@ function toResponse(o, extra) {
         total: o.total,
         obs: o.obs,
         vendaId: o.vendaId,
+        formasPag: o.formasPag,
         itens: o.itens,
         cliente: extra?.clienteNome ? { nome: extra.clienteNome } : undefined,
         animal: extra?.animalNome ? { nome: extra.animalNome } : undefined,
@@ -96,7 +98,7 @@ function registerOrcamentosRoutes(app, prisma) {
         const body = orcamentos_schema_js_1.ConverterOrcamentoSchema.safeParse(req.body);
         if (!body.success)
             throw new validation_error_js_1.ValidationError('VALIDATION_ERROR', body.error.errors[0].message);
-        const venda = await converterUC.execute({ id, formaPag: body.data.formaPag });
+        const venda = await converterUC.execute({ id, formaPag: body.data.formaPag, taxaCartao: body.data.taxaCartao });
         rep.status(201).send({ data: { vendaId: venda.id } });
     });
     app.put('/api/v1/orcamentos/:id', async (req, rep) => {

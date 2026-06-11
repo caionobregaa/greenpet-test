@@ -43,6 +43,7 @@ export declare const CreateOrcamentoSchema: z.ZodObject<{
     data: z.ZodEffects<z.ZodOptional<z.ZodString>, Date | undefined, string | undefined>;
     validade: z.ZodEffects<z.ZodString, Date, string>;
     obs: z.ZodOptional<z.ZodString>;
+    formasPag: z.ZodDefault<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
     itens: z.ZodArray<z.ZodObject<{
         produtoId: z.ZodEffects<z.ZodOptional<z.ZodNullable<z.ZodString>>, string | undefined, string | null | undefined>;
         nome: z.ZodString;
@@ -67,6 +68,7 @@ export declare const CreateOrcamentoSchema: z.ZodObject<{
         produtoId?: string | undefined;
     }[];
     validade: Date;
+    formasPag: string[];
     data?: Date | undefined;
     obs?: string | undefined;
     clienteId?: string | undefined;
@@ -83,6 +85,7 @@ export declare const CreateOrcamentoSchema: z.ZodObject<{
     obs?: string | undefined;
     clienteId?: string | undefined;
     animalId?: string | undefined;
+    formasPag?: string[] | undefined;
 }>;
 export declare const UpdateOrcamentoStatusSchema: z.ZodObject<{
     acao: z.ZodEnum<["aprovar", "recusar", "reabrir"]>;
@@ -93,10 +96,13 @@ export declare const UpdateOrcamentoStatusSchema: z.ZodObject<{
 }>;
 export declare const ConverterOrcamentoSchema: z.ZodObject<{
     formaPag: z.ZodEnum<["Pix", "Dinheiro", "Cartão Crédito", "Cartão Débito", "Boleto"]>;
+    taxaCartao: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
 }, "strip", z.ZodTypeAny, {
     formaPag: "Pix" | "Dinheiro" | "Cartão Crédito" | "Cartão Débito" | "Boleto";
+    taxaCartao: number;
 }, {
     formaPag: "Pix" | "Dinheiro" | "Cartão Crédito" | "Cartão Débito" | "Boleto";
+    taxaCartao?: number | undefined;
 }>;
 export declare const ListOrcamentosQuerySchema: z.ZodObject<{
     clienteId: z.ZodOptional<z.ZodString>;

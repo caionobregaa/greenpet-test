@@ -33,6 +33,7 @@ class Venda extends aggregate_root_base_js_1.AggregateRoot {
             animalId: data.animalId,
             data: data.data ?? new Date(),
             formaPag: data.formaPag,
+            taxaCartao: data.taxaCartao ?? 0,
             total: money_vo_js_1.Money.create(totalValue),
             obs: data.obs,
             itens,
@@ -42,6 +43,7 @@ class Venda extends aggregate_root_base_js_1.AggregateRoot {
     get animalId() { return this.props.animalId; }
     get data() { return this.props.data; }
     get formaPag() { return this.props.formaPag; }
+    get taxaCartao() { return this.props.taxaCartao; }
     get total() { return this.props.total.value; }
     get obs() { return this.props.obs; }
     get itens() { return this.props.itens; }

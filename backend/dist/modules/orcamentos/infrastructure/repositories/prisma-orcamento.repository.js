@@ -8,7 +8,7 @@ class PrismaOrcamentoRepository {
         this.prisma = prisma;
     }
     async findById(id) {
-        const row = await this.prisma.orcamento.findUnique({ where: { id }, include: { itens: true } });
+        const row = await this.prisma.orcamento.findUnique({ where: { id }, include: { itens: true, } });
         return row ? this.toDomain(row) : null;
     }
     async findMany(params) {
@@ -39,14 +39,15 @@ class PrismaOrcamentoRepository {
                     obs: orcamento.obs ?? null,
                     vendaId: orcamento.vendaId ?? null,
                     total: orcamento.total,
+                    formasPag: orcamento.formasPag,
                 },
             });
         }
         else {
-            await this.prisma.orcamento.create({
+            const created = await this.prisma.orcamento.create({
                 data: {
                     id: orcamento.id,
-                    clienteId: orcamento.clienteId,
+                    clienteId: orcamento.clienteId ?? null,
                     animalId: orcamento.animalId ?? null,
                     data: orcamento.data,
                     validade: orcamento.validade,
@@ -54,6 +55,7 @@ class PrismaOrcamentoRepository {
                     total: orcamento.total,
                     obs: orcamento.obs ?? null,
                     vendaId: orcamento.vendaId ?? null,
+                    formasPag: orcamento.formasPag,
                     itens: {
                         create: orcamento.itens.map((i) => ({
                             id: i.id,
@@ -65,14 +67,16 @@ class PrismaOrcamentoRepository {
                         })),
                     },
                 },
+                select: { numero: true },
             });
+            orcamento.applyNumero(created.numero);
         }
     }
     async delete(id) {
         await this.prisma.orcamento.delete({ where: { id } });
     }
     toDomain(row) {
-        return orcamento_entity_js_1.Orcamento.create({
+        const entity = orcamento_entity_js_1.Orcamento.create({
             id: row.id,
             clienteId: row.clienteId ?? undefined,
             animalId: row.animalId ?? undefined,
@@ -81,6 +85,7 @@ class PrismaOrcamentoRepository {
             status: row.status,
             obs: row.obs ?? undefined,
             vendaId: row.vendaId ?? undefined,
+            formasPag: row.formasPag ?? [],
             itens: row.itens.map((i) => ({
                 id: i.id,
                 produtoId: i.produtoId ?? undefined,
@@ -89,6 +94,8 @@ class PrismaOrcamentoRepository {
                 valorUnitario: Number(i.valorUnitario),
             })),
         });
+        entity.applyNumero(row.numero);
+        return entity;
     }
 }
 exports.PrismaOrcamentoRepository = PrismaOrcamentoRepository;

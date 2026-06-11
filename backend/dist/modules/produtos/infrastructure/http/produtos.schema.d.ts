@@ -1,8 +1,8 @@
 import { z } from 'zod';
 export declare const CreateProdutoSchema: z.ZodObject<{
     nome: z.ZodString;
-    categoria: z.ZodEnum<["Ração", "Petisco", "Medicamento", "Acessório", "Higiene", "Serviço"]>;
-    especie: z.ZodOptional<z.ZodEnum<["Cão", "Gato", "Ambos"]>>;
+    categoria: z.ZodEnum<["Ração", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"]>;
+    especie: z.ZodOptional<z.ZodEnum<["Cão", "Gato", "Cão e Gato", "Ambos"]>>;
     subCategoria: z.ZodOptional<z.ZodString>;
     marca: z.ZodOptional<z.ZodString>;
     fornecedor: z.ZodOptional<z.ZodString>;
@@ -18,14 +18,14 @@ export declare const CreateProdutoSchema: z.ZodObject<{
     imagemUrl: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, "strip", z.ZodTypeAny, {
     nome: string;
-    categoria: "Ração" | "Petisco" | "Medicamento" | "Acessório" | "Higiene" | "Serviço";
+    categoria: "Ração" | "Petisco" | "Suplemento" | "Medicamento" | "Acessório" | "Higiene" | "Serviço";
     valorCusto: number;
     valorVenda: number;
     margemCartao: number;
     margemImposto: number;
     margemOperacao: number;
     margemLucro: number;
-    especie?: "Cão" | "Gato" | "Ambos" | undefined;
+    especie?: "Cão" | "Gato" | "Cão e Gato" | "Ambos" | undefined;
     subCategoria?: string | undefined;
     marca?: string | undefined;
     fornecedor?: string | undefined;
@@ -35,9 +35,9 @@ export declare const CreateProdutoSchema: z.ZodObject<{
     imagemUrl?: string | null | undefined;
 }, {
     nome: string;
-    categoria: "Ração" | "Petisco" | "Medicamento" | "Acessório" | "Higiene" | "Serviço";
+    categoria: "Ração" | "Petisco" | "Suplemento" | "Medicamento" | "Acessório" | "Higiene" | "Serviço";
     valorVenda: number;
-    especie?: "Cão" | "Gato" | "Ambos" | undefined;
+    especie?: "Cão" | "Gato" | "Cão e Gato" | "Ambos" | undefined;
     subCategoria?: string | undefined;
     marca?: string | undefined;
     fornecedor?: string | undefined;
@@ -53,8 +53,8 @@ export declare const CreateProdutoSchema: z.ZodObject<{
 }>;
 export declare const UpdateProdutoSchema: z.ZodObject<{
     nome: z.ZodOptional<z.ZodString>;
-    categoria: z.ZodOptional<z.ZodEnum<["Ração", "Petisco", "Medicamento", "Acessório", "Higiene", "Serviço"]>>;
-    especie: z.ZodOptional<z.ZodOptional<z.ZodEnum<["Cão", "Gato", "Ambos"]>>>;
+    categoria: z.ZodOptional<z.ZodEnum<["Ração", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"]>>;
+    especie: z.ZodOptional<z.ZodOptional<z.ZodEnum<["Cão", "Gato", "Cão e Gato", "Ambos"]>>>;
     subCategoria: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     marca: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     fornecedor: z.ZodOptional<z.ZodOptional<z.ZodString>>;
@@ -70,8 +70,8 @@ export declare const UpdateProdutoSchema: z.ZodObject<{
     imagemUrl: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
 }, "strip", z.ZodTypeAny, {
     nome?: string | undefined;
-    especie?: "Cão" | "Gato" | "Ambos" | undefined;
-    categoria?: "Ração" | "Petisco" | "Medicamento" | "Acessório" | "Higiene" | "Serviço" | undefined;
+    especie?: "Cão" | "Gato" | "Cão e Gato" | "Ambos" | undefined;
+    categoria?: "Ração" | "Petisco" | "Suplemento" | "Medicamento" | "Acessório" | "Higiene" | "Serviço" | undefined;
     subCategoria?: string | undefined;
     marca?: string | undefined;
     fornecedor?: string | undefined;
@@ -87,8 +87,8 @@ export declare const UpdateProdutoSchema: z.ZodObject<{
     imagemUrl?: string | null | undefined;
 }, {
     nome?: string | undefined;
-    especie?: "Cão" | "Gato" | "Ambos" | undefined;
-    categoria?: "Ração" | "Petisco" | "Medicamento" | "Acessório" | "Higiene" | "Serviço" | undefined;
+    especie?: "Cão" | "Gato" | "Cão e Gato" | "Ambos" | undefined;
+    categoria?: "Ração" | "Petisco" | "Suplemento" | "Medicamento" | "Acessório" | "Higiene" | "Serviço" | undefined;
     subCategoria?: string | undefined;
     marca?: string | undefined;
     fornecedor?: string | undefined;

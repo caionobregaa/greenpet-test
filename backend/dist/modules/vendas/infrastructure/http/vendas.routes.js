@@ -9,16 +9,19 @@ const list_vendas_use_case_js_1 = require("../../application/use-cases/list-vend
 const delete_venda_use_case_js_1 = require("../../application/use-cases/delete-venda.use-case.js");
 const vendas_schema_js_1 = require("./vendas.schema.js");
 const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
-function toResponse(v) {
+function toResponse(v, extra) {
     return {
         id: v.id,
         clienteId: v.clienteId,
         animalId: v.animalId,
         data: v.data,
         formaPag: v.formaPag,
+        taxaCartao: v.taxaCartao,
         total: v.total,
         obs: v.obs,
         itens: v.itens,
+        cliente: extra?.clienteNome ? { nome: extra.clienteNome } : undefined,
+        animal: extra?.animalNome ? { nome: extra.animalNome } : undefined,
         createdAt: v.createdAt,
     };
 }
@@ -34,7 +37,20 @@ function registerVendasRoutes(app, prisma) {
         if (!q.success)
             throw new validation_error_js_1.ValidationError('VALIDATION_ERROR', q.error.errors[0].message);
         const result = await listUC.execute(q.data);
-        rep.send({ data: result.vendas.map(toResponse), meta: { page: q.data.page, limit: q.data.limit, total: result.total } });
+        const ids = result.vendas.map((v) => v.id);
+        const rows = await prisma.venda.findMany({
+            where: { id: { in: ids } },
+            select: {
+                id: true,
+                cliente: { select: { nome: true } },
+                animal: { select: { nome: true } },
+            },
+        });
+        const extraMap = new Map(rows.map((r) => [r.id, { clienteNome: r.cliente?.nome, animalNome: r.animal?.nome }]));
+        rep.send({
+            data: result.vendas.map((v) => toResponse(v, extraMap.get(v.id))),
+            meta: { page: q.data.page, limit: q.data.limit, total: result.total },
+        });
     });
     app.post('/api/v1/vendas', async (req, rep) => {
         const body = vendas_schema_js_1.CreateVendaSchema.safeParse(req.body);
@@ -46,7 +62,14 @@ function registerVendasRoutes(app, prisma) {
     app.get('/api/v1/vendas/:id', async (req, rep) => {
         const { id } = req.params;
         const venda = await getUC.execute({ id });
-        rep.send({ data: toResponse(venda) });
+        const row = await prisma.venda.findUnique({
+            where: { id },
+            select: {
+                cliente: { select: { nome: true } },
+                animal: { select: { nome: true } },
+            },
+        });
+        rep.send({ data: toResponse(venda, { clienteNome: row?.cliente?.nome, animalNome: row?.animal?.nome }) });
     });
     app.delete('/api/v1/vendas/:id', async (req, rep) => {
         const { id } = req.params;

@@ -5,6 +5,9 @@ const aggregate_root_base_js_1 = require("../../../../src/shared/domain/aggregat
 const money_vo_js_1 = require("../../../../src/shared/domain/value-objects/money.vo.js");
 const validation_error_js_1 = require("../../../../src/shared/errors/validation.error.js");
 class Orcamento extends aggregate_root_base_js_1.AggregateRoot {
+    _numero = 0;
+    applyNumero(n) { this._numero = n; }
+    get numero() { return this._numero; }
     static create(data) {
         const itens = data.itens.map((item) => ({
             id: item.id ?? crypto.randomUUID(),
@@ -24,6 +27,7 @@ class Orcamento extends aggregate_root_base_js_1.AggregateRoot {
             total: money_vo_js_1.Money.create(totalValue),
             obs: data.obs,
             vendaId: data.vendaId,
+            formasPag: data.formasPag ?? [],
             itens,
         }, data.id);
     }
@@ -35,6 +39,7 @@ class Orcamento extends aggregate_root_base_js_1.AggregateRoot {
     get total() { return this.props.total.value; }
     get obs() { return this.props.obs; }
     get vendaId() { return this.props.vendaId; }
+    get formasPag() { return this.props.formasPag; }
     get itens() { return this.props.itens; }
     get vencido() {
         if (this.props.status !== 'pendente')

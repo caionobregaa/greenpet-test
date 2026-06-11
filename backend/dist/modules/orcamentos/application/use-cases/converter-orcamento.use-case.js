@@ -11,7 +11,7 @@ class ConverterOrcamentoUseCase {
         this.orcamentoRepo = orcamentoRepo;
         this.vendaRepo = vendaRepo;
     }
-    async execute({ id, formaPag }) {
+    async execute({ id, formaPag, taxaCartao = 0 }) {
         const orcamento = await this.orcamentoRepo.findById(id);
         if (!orcamento)
             throw new not_found_error_js_1.NotFoundError('NOT_FOUND', 'Orçamento não encontrado');
@@ -30,6 +30,7 @@ class ConverterOrcamentoUseCase {
             animalId: orcamento.animalId,
             data: new Date(),
             formaPag,
+            taxaCartao,
             obs: orcamento.obs,
             itens: orcamento.itens.map((i) => ({
                 produtoId: i.produtoId,

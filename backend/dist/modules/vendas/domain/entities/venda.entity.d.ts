@@ -22,6 +22,7 @@ interface VendaProps {
     animalId?: string;
     data: Date;
     formaPag: FormaPag;
+    taxaCartao: number;
     total: Money;
     obs?: string;
     itens: VendaItemReadOnly[];
@@ -33,6 +34,7 @@ export declare class Venda extends AggregateRoot<VendaProps> {
         animalId?: string;
         data?: Date;
         formaPag: string;
+        taxaCartao?: number;
         obs?: string;
         itens: VendaItemData[];
     }): Venda;
@@ -40,6 +42,7 @@ export declare class Venda extends AggregateRoot<VendaProps> {
     get animalId(): string | undefined;
     get data(): Date;
     get formaPag(): string;
+    get taxaCartao(): number;
     get total(): number;
     get obs(): string | undefined;
     get itens(): VendaItemReadOnly[];

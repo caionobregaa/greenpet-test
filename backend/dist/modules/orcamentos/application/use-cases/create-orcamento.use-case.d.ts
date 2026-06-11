@@ -7,6 +7,7 @@ export interface CreateOrcamentoInput {
     data?: Date;
     validade: Date;
     obs?: string;
+    formasPag?: string[];
     itens: OrcamentoItemData[];
 }
 export declare class CreateOrcamentoUseCase {

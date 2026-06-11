@@ -4,8 +4,8 @@ exports.ListProdutosQuerySchema = exports.UpdateProdutoSchema = exports.CreatePr
 const zod_1 = require("zod");
 exports.CreateProdutoSchema = zod_1.z.object({
     nome: zod_1.z.string().min(1),
-    categoria: zod_1.z.enum(['Ração', 'Petisco', 'Medicamento', 'Acessório', 'Higiene', 'Serviço']),
-    especie: zod_1.z.enum(['Cão', 'Gato', 'Ambos']).optional(),
+    categoria: zod_1.z.enum(['Ração', 'Petisco', 'Suplemento', 'Medicamento', 'Acessório', 'Higiene', 'Serviço']),
+    especie: zod_1.z.enum(['Cão', 'Gato', 'Cão e Gato', 'Ambos']).optional(),
     subCategoria: zod_1.z.string().optional(),
     marca: zod_1.z.string().optional(),
     fornecedor: zod_1.z.string().optional(),

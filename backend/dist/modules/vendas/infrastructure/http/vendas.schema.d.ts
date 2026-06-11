@@ -4,6 +4,7 @@ export declare const CreateVendaSchema: z.ZodObject<{
     animalId: z.ZodOptional<z.ZodString>;
     data: z.ZodEffects<z.ZodOptional<z.ZodString>, Date | undefined, string | undefined>;
     formaPag: z.ZodEnum<["Pix", "Dinheiro", "Cartão Crédito", "Cartão Débito", "Boleto"]>;
+    taxaCartao: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
     obs: z.ZodOptional<z.ZodString>;
     itens: z.ZodArray<z.ZodObject<{
         produtoId: z.ZodOptional<z.ZodString>;
@@ -24,6 +25,7 @@ export declare const CreateVendaSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     clienteId: string;
     formaPag: "Pix" | "Dinheiro" | "Cartão Crédito" | "Cartão Débito" | "Boleto";
+    taxaCartao: number;
     itens: {
         nome: string;
         qtd: number;
@@ -45,6 +47,7 @@ export declare const CreateVendaSchema: z.ZodObject<{
     data?: string | undefined;
     obs?: string | undefined;
     animalId?: string | undefined;
+    taxaCartao?: number | undefined;
 }>;
 export declare const ListVendasQuerySchema: z.ZodObject<{
     clienteId: z.ZodOptional<z.ZodString>;

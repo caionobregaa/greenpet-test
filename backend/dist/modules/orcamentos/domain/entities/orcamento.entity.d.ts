@@ -25,9 +25,13 @@ interface OrcamentoProps {
     total: Money;
     obs?: string;
     vendaId?: string;
+    formasPag: string[];
     itens: OrcamentoItemReadOnly[];
 }
 export declare class Orcamento extends AggregateRoot<OrcamentoProps> {
+    private _numero;
+    applyNumero(n: number): void;
+    get numero(): number;
     static create(data: {
         id?: string;
         clienteId?: string;
@@ -37,6 +41,7 @@ export declare class Orcamento extends AggregateRoot<OrcamentoProps> {
         status?: OrcamentoStatus;
         obs?: string;
         vendaId?: string;
+        formasPag?: string[];
         itens: OrcamentoItemData[];
     }): Orcamento;
     get clienteId(): string | undefined;
@@ -47,6 +52,7 @@ export declare class Orcamento extends AggregateRoot<OrcamentoProps> {
     get total(): number;
     get obs(): string | undefined;
     get vendaId(): string | undefined;
+    get formasPag(): string[];
     get itens(): OrcamentoItemReadOnly[];
     get vencido(): boolean;
     aprovar(): void;

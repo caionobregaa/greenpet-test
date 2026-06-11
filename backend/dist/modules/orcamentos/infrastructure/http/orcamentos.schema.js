@@ -19,6 +19,7 @@ exports.CreateOrcamentoSchema = zod_1.z.object({
     data: zod_1.z.string().date().optional().transform((v) => v ? new Date(v) : undefined),
     validade: zod_1.z.string().date().transform((v) => new Date(v)),
     obs: zod_1.z.string().optional(),
+    formasPag: zod_1.z.array(zod_1.z.string()).optional().default([]),
     itens: zod_1.z.array(OrcamentoItemSchema).min(1),
 });
 exports.UpdateOrcamentoStatusSchema = zod_1.z.object({
@@ -26,6 +27,7 @@ exports.UpdateOrcamentoStatusSchema = zod_1.z.object({
 });
 exports.ConverterOrcamentoSchema = zod_1.z.object({
     formaPag: zod_1.z.enum(['Pix', 'Dinheiro', 'Cartão Crédito', 'Cartão Débito', 'Boleto']),
+    taxaCartao: zod_1.z.number().min(0).max(100).optional().default(0),
 });
 exports.ListOrcamentosQuerySchema = zod_1.z.object({
     clienteId: zod_1.z.string().uuid().optional(),

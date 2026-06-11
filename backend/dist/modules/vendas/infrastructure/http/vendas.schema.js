@@ -13,6 +13,7 @@ exports.CreateVendaSchema = zod_1.z.object({
     animalId: zod_1.z.string().uuid().optional(),
     data: zod_1.z.string().date().optional().transform((v) => v ? new Date(v) : undefined),
     formaPag: zod_1.z.enum(['Pix', 'Dinheiro', 'Cartão Crédito', 'Cartão Débito', 'Boleto']),
+    taxaCartao: zod_1.z.number().min(0).max(100).optional().default(0),
     obs: zod_1.z.string().optional(),
     itens: zod_1.z.array(VendaItemSchema).min(1),
 });
