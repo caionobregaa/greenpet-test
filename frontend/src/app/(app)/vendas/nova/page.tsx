@@ -221,17 +221,23 @@ export default function NovaVendaPage() {
 
   const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<CreateVendaInput>({
     resolver: zodResolver(CreateVendaSchema),
-    defaultValues: { data: todayISO(), itens: [], taxaCartao: 0 },
+    defaultValues: { data: todayISO(), itens: [], taxaCartao: 0, taxaEntrega: 0 },
   });
+
+  // Delivery fee state
+  const [cobrarEntrega, setCobrarEntrega] = useState(false);
+  const [valorEntrega, setValorEntrega] = useState(0);
 
   // Compute total from itens for profit display
   const [formTotal, setFormTotal] = useState(0);
 
   const selectedOpcao = OPCOES_PAG.find((o) => o.value === formaPagKey);
   const taxaPct = selectedOpcao?.taxaKey ? TAXAS[selectedOpcao.taxaKey].pct : 0;
-  const lucroLiquido = orcamentoSelecionado
-    ? orcamentoSelecionado.total * (1 - taxaPct / 100)
-    : formTotal * (1 - taxaPct / 100);
+  const entrega = cobrarEntrega ? (valorEntrega || 0) : 0;
+  const totalBruto = orcamentoSelecionado
+    ? orcamentoSelecionado.total + entrega
+    : formTotal + entrega;
+  const lucroLiquido = totalBruto * (1 - taxaPct / 100);
 
   function searchClientes(q: string) {
     setClienteQ(q);
@@ -248,7 +254,7 @@ export default function NovaVendaPage() {
     }, 300);
   }
 
-  function selectCliente(c: Cliente, onChange: (v: string) => void) {
+  async function selectCliente(c: Cliente, onChange: (v: string) => void) {
     setClienteSelected(c);
     setClienteQ(c.nome);
     setClienteOptions([]);
@@ -257,6 +263,17 @@ export default function NovaVendaPage() {
     setAnimalSelected(null);
     setAnimalQ("");
     setValue("animalId", null);
+    try {
+      const { data } = await apiAnimais.list({ clienteId: c.id, limit: 20 });
+      if (data.length === 1) {
+        setAnimalSelected(data[0]);
+        setAnimalQ(data[0].nome);
+        setValue("animalId", data[0].id);
+      } else if (data.length > 1) {
+        setAnimalOptions(data);
+        setAnimalOpen(true);
+      }
+    } catch { /* ignore */ }
   }
 
   function clearCliente(onChange: (v: string) => void) {
@@ -317,7 +334,7 @@ export default function NovaVendaPage() {
     try {
       const result = await converterOrcamento.mutateAsync({
         id: orcamentoSelecionado.id,
-        input: { formaPag: opcao.backend, taxaCartao: taxaPctVal },
+        input: { formaPag: opcao.backend, taxaCartao: taxaPctVal, taxaEntrega: entrega },
       });
       toast.success("Venda registrada com sucesso!");
       router.push(`/vendas/${result.vendaId}`);
@@ -337,6 +354,7 @@ export default function NovaVendaPage() {
         ...data,
         formaPag: opcao.backend,
         taxaCartao: taxaPctVal,
+        taxaEntrega: entrega,
       });
       toast.success("Venda registrada com sucesso!");
       router.push(`/vendas/${venda.id}`);
@@ -390,12 +408,44 @@ export default function NovaVendaPage() {
           }} />
           {errors.formaPag && <p className="text-xs text-destructive mt-1">{errors.formaPag.message}</p>}
 
+          {/* Taxa de entrega */}
+          <div className="mt-4 flex items-center gap-3">
+            <label className="flex items-center gap-2 cursor-pointer select-none text-sm">
+              <input
+                type="checkbox"
+                checked={cobrarEntrega}
+                onChange={(e) => { setCobrarEntrega(e.target.checked); if (!e.target.checked) setValorEntrega(0); }}
+                className="w-4 h-4 rounded border-input accent-primary"
+              />
+              Cobrar taxa de entrega?
+            </label>
+            {cobrarEntrega && (
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={valorEntrega || ""}
+                onChange={(e) => setValorEntrega(Number(e.target.value) || 0)}
+                placeholder="R$ 0,00"
+                className="w-32 h-8 text-sm"
+              />
+            )}
+          </div>
+
           {formaPagKey && (
-            <div className="mt-3 rounded-lg border border-border bg-accent/30 p-3 flex gap-4 text-sm">
-              <span className="text-muted-foreground">Total bruto:</span>
+            <div className="mt-3 rounded-lg border border-border bg-accent/30 p-3 flex flex-wrap gap-4 text-sm">
+              <span className="text-muted-foreground">Itens:</span>
               <span className="font-mono font-semibold">
                 {formatBRL(orcamentoSelecionado ? orcamentoSelecionado.total : formTotal)}
               </span>
+              {entrega > 0 && (
+                <>
+                  <span className="text-muted-foreground">+ entrega:</span>
+                  <span className="font-mono font-semibold">{formatBRL(entrega)}</span>
+                </>
+              )}
+              <span className="text-muted-foreground">= Total:</span>
+              <span className="font-mono font-semibold">{formatBRL(totalBruto)}</span>
               {taxaPct > 0 && (
                 <>
                   <span className="text-destructive">−{taxaPct}% taxa</span>

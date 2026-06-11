@@ -120,9 +120,10 @@ model Venda {
   cliente   Cliente     @relation(fields: [clienteId], references: [id])
   animalId  String?
   animal    Animal?     @relation(fields: [animalId], references: [id])
-  formaPag   String
-  taxaCartao Float       @default(0)
-  total      Decimal     @db.Decimal(10, 2)
+  formaPag    String
+  taxaCartao  Float      @default(0)
+  taxaEntrega Float      @default(0)
+  total       Decimal    @db.Decimal(10, 2)
   obs        String?
   itens      VendaItem[]
   orcamento  Orcamento?

@@ -15,6 +15,7 @@ export const CreateVendaSchema = z.object({
     message: "Selecione a forma de pagamento",
   }),
   taxaCartao: z.number().min(0).max(100).optional(),
+  taxaEntrega: z.number().min(0).optional(),
   obs: z.string().optional().or(z.literal("")),
   itens: z.array(VendaItemSchema).min(1, "Adicione pelo menos um item"),
 });

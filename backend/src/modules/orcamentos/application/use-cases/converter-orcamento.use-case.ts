@@ -10,7 +10,7 @@ export class ConverterOrcamentoUseCase {
     private readonly vendaRepo: IVendaRepository,
   ) {}
 
-  async execute({ id, formaPag, taxaCartao = 0 }: { id: string; formaPag: string; taxaCartao?: number }): Promise<Venda> {
+  async execute({ id, formaPag, taxaCartao = 0, taxaEntrega = 0 }: { id: string; formaPag: string; taxaCartao?: number; taxaEntrega?: number }): Promise<Venda> {
     const orcamento = await this.orcamentoRepo.findById(id)
     if (!orcamento) throw new NotFoundError('NOT_FOUND', 'Orçamento não encontrado')
 
@@ -33,6 +33,7 @@ export class ConverterOrcamentoUseCase {
       data: new Date(),
       formaPag,
       taxaCartao,
+      taxaEntrega,
       obs: orcamento.obs,
       itens: orcamento.itens.map((i) => ({
         produtoId: i.produtoId,

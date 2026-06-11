@@ -18,6 +18,7 @@ function toResponse(v: Venda, extra?: { clienteNome?: string | null; animalNome?
     data: v.data,
     formaPag: v.formaPag,
     taxaCartao: v.taxaCartao,
+    taxaEntrega: v.taxaEntrega,
     total: v.total,
     obs: v.obs,
     itens: v.itens,

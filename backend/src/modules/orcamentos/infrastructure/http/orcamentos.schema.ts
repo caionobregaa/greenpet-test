@@ -30,6 +30,7 @@ export const UpdateOrcamentoStatusSchema = z.object({
 export const ConverterOrcamentoSchema = z.object({
   formaPag: z.enum(['Pix', 'Dinheiro', 'Cartão Crédito', 'Cartão Débito', 'Boleto']),
   taxaCartao: z.number().min(0).max(100).optional().default(0),
+  taxaEntrega: z.number().min(0).optional().default(0),
 })
 
 export const ListOrcamentosQuerySchema = z.object({
