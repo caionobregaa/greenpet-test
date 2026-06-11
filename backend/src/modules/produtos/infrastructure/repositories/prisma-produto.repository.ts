@@ -15,11 +15,13 @@ export class PrismaProdutoRepository implements IProdutoRepository {
     return row ? this.toDomain(row) : null
   }
 
-  async findMany(params: { q?: string; categoria?: string; especie?: string; page: number; limit: number }) {
+  async findMany(params: { q?: string; categoria?: string; especie?: string; fornecedor?: string; marca?: string; page: number; limit: number }) {
     const where = {
       deletedAt: null,
-      ...(params.categoria ? { categoria: params.categoria } : {}),
-      ...(params.especie ? { especie: params.especie } : {}),
+      ...(params.categoria  ? { categoria:  params.categoria }  : {}),
+      ...(params.especie    ? { especie:    params.especie }    : {}),
+      ...(params.fornecedor ? { fornecedor: params.fornecedor } : {}),
+      ...(params.marca      ? { marca:      params.marca }      : {}),
       ...(params.q ? { nome: { contains: params.q, mode: 'insensitive' as const } } : {}),
     }
     const [rows, total] = await this.prisma.$transaction([

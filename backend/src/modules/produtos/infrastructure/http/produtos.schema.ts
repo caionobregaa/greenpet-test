@@ -25,6 +25,8 @@ export const ListProdutosQuerySchema = z.object({
   q: z.string().optional(),
   categoria: z.string().optional(),
   especie: z.string().optional(),
+  fornecedor: z.string().optional(),
+  marca: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 })

@@ -8,6 +8,8 @@ export class ListProdutosUseCase {
     q?: string
     categoria?: string
     especie?: string
+    fornecedor?: string
+    marca?: string
     page?: number
     limit?: number
   }): Promise<{ produtos: Produto[]; total: number }> {
@@ -15,6 +17,8 @@ export class ListProdutosUseCase {
       q: params.q,
       categoria: params.categoria,
       especie: params.especie,
+      fornecedor: params.fornecedor,
+      marca: params.marca,
       page: params.page ?? 1,
       limit: params.limit ?? 20,
     })

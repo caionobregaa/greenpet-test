@@ -6,6 +6,8 @@ interface ListParams {
   q?: string;
   categoria?: string;
   especie?: string;
+  fornecedor?: string;
+  marca?: string;
   page?: number;
   limit?: number;
 }

@@ -175,10 +175,6 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
           )}
 
           <div className="space-y-1.5">
-            <Label htmlFor="margemCartao">Margem Cartão (%)</Label>
-            <Input id="margemCartao" type="number" step="0.1" min="0" max="100" {...register("margemCartao", { valueAsNumber: true })} placeholder="0" />
-          </div>
-          <div className="space-y-1.5">
             <Label htmlFor="margemImposto">Margem Imposto (%)</Label>
             <Input id="margemImposto" type="number" step="0.1" min="0" max="100" {...register("margemImposto", { valueAsNumber: true })} placeholder="0" />
           </div>

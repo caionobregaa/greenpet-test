@@ -7,6 +7,8 @@ export interface IProdutoRepository {
     q?: string
     categoria?: string
     especie?: string
+    fornecedor?: string
+    marca?: string
     page: number
     limit: number
   }): Promise<{ produtos: Produto[]; total: number }>

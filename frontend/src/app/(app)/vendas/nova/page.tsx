@@ -28,8 +28,9 @@ import { cn } from "@/lib/utils";
 const TAXAS = {
   "link-1x":        { label: "Link de Pagamento 1x",          pct: 4.20 },
   "link-2x":        { label: "Link de Pagamento 2x+",         pct: 6.09 },
-  "maquininha-1x":  { label: "Maquininha 1x",                 pct: 3.15 },
-  "maquininha-2x":  { label: "Maquininha 2x+",                pct: 5.39 },
+  "maquininha-1x":  { label: "Infinite TAP 1x",               pct: 3.15 },
+  "maquininha-2x":  { label: "Infinite TAP 2x+",              pct: 5.39 },
+  "debito":         { label: "Cartão Débito",                  pct: 1.37 },
 } as const;
 
 type TaxaKey = keyof typeof TAXAS;
@@ -44,13 +45,13 @@ interface OpcaoPag {
 }
 
 const OPCOES_PAG: OpcaoPag[] = [
-  { value: "pix",           label: "PIX",                            backend: "Pix",            Icon: QrCode },
-  { value: "dinheiro",      label: "Dinheiro",                       backend: "Dinheiro",       Icon: Banknote },
-  { value: "link-1x",       label: "Cartão Crédito — Link 1x (4,2%)",    backend: "Cartão Crédito", taxaKey: "link-1x",       Icon: CreditCard },
-  { value: "link-2x",       label: "Cartão Crédito — Link 2x+ (6,09%)",  backend: "Cartão Crédito", taxaKey: "link-2x",       Icon: CreditCard },
-  { value: "maquininha-1x", label: "Cartão Crédito — Maquininha 1x (3,15%)",  backend: "Cartão Crédito", taxaKey: "maquininha-1x", Icon: CreditCard },
-  { value: "maquininha-2x", label: "Cartão Crédito — Maquininha 2x+ (5,39%)", backend: "Cartão Crédito", taxaKey: "maquininha-2x", Icon: CreditCard },
-  { value: "cartao-debito", label: "Cartão Débito",                   backend: "Cartão Débito",  Icon: Wallet },
+  { value: "pix",           label: "PIX",                                         backend: "Pix",           Icon: QrCode    },
+  { value: "dinheiro",      label: "Dinheiro",                                    backend: "Dinheiro",      Icon: Banknote  },
+  { value: "link-1x",       label: "Crédito — Link de Pagamento 1x (4,2%)",       backend: "Cartão Crédito", taxaKey: "link-1x",       Icon: CreditCard },
+  { value: "link-2x",       label: "Crédito — Link de Pagamento 2x+ (6,09%)",     backend: "Cartão Crédito", taxaKey: "link-2x",       Icon: CreditCard },
+  { value: "maquininha-1x", label: "Crédito — Infinite TAP 1x (3,15%)",           backend: "Cartão Crédito", taxaKey: "maquininha-1x", Icon: CreditCard },
+  { value: "maquininha-2x", label: "Crédito — Infinite TAP 2x+ (5,39%)",          backend: "Cartão Crédito", taxaKey: "maquininha-2x", Icon: CreditCard },
+  { value: "cartao-debito", label: "Débito (1,37%)",                               backend: "Cartão Débito",  taxaKey: "debito",        Icon: Wallet     },
 ];
 
 // ── FormaPag selector ────────────────────────────────────────────────────────
