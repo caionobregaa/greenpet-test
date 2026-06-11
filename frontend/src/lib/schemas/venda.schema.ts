@@ -4,7 +4,7 @@ export const VendaItemSchema = z.object({
   produtoId: z.string().uuid().optional().nullable(),
   nome: z.string().min(1, "Nome do item é obrigatório"),
   qtd: z.number().int().min(1, "Quantidade mínima é 1"),
-  valorUnitario: z.number().min(0.01, "Valor deve ser maior que zero"),
+  valorUnitario: z.number().min(0, "Valor inválido"),
 });
 
 export const CreateVendaSchema = z.object({

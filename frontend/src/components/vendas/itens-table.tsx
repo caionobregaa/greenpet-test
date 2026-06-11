@@ -223,9 +223,14 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false }: It
                     onSelect={(p) => selectProduto(index, p)}
                     autoFocus={index === lastAddedIndex}
                   />
+                  {isRacao && extra.pesoEmbalagem ? (
+                    <p className="text-[11px] text-primary/80 font-medium">
+                      Embalagem: {extra.pesoEmbalagem} kg
+                    </p>
+                  ) : null}
                 </div>
                 <div className="space-y-1.5">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Descrição *</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Descrição</p>
                   <Input
                     {...control.register(`itens.${index}.nome` as never)}
                     placeholder="Nome do item ou serviço"

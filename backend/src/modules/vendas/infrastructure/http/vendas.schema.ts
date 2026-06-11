@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 const VendaItemSchema = z.object({
-  produtoId: z.string().uuid().optional(),
+  produtoId: z.string().uuid().nullable().optional().transform((v) => v ?? undefined),
   nome: z.string().min(1),
   qtd: z.number().int().positive(),
   valorUnitario: z.number().min(0),
