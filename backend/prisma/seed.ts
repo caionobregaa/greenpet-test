@@ -20,13 +20,15 @@ async function main(): Promise<void> {
   console.log('✅ Usuário admin criado: admin@greenpet.com / admin123')
 
   await seedProdutosPrime(prisma)
+  await seedProdutosBasso(prisma)
   console.log('✅ Seed concluído.')
 }
 
 // ─── Margens por categoria ────────────────────────────────────────────────────
-const M_MATISSE    = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 32 }
-const M_PETICOS    = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 60 }
-const M_SUPLEMENTO = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 30 }
+const M_MATISSE       = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 32 }
+const M_PETICOS       = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 60 }
+const M_SUPLEMENTO    = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 30 }
+const M_ROYAL_CANINE  = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 45 }
 
 interface ProdutoSeed {
   nome: string; categoria: string; especie?: string; subCategoria?: string
@@ -120,6 +122,81 @@ const PRODUTOS_PRIME: ProdutoSeed[] = [
   { nome: 'Ograx Baby para Cães e Gatos 30ml',                      categoria: 'Suplemento', especie: 'Cão e Gato', subCategoria: 'Líquido',    marca: 'Ograx',     fornecedor: 'PRIME', valorCusto:  94.50, valorVenda: 135, ...M_SUPLEMENTO },
   { nome: 'Ograx 5 para Gatos 30 Cápsulas',                         categoria: 'Suplemento', especie: 'Gato',       subCategoria: 'Cápsula',    marca: 'Ograx',     fornecedor: 'PRIME', valorCusto:  90.72, valorVenda: 130, ...M_SUPLEMENTO },
 ]
+
+// ─── Royal Canine – BASSO PANCOTTE ───────────────────────────────────────────
+const PRODUTOS_BASSO: ProdutoSeed[] = [
+  // ── Cão · Adulto ─────────────────────────────────────────────────────────
+  { nome: 'Royal Canine X Small Adult 2,5kg',                          categoria: 'Ração', especie: 'Cão', subCategoria: 'Seca',         marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  2.5, valorCusto: 107.70, valorVenda: 170, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Mini Adult 2,5kg',                             categoria: 'Ração', especie: 'Cão', subCategoria: 'Seca',         marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  2.5, valorCusto:  88.38, valorVenda: 140, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Mini Adult 7,5kg',                             categoria: 'Ração', especie: 'Cão', subCategoria: 'Seca',         marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  7.5, valorCusto: 192.23, valorVenda: 304, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Mini Indoor Adult 2,5kg',                      categoria: 'Ração', especie: 'Cão', subCategoria: 'Seca',         marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  2.5, valorCusto:  96.84, valorVenda: 153, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Mini Indoor Adult 7,5kg',                      categoria: 'Ração', especie: 'Cão', subCategoria: 'Seca',         marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  7.5, valorCusto: 211.46, valorVenda: 334, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Medium Adult 2,5kg',                           categoria: 'Ração', especie: 'Cão', subCategoria: 'Seca',         marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  2.5, valorCusto:  80.69, valorVenda: 128, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Medium Adult 12kg',                            categoria: 'Ração', especie: 'Cão', subCategoria: 'Seca',         marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem: 12,   valorCusto: 217.62, valorVenda: 344, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Maxi Adult 12kg',                              categoria: 'Ração', especie: 'Cão', subCategoria: 'Seca',         marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem: 12,   valorCusto: 265.08, valorVenda: 419, ...M_ROYAL_CANINE },
+  // ── Cão · Filhote ────────────────────────────────────────────────────────
+  { nome: 'Royal Canine Mini Puppy 2,5kg',                             categoria: 'Ração', especie: 'Cão', subCategoria: 'Seca Filhote', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  2.5, valorCusto:  84.54, valorVenda: 134,    ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Mini Puppy 7,5kg',                             categoria: 'Ração', especie: 'Cão', subCategoria: 'Seca Filhote', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  7.5, valorCusto: 192.23, valorVenda: 304,    ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Maxi Puppy 4kg',                               categoria: 'Ração', especie: 'Cão', subCategoria: 'Seca Filhote', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  4,   valorCusto: 143.18, valorVenda: 226,    ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Maxi Puppy 12kg',                              categoria: 'Ração', especie: 'Cão', subCategoria: 'Seca Filhote', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem: 12,   valorCusto: 285.11, valorVenda: 451,    ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Medium Puppy 2,5kg',                           categoria: 'Ração', especie: 'Cão', subCategoria: 'Seca Filhote', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  2.5, valorCusto:  76.85, valorVenda: 121.49, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Medium Puppy 12kg',                            categoria: 'Ração', especie: 'Cão', subCategoria: 'Seca Filhote', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem: 12,   valorCusto: 207.62, valorVenda: 328,    ...M_ROYAL_CANINE },
+  // ── Cão · Raças Específicas ───────────────────────────────────────────────
+  { nome: 'Royal Canine Yorkshire Adult 2,5kg',                        categoria: 'Ração', especie: 'Cão', subCategoria: 'Raça Específica', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem: 2.5, valorCusto: 102.23, valorVenda: 162, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Yorkshire Adult 8+ 2,5kg',                     categoria: 'Ração', especie: 'Cão', subCategoria: 'Raça Específica', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem: 2.5, valorCusto: 105.46, valorVenda: 167, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Shih Tzu Adult 2,5kg',                         categoria: 'Ração', especie: 'Cão', subCategoria: 'Raça Específica', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem: 2.5, valorCusto: 102.23, valorVenda: 162, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Maltês Adult 2,5kg',                           categoria: 'Ração', especie: 'Cão', subCategoria: 'Raça Específica', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem: 2.5, valorCusto: 102.23, valorVenda: 162, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Pomeranian Adult 2,5kg',                       categoria: 'Ração', especie: 'Cão', subCategoria: 'Raça Específica', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem: 2.5, valorCusto: 102.23, valorVenda: 162, ...M_ROYAL_CANINE },
+  // ── Cão · Medicamentosas ─────────────────────────────────────────────────
+  { nome: 'Royal Canine Light 3kg',                                    categoria: 'Ração', especie: 'Cão', subCategoria: 'Medicamentosa', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  3,   valorCusto: 226.31, valorVenda: 358, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Hipoalergênica Cães Pequenos e Adultos 7,5kg', categoria: 'Ração', especie: 'Cão', subCategoria: 'Medicamentosa', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  7.5, valorCusto: 386.26, valorVenda: 611, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Hipoalergênica Cães Adultos 10,1kg',           categoria: 'Ração', especie: 'Cão', subCategoria: 'Medicamentosa', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem: 10.1, valorCusto: 452.85, valorVenda: 716, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Urinary Cão',                                  categoria: 'Ração', especie: 'Cão', subCategoria: 'Medicamentosa', marca: 'Royal Canine', fornecedor: 'Basso Pancotte',                      valorCusto: 121.86, valorVenda: 193, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Ração Úmida Urinary Cão',                      categoria: 'Ração', especie: 'Cão', subCategoria: 'Úmida',         marca: 'Royal Canine', fornecedor: 'Basso Pancotte',                      valorCusto:  34.34, valorVenda:  54, ...M_ROYAL_CANINE },
+  // ── Gato · Adulto ─────────────────────────────────────────────────────────
+  { nome: 'Royal Canine Super Premium Cat Adult Castrado 2,5kg',       categoria: 'Ração', especie: 'Gato', subCategoria: 'Seca',         marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  2.5, valorCusto: 103.30, valorVenda: 163, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Super Premium Cat Adult Castrado 10,1kg',      categoria: 'Ração', especie: 'Gato', subCategoria: 'Seca',         marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem: 10.1, valorCusto: 239.21, valorVenda: 378, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Fit Gato 1,5kg',                               categoria: 'Ração', especie: 'Gato', subCategoria: 'Seca',         marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  1.5, valorCusto:  90.44, valorVenda: 143, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Fit Gato 7,5kg',                               categoria: 'Ração', especie: 'Gato', subCategoria: 'Seca',         marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  7.5, valorCusto: 321.53, valorVenda: 508, ...M_ROYAL_CANINE },
+  // ── Gato · Filhote ────────────────────────────────────────────────────────
+  { nome: 'Royal Canine Mother e Baby Cat 1,5kg',                      categoria: 'Ração', especie: 'Gato', subCategoria: 'Seca Filhote', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  1.5, valorCusto: 103.56, valorVenda: 164, ...M_ROYAL_CANINE },
+  { nome: 'Royal Canine Mother e Baby Cat 4kg',                        categoria: 'Ração', especie: 'Gato', subCategoria: 'Seca Filhote', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem:  4,   valorCusto: 250.28, valorVenda: 396, ...M_ROYAL_CANINE },
+  // ── Gato · Raças Específicas ──────────────────────────────────────────────
+  { nome: 'Royal Canine Maine Coon 4kg',                               categoria: 'Ração', especie: 'Gato', subCategoria: 'Raça Específica', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem: 4, valorCusto: 278.41, valorVenda: 440, ...M_ROYAL_CANINE },
+]
+
+async function seedProdutosBasso(prisma: PrismaClient): Promise<void> {
+  console.log(`📦 Seeding ${PRODUTOS_BASSO.length} produtos Royal Canine (Basso Pancotte)...`)
+  let criados = 0
+  let atualizados = 0
+
+  for (const p of PRODUTOS_BASSO) {
+    const data = {
+      categoria:      p.categoria,
+      especie:        p.especie ?? null,
+      subCategoria:   p.subCategoria ?? null,
+      marca:          p.marca ?? null,
+      fornecedor:     p.fornecedor ?? null,
+      pesoEmbalagem:  p.pesoEmbalagem ?? null,
+      valorCusto:     p.valorCusto,
+      valorVenda:     p.valorVenda,
+      margemCartao:   p.margemCartao ?? 0,
+      margemImposto:  p.margemImposto ?? 0,
+      margemOperacao: p.margemOperacao ?? 0,
+      margemLucro:    p.margemLucro ?? 0,
+    }
+    const existing = await prisma.produto.findUnique({ where: { nome: p.nome } })
+    if (existing) {
+      await prisma.produto.update({ where: { nome: p.nome }, data })
+      atualizados++
+    } else {
+      await prisma.produto.create({ data: { nome: p.nome, ...data } })
+      criados++
+    }
+  }
+
+  console.log(`✅ Royal Canine: ${criados} criados, ${atualizados} atualizados`)
+}
 
 async function seedProdutosPrime(prisma: PrismaClient): Promise<void> {
   console.log(`📦 Seeding ${PRODUTOS_PRIME.length} produtos PRIME...`)
