@@ -23,6 +23,7 @@ interface ItemRow {
   qtd: number;
   pesoKg?: number | null;
   valorUnitario: number;
+  desconto?: number;
 }
 
 interface ItemExtra {
@@ -159,7 +160,8 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false }: It
   const [itemExtras, setItemExtras] = useState<Record<number, ItemExtra>>({});
 
   const total = (itens ?? []).reduce((acc, item) => {
-    return acc + Number(item?.qtd ?? 0) * Number(item?.valorUnitario ?? 0);
+    const sub = Math.max(0, Number(item?.qtd ?? 0) * Number(item?.valorUnitario ?? 0) - Number(item?.desconto ?? 0));
+    return acc + sub;
   }, 0);
 
   function addEmpty() {
@@ -206,7 +208,7 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false }: It
       <div className="space-y-2">
         {fields.map((field, index) => {
           const item = (itens ?? [])[index] ?? {};
-          const subtotal = Number(item.qtd ?? 0) * Number(item.valorUnitario ?? 0);
+          const subtotal = Math.max(0, Number(item.qtd ?? 0) * Number(item.valorUnitario ?? 0) - Number(item.desconto ?? 0));
           const extra = itemExtras[index] ?? {};
           const duracao = calcDuracao(extra);
           const isRacao = extra.categoria === "Ração";
@@ -282,10 +284,23 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false }: It
                   />
                 </div>
 
+                <div className="space-y-1.5 w-[110px]">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Desconto R$</p>
+                  <Input
+                    type="number" step="0.01" min="0"
+                    {...control.register(`itens.${index}.desconto` as never, { valueAsNumber: true })}
+                    placeholder="0,00"
+                    className="text-primary/80"
+                  />
+                </div>
+
                 <div className="space-y-1.5 flex-1 min-w-[80px]">
                   <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Subtotal</p>
                   <div className="flex items-center h-9">
                     <span className="text-[13px] font-bold text-primary tabular-nums">{formatBRL(subtotal)}</span>
+                    {Number(item.desconto ?? 0) > 0 && (
+                      <span className="ml-1 text-[10px] text-primary/60">−{formatBRL(Number(item.desconto))}</span>
+                    )}
                   </div>
                 </div>
 

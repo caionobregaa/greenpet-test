@@ -49,6 +49,7 @@ export class PrismaVendaRepository implements IVendaRepository {
             nome: i.nome,
             qtd: i.qtd,
             valorUnitario: i.valorUnitario,
+            desconto: i.desconto,
             total: i.total,
           })),
         },
@@ -71,6 +72,7 @@ export class PrismaVendaRepository implements IVendaRepository {
             nome: i.nome,
             qtd: i.qtd,
             valorUnitario: i.valorUnitario,
+            desconto: i.desconto,
             total: i.total,
           })),
         },
@@ -100,6 +102,7 @@ export class PrismaVendaRepository implements IVendaRepository {
       nome: string
       qtd: number
       valorUnitario: unknown
+      desconto: number
       total: unknown
     }>
   }): Venda {
@@ -119,6 +122,7 @@ export class PrismaVendaRepository implements IVendaRepository {
         nome: i.nome,
         qtd: i.qtd,
         valorUnitario: Number(i.valorUnitario),
+        desconto: i.desconto ?? 0,
       })),
     })
   }

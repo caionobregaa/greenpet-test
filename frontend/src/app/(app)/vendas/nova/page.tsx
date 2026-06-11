@@ -228,10 +228,6 @@ export default function NovaVendaPage() {
   const [cobrarEntrega, setCobrarEntrega] = useState(false);
   const [valorEntrega, setValorEntrega] = useState(0);
 
-  // Discount state
-  const [cobrarDesconto, setCobrarDesconto] = useState(false);
-  const [valorDesconto, setValorDesconto] = useState(0);
-
   // New animal inline state
   const [showNovoAnimal, setShowNovoAnimal] = useState(false);
   const [novoAnimalNome, setNovoAnimalNome] = useState("");
@@ -244,10 +240,9 @@ export default function NovaVendaPage() {
   const selectedOpcao = OPCOES_PAG.find((o) => o.value === formaPagKey);
   const taxaPct = selectedOpcao?.taxaKey ? TAXAS[selectedOpcao.taxaKey].pct : 0;
   const entrega = cobrarEntrega ? (valorEntrega || 0) : 0;
-  const desconto = cobrarDesconto ? (valorDesconto || 0) : 0;
   const totalBruto = orcamentoSelecionado
-    ? Math.max(0, orcamentoSelecionado.total + entrega - desconto)
-    : Math.max(0, formTotal + entrega - desconto);
+    ? Math.max(0, orcamentoSelecionado.total + entrega)
+    : Math.max(0, formTotal + entrega);
   const lucroLiquido = totalBruto * (1 - taxaPct / 100);
 
   function searchClientes(q: string) {
@@ -367,7 +362,7 @@ export default function NovaVendaPage() {
     try {
       const result = await converterOrcamento.mutateAsync({
         id: orcamentoSelecionado.id,
-        input: { formaPag: opcao.backend, taxaCartao: taxaPctVal, taxaEntrega: entrega, desconto },
+        input: { formaPag: opcao.backend, taxaCartao: taxaPctVal, taxaEntrega: entrega },
       });
       toast.success("Venda registrada com sucesso!");
       router.push(`/vendas/${result.vendaId}`);
@@ -388,7 +383,6 @@ export default function NovaVendaPage() {
         formaPag: opcao.backend,
         taxaCartao: taxaPctVal,
         taxaEntrega: entrega,
-        desconto,
       });
       toast.success("Venda registrada com sucesso!");
       router.push(`/vendas/${venda.id}`);
@@ -466,30 +460,6 @@ export default function NovaVendaPage() {
             )}
           </div>
 
-          {/* Desconto */}
-          <div className="mt-3 flex items-center gap-3">
-            <label className="flex items-center gap-2 cursor-pointer select-none text-sm">
-              <input
-                type="checkbox"
-                checked={cobrarDesconto}
-                onChange={(e) => { setCobrarDesconto(e.target.checked); if (!e.target.checked) setValorDesconto(0); }}
-                className="w-4 h-4 rounded border-input accent-primary"
-              />
-              Aplicar desconto?
-            </label>
-            {cobrarDesconto && (
-              <Input
-                type="number"
-                min="0"
-                step="0.01"
-                value={valorDesconto || ""}
-                onChange={(e) => setValorDesconto(Number(e.target.value) || 0)}
-                placeholder="R$ 0,00"
-                className="w-32 h-8 text-sm"
-              />
-            )}
-          </div>
-
           {formaPagKey && (
             <div className="mt-3 rounded-lg border border-border bg-accent/30 p-3 flex flex-wrap gap-4 text-sm">
               <span className="text-muted-foreground">Itens:</span>
@@ -500,12 +470,6 @@ export default function NovaVendaPage() {
                 <>
                   <span className="text-muted-foreground">+ entrega:</span>
                   <span className="font-mono font-semibold">{formatBRL(entrega)}</span>
-                </>
-              )}
-              {desconto > 0 && (
-                <>
-                  <span className="text-primary/80">− desconto:</span>
-                  <span className="font-mono font-semibold text-primary/80">{formatBRL(desconto)}</span>
                 </>
               )}
               <span className="text-muted-foreground">= Total:</span>

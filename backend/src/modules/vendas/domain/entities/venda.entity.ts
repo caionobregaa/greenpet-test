@@ -11,6 +11,7 @@ export interface VendaItemData {
   nome: string
   qtd: number
   valorUnitario: number
+  desconto?: number
 }
 
 export interface VendaItemReadOnly {
@@ -19,6 +20,7 @@ export interface VendaItemReadOnly {
   nome: string
   qtd: number
   valorUnitario: number
+  desconto: number
   total: number
 }
 
@@ -59,13 +61,15 @@ export class Venda extends AggregateRoot<VendaProps> {
       if (item.qtd <= 0) {
         throw new ValidationError('VALIDATION_ERROR', 'Quantidade deve ser maior que zero')
       }
-      const itemTotal = Money.create(item.valorUnitario).multiply(item.qtd).value
+      const itemDesconto = item.desconto ?? 0
+      const itemTotal = Math.max(0, Money.create(item.valorUnitario).multiply(item.qtd).value - itemDesconto)
       return {
         id: item.id ?? crypto.randomUUID(),
         produtoId: item.produtoId,
         nome: item.nome,
         qtd: item.qtd,
         valorUnitario: item.valorUnitario,
+        desconto: itemDesconto,
         total: itemTotal,
       }
     })

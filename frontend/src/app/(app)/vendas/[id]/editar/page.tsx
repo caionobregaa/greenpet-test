@@ -117,8 +117,6 @@ export default function EditarVendaPage({ params }: Props) {
   const [formaPagKey, setFormaPagKey] = useState("");
   const [cobrarEntrega, setCobrarEntrega] = useState(false);
   const [valorEntrega, setValorEntrega] = useState(0);
-  const [cobrarDesconto, setCobrarDesconto] = useState(false);
-  const [valorDesconto, setValorDesconto] = useState(0);
 
   const [animalQ, setAnimalQ] = useState("");
   const [animalOptions, setAnimalOptions] = useState<Animal[]>([]);
@@ -141,16 +139,14 @@ export default function EditarVendaPage({ params }: Props) {
     const key = derivePagKey(venda.formaPag, venda.taxaCartao);
     setFormaPagKey(key);
     if (venda.taxaEntrega > 0) { setCobrarEntrega(true); setValorEntrega(venda.taxaEntrega); }
-    if (venda.desconto > 0) { setCobrarDesconto(true); setValorDesconto(venda.desconto); }
     reset({
       animalId: venda.animalId ?? undefined,
       data: venda.data.slice(0, 10),
       formaPag: venda.formaPag as UpdateVendaInput["formaPag"],
       taxaCartao: venda.taxaCartao,
       taxaEntrega: venda.taxaEntrega,
-      desconto: venda.desconto,
       obs: venda.obs ?? "",
-      itens: venda.itens.map((i) => ({ produtoId: i.produtoId, nome: i.nome, qtd: i.qtd, valorUnitario: i.valorUnitario })),
+      itens: venda.itens.map((i) => ({ produtoId: i.produtoId, nome: i.nome, qtd: i.qtd, valorUnitario: i.valorUnitario, desconto: i.desconto })),
     });
     if (venda.animalId) {
       setAnimalSelected({ id: venda.animalId, nome: venda.animal?.nome ?? "", especie: "" } as unknown as Animal);
@@ -216,7 +212,6 @@ export default function EditarVendaPage({ params }: Props) {
           formaPag: opcao.backend,
           taxaCartao: taxaPctVal,
           taxaEntrega: cobrarEntrega ? (valorEntrega || 0) : 0,
-          desconto: cobrarDesconto ? (valorDesconto || 0) : 0,
         },
       });
       toast.success("Venda atualizada com sucesso!");
@@ -227,14 +222,15 @@ export default function EditarVendaPage({ params }: Props) {
     }
   }
 
-  const watchedItens = useWatch({ control, name: "itens" }) as Array<{ qtd?: number; valorUnitario?: number }> | undefined;
-  const formTotal = (watchedItens ?? []).reduce((s, i) => s + (Number(i?.qtd) || 0) * (Number(i?.valorUnitario) || 0), 0);
+  const watchedItens = useWatch({ control, name: "itens" }) as Array<{ qtd?: number; valorUnitario?: number; desconto?: number }> | undefined;
+  const formTotal = (watchedItens ?? []).reduce((s, i) => {
+    return s + Math.max(0, (Number(i?.qtd) || 0) * (Number(i?.valorUnitario) || 0) - (Number(i?.desconto) || 0));
+  }, 0);
 
   const selectedOpcao = OPCOES_PAG.find((o) => o.value === formaPagKey);
   const taxaPct = selectedOpcao?.taxaKey ? TAXAS[selectedOpcao.taxaKey].pct : 0;
   const entrega = cobrarEntrega ? (valorEntrega || 0) : 0;
-  const desconto = cobrarDesconto ? (valorDesconto || 0) : 0;
-  const totalBruto = Math.max(0, formTotal + entrega - desconto);
+  const totalBruto = Math.max(0, formTotal + entrega);
   const lucroLiquido = totalBruto * (1 - taxaPct / 100);
 
   if (isLoading) {
@@ -290,32 +286,11 @@ export default function EditarVendaPage({ params }: Props) {
             )}
           </div>
 
-          <div className="mt-3 flex items-center gap-3">
-            <label className="flex items-center gap-2 cursor-pointer select-none text-sm">
-              <input
-                type="checkbox"
-                checked={cobrarDesconto}
-                onChange={(e) => { setCobrarDesconto(e.target.checked); if (!e.target.checked) setValorDesconto(0); }}
-                className="w-4 h-4 rounded border-input accent-primary"
-              />
-              Aplicar desconto?
-            </label>
-            {cobrarDesconto && (
-              <Input
-                type="number" min="0" step="0.01"
-                value={valorDesconto || ""}
-                onChange={(e) => setValorDesconto(Number(e.target.value) || 0)}
-                placeholder="R$ 0,00" className="w-32 h-8 text-sm"
-              />
-            )}
-          </div>
-
           {formaPagKey && (
             <div className="mt-3 rounded-lg border border-border bg-accent/30 p-3 flex flex-wrap gap-4 text-sm">
               <span className="text-muted-foreground">Itens:</span>
               <span className="font-mono font-semibold">{formatBRL(formTotal)}</span>
               {entrega > 0 && <><span className="text-muted-foreground">+ entrega:</span><span className="font-mono font-semibold">{formatBRL(entrega)}</span></>}
-              {desconto > 0 && <><span className="text-primary/80">− desconto:</span><span className="font-mono font-semibold text-primary/80">{formatBRL(desconto)}</span></>}
               <span className="text-muted-foreground">= Total:</span>
               <span className="font-mono font-semibold">{formatBRL(totalBruto)}</span>
               {taxaPct > 0 && <>

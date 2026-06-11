@@ -6,6 +6,7 @@ export interface VendaItem {
   nome: string;
   qtd: number;
   valorUnitario: number;
+  desconto: number;
   total: number;
 }
 

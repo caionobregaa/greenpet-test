@@ -5,6 +5,7 @@ const VendaItemSchema = z.object({
   nome: z.string().min(1),
   qtd: z.number().int().positive(),
   valorUnitario: z.number().min(0),
+  desconto: z.number().min(0).optional().default(0),
 })
 
 export const CreateVendaSchema = z.object({
