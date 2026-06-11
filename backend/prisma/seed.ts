@@ -22,6 +22,7 @@ async function main(): Promise<void> {
   await seedProdutosPrime(prisma)
   await seedProdutosBasso(prisma)
   await seedProdutosCentralPec(prisma)
+  await seedProdutosMarket(prisma)
   console.log('✅ Seed concluído.')
 }
 
@@ -31,6 +32,7 @@ const M_PETICOS       = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 
 const M_SUPLEMENTO    = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 30 }
 const M_ROYAL_CANINE  = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 45 }
 const M_CENTRAL_PEC   = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 30 }
+const M_MARKET        = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 15 }
 
 interface ProdutoSeed {
   nome: string; categoria: string; especie?: string; subCategoria?: string
@@ -173,6 +175,48 @@ const PRODUTOS_CENTRAL_PEC: ProdutoSeed[] = [
   { nome: 'Simparic 1 Comp 10mg 2,6 a 5kg',    categoria: 'Suplemento', especie: 'Cão', subCategoria: 'Antiparasitário', marca: 'Simparic', fornecedor: 'Central Pec', valorCusto: 68.02, valorVenda:  97, ...M_CENTRAL_PEC },
   { nome: 'Simparic 1 Comp 20mg 5,1 a 10kg',   categoria: 'Suplemento', especie: 'Cão', subCategoria: 'Antiparasitário', marca: 'Simparic', fornecedor: 'Central Pec', valorCusto: 71.50, valorVenda: 102, ...M_CENTRAL_PEC },
 ]
+
+// ─── Market ───────────────────────────────────────────────────────────────────
+const PRODUTOS_MARKET: ProdutoSeed[] = [
+  { nome: 'Bravecto 112,5mg (2 a 4,5kg)',   categoria: 'Medicamento', especie: 'Cão', subCategoria: 'Antiparasitário', marca: 'Bravecto', fornecedor: 'Market', valorCusto: 165.00, valorVenda: 211, ...M_MARKET },
+  { nome: 'Bravecto 250mg (4,5 a 10kg)',    categoria: 'Medicamento', especie: 'Cão', subCategoria: 'Antiparasitário', marca: 'Bravecto', fornecedor: 'Market', valorCusto: 183.60, valorVenda: 235, ...M_MARKET },
+  { nome: 'Bravecto 500mg (10 a 20kg)',     categoria: 'Medicamento', especie: 'Cão', subCategoria: 'Antiparasitário', marca: 'Bravecto', fornecedor: 'Market', valorCusto: 227.00, valorVenda: 291, ...M_MARKET },
+  { nome: 'Bravecto 1000mg (20 a 40kg)',    categoria: 'Medicamento', especie: 'Cão', subCategoria: 'Antiparasitário', marca: 'Bravecto', fornecedor: 'Market', valorCusto: 260.00, valorVenda: 333, ...M_MARKET },
+  { nome: 'Bravecto 1400mg (40 a 56kg)',    categoria: 'Medicamento', especie: 'Cão', subCategoria: 'Antiparasitário', marca: 'Bravecto', fornecedor: 'Market', valorCusto: 286.00, valorVenda: 366, ...M_MARKET },
+]
+
+async function seedProdutosMarket(prisma: PrismaClient): Promise<void> {
+  console.log(`📦 Seeding ${PRODUTOS_MARKET.length} produtos Bravecto (Market)...`)
+  let criados = 0
+  let atualizados = 0
+
+  for (const p of PRODUTOS_MARKET) {
+    const data = {
+      categoria:      p.categoria,
+      especie:        p.especie ?? null,
+      subCategoria:   p.subCategoria ?? null,
+      marca:          p.marca ?? null,
+      fornecedor:     p.fornecedor ?? null,
+      pesoEmbalagem:  p.pesoEmbalagem ?? null,
+      valorCusto:     p.valorCusto,
+      valorVenda:     p.valorVenda,
+      margemCartao:   p.margemCartao ?? 0,
+      margemImposto:  p.margemImposto ?? 0,
+      margemOperacao: p.margemOperacao ?? 0,
+      margemLucro:    p.margemLucro ?? 0,
+    }
+    const existing = await prisma.produto.findUnique({ where: { nome: p.nome } })
+    if (existing) {
+      await prisma.produto.update({ where: { nome: p.nome }, data })
+      atualizados++
+    } else {
+      await prisma.produto.create({ data: { nome: p.nome, ...data } })
+      criados++
+    }
+  }
+
+  console.log(`✅ Market: ${criados} criados, ${atualizados} atualizados`)
+}
 
 async function seedProdutosCentralPec(prisma: PrismaClient): Promise<void> {
   console.log(`📦 Seeding ${PRODUTOS_CENTRAL_PEC.length} produtos Simparic (Central Pec)...`)
