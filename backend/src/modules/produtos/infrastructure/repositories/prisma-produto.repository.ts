@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client'
+import { Prisma, type PrismaClient } from '@prisma/client'
 import type { IProdutoRepository } from '../../domain/repositories/produto.repository.interface.js'
 import { Produto } from '../../domain/entities/produto.entity.js'
 
@@ -16,21 +16,42 @@ export class PrismaProdutoRepository implements IProdutoRepository {
   }
 
   async findMany(params: { q?: string; categoria?: string; especie?: string; fornecedor?: string; marca?: string; page: number; limit: number }) {
+    const skip = (params.page - 1) * params.limit
+    const take = params.limit
+
+    if (params.q) {
+      // accent-insensitive + partial match anywhere in nome, marca, subCategoria
+      const qParam = `%${params.q}%`
+      const conditions: Prisma.Sql[] = [Prisma.sql`"deletedAt" IS NULL`]
+      if (params.categoria)  conditions.push(Prisma.sql`categoria  = ${params.categoria}`)
+      if (params.especie)    conditions.push(Prisma.sql`especie    = ${params.especie}`)
+      if (params.fornecedor) conditions.push(Prisma.sql`fornecedor = ${params.fornecedor}`)
+      if (params.marca)      conditions.push(Prisma.sql`marca      = ${params.marca}`)
+      conditions.push(Prisma.sql`(
+        unaccent(lower(nome))                         LIKE unaccent(lower(${qParam}))
+        OR unaccent(lower(COALESCE(marca, '')))        LIKE unaccent(lower(${qParam}))
+        OR unaccent(lower(COALESCE("subCategoria", ''))) LIKE unaccent(lower(${qParam}))
+      )`)
+      const where = Prisma.join(conditions, ' AND ')
+      type ProdutoRow = Record<string, unknown>
+      const rows = await this.prisma.$queryRaw<ProdutoRow[]>(
+        Prisma.sql`SELECT * FROM produtos WHERE ${where} ORDER BY nome ASC LIMIT ${take} OFFSET ${skip}`
+      )
+      const countResult = await this.prisma.$queryRaw<Array<{ count: string }>>(
+        Prisma.sql`SELECT COUNT(*)::text AS count FROM produtos WHERE ${where}`
+      )
+      return { produtos: rows.map((r) => this.toDomain(r)), total: Number(countResult[0]?.count ?? 0) }
+    }
+
     const where = {
       deletedAt: null,
       ...(params.categoria  ? { categoria:  params.categoria }  : {}),
       ...(params.especie    ? { especie:    params.especie }    : {}),
       ...(params.fornecedor ? { fornecedor: params.fornecedor } : {}),
       ...(params.marca      ? { marca:      params.marca }      : {}),
-      ...(params.q ? { nome: { contains: params.q, mode: 'insensitive' as const } } : {}),
     }
     const [rows, total] = await this.prisma.$transaction([
-      this.prisma.produto.findMany({
-        where,
-        skip: (params.page - 1) * params.limit,
-        take: params.limit,
-        orderBy: { nome: 'asc' },
-      }),
+      this.prisma.produto.findMany({ where, skip, take, orderBy: { nome: 'asc' } }),
       this.prisma.produto.count({ where }),
     ])
     return { produtos: rows.map((r) => this.toDomain(r)), total }

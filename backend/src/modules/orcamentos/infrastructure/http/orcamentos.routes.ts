@@ -110,7 +110,7 @@ export function registerOrcamentosRoutes(app: FastifyInstance, prisma: PrismaCli
     const { id } = req.params as { id: string }
     const body = ConverterOrcamentoSchema.safeParse(req.body)
     if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
-    const venda = await converterUC.execute({ id, formaPag: body.data.formaPag, taxaCartao: body.data.taxaCartao, taxaEntrega: body.data.taxaEntrega })
+    const venda = await converterUC.execute({ id, formaPag: body.data.formaPag, taxaCartao: body.data.taxaCartao, taxaEntrega: body.data.taxaEntrega, desconto: body.data.desconto })
     rep.status(201).send({ data: { vendaId: venda.id } })
   })
 

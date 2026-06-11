@@ -49,6 +49,11 @@ export default function DashboardPage() {
             sub="no período"
           />
           <KpiCard
+            label="Líquido (após taxas)"
+            value={formatBRL(data?.totalLucroLiquido ?? 0)}
+            sub="receita após cartão"
+          />
+          <KpiCard
             label="Total de Vendas"
             value={String(data?.totalVendas ?? 0)}
             sub="transações"
@@ -57,15 +62,6 @@ export default function DashboardPage() {
             label="Ticket Médio"
             value={formatBRL(data?.ticketMedio ?? 0)}
             sub="por venda"
-          />
-          <KpiCard
-            label="Top Cliente"
-            value={data?.topClientes?.[0]?.nome ?? "—"}
-            sub={
-              data?.topClientes?.[0]
-                ? formatBRL(data.topClientes[0].totalGasto)
-                : undefined
-            }
           />
         </div>
       )}

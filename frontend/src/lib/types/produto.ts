@@ -16,6 +16,7 @@ export interface Produto {
   diasRecompra: number | null;
   descricao: string | null;
   imagemUrl: string | null;
+  estoque: number;
   deletedAt: string | null;
   createdAt: string;
   updatedAt: string;

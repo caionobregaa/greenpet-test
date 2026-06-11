@@ -6,7 +6,8 @@ import { CreateVendaUseCase } from '../../application/use-cases/create-venda.use
 import { GetVendaUseCase } from '../../application/use-cases/get-venda.use-case.js'
 import { ListVendasUseCase } from '../../application/use-cases/list-vendas.use-case.js'
 import { DeleteVendaUseCase } from '../../application/use-cases/delete-venda.use-case.js'
-import { CreateVendaSchema, ListVendasQuerySchema } from './vendas.schema.js'
+import { UpdateVendaUseCase } from '../../application/use-cases/update-venda.use-case.js'
+import { CreateVendaSchema, UpdateVendaSchema, ListVendasQuerySchema } from './vendas.schema.js'
 import { ValidationError } from '@/shared/errors/validation.error.js'
 import type { Venda } from '../../domain/entities/venda.entity.js'
 
@@ -19,6 +20,7 @@ function toResponse(v: Venda, extra?: { clienteNome?: string | null; animalNome?
     formaPag: v.formaPag,
     taxaCartao: v.taxaCartao,
     taxaEntrega: v.taxaEntrega,
+    desconto: v.desconto,
     total: v.total,
     obs: v.obs,
     itens: v.itens,
@@ -35,6 +37,7 @@ export function registerVendasRoutes(app: FastifyInstance, prisma: PrismaClient)
   const getUC = new GetVendaUseCase(vendaRepo)
   const listUC = new ListVendasUseCase(vendaRepo)
   const deleteUC = new DeleteVendaUseCase(vendaRepo)
+  const updateUC = new UpdateVendaUseCase(vendaRepo)
 
   app.get('/api/v1/vendas', async (req, rep) => {
     const q = ListVendasQuerySchema.safeParse(req.query)
@@ -74,6 +77,18 @@ export function registerVendasRoutes(app: FastifyInstance, prisma: PrismaClient)
         cliente: { select: { nome: true } },
         animal: { select: { nome: true } },
       },
+    })
+    rep.send({ data: toResponse(venda, { clienteNome: row?.cliente?.nome, animalNome: row?.animal?.nome }) })
+  })
+
+  app.patch('/api/v1/vendas/:id', async (req, rep) => {
+    const { id } = req.params as { id: string }
+    const body = UpdateVendaSchema.safeParse(req.body)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    const venda = await updateUC.execute({ id, ...body.data })
+    const row = await prisma.venda.findUnique({
+      where: { id },
+      select: { cliente: { select: { nome: true } }, animal: { select: { nome: true } } },
     })
     rep.send({ data: toResponse(venda, { clienteNome: row?.cliente?.nome, animalNome: row?.animal?.nome }) })
   })

@@ -3,6 +3,7 @@ import type { PrismaClient } from '@prisma/client'
 export interface DashboardKPIs {
   periodo: { inicio: string; fim: string }
   totalReceita: number
+  totalLucroLiquido: number
   totalVendas: number
   ticketMedio: number
   topClientes: Array<{ clienteId: string; nome: string; totalGasto: number; vendas: number }>
@@ -26,6 +27,14 @@ export class PrismaDashboardRepository {
     const totalReceita = Number(vendaAggregate._sum.total ?? 0)
     const totalVendas = vendaAggregate._count.id
     const ticketMedio = totalVendas > 0 ? totalReceita / totalVendas : 0
+
+    // Lucro líquido = receita após taxas do cartão
+    const lucroResult = await this.prisma.$queryRaw<Array<{ lucro: string }>>`
+      SELECT COALESCE(SUM(CAST(total AS DOUBLE PRECISION) * (1.0 - "taxaCartao" / 100.0)), 0)::text AS lucro
+      FROM vendas
+      WHERE data >= ${inicio} AND data <= ${fim}
+    `
+    const totalLucroLiquido = Number(lucroResult[0]?.lucro ?? 0)
 
     // Top clientes
     const clienteGroups = await this.prisma.venda.groupBy({
@@ -97,6 +106,7 @@ export class PrismaDashboardRepository {
         fim: fim.toISOString().slice(0, 10),
       },
       totalReceita,
+      totalLucroLiquido: Math.round(totalLucroLiquido * 100) / 100,
       totalVendas,
       ticketMedio: Math.round(ticketMedio * 100) / 100,
       topClientes,

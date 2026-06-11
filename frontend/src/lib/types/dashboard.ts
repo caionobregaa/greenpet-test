@@ -1,6 +1,7 @@
 export interface DashboardKPIs {
   periodo: { inicio: string; fim: string };
   totalReceita: number;
+  totalLucroLiquido: number;
   totalVendas: number;
   ticketMedio: number;
   topClientes: Array<{

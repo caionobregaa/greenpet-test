@@ -16,9 +16,22 @@ export const CreateVendaSchema = z.object({
   }),
   taxaCartao: z.number().min(0).max(100).optional(),
   taxaEntrega: z.number().min(0).optional(),
+  desconto: z.number().min(0).optional(),
   obs: z.string().optional().or(z.literal("")),
   itens: z.array(VendaItemSchema).min(1, "Adicione pelo menos um item"),
 });
 
+export const UpdateVendaSchema = z.object({
+  animalId: z.string().uuid().optional().nullable(),
+  data: z.string().date().optional(),
+  formaPag: z.enum(["Pix", "Dinheiro", "Cartão Crédito", "Cartão Débito", "Boleto"]).optional(),
+  taxaCartao: z.number().min(0).max(100).optional(),
+  taxaEntrega: z.number().min(0).optional(),
+  desconto: z.number().min(0).optional(),
+  obs: z.string().optional().or(z.literal("")),
+  itens: z.array(VendaItemSchema).min(1, "Adicione pelo menos um item").optional(),
+});
+
 export type VendaItemInput = z.infer<typeof VendaItemSchema>;
 export type CreateVendaInput = z.infer<typeof CreateVendaSchema>;
+export type UpdateVendaInput = z.infer<typeof UpdateVendaSchema>;

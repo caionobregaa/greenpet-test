@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Plus, Eye, Trash2 } from "lucide-react";
+import { Plus, Eye, Trash2, Pencil } from "lucide-react";
 import { useVendas, useDeleteVenda } from "@/lib/hooks/use-vendas";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -87,6 +87,9 @@ export default function VendasPage() {
                       <div className="flex items-center gap-1 justify-end">
                         <Link href={`/vendas/${v.id}`} className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-8 w-8 p-0")}>
                           <Eye className="w-3.5 h-3.5" />
+                        </Link>
+                        <Link href={`/vendas/${v.id}/editar`} className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-8 w-8 p-0")}>
+                          <Pencil className="w-3.5 h-3.5" />
                         </Link>
                         <Button
                           variant="ghost" size="sm"

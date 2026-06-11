@@ -19,6 +19,7 @@ export interface Venda {
   formaPag: FormaPag;
   taxaCartao: number;
   taxaEntrega: number;
+  desconto: number;
   total: number;
   obs: string | null;
   createdAt: string;

@@ -59,8 +59,8 @@ export class PrismaRecompraRepository {
       seen.set(key, {
         clienteId: item.venda.clienteId,
         clienteNome: item.venda.cliente.nome,
-        animalId: item.venda.animal?.id,
-        animalNome: item.venda.animal?.nome,
+        animalId: item.venda.animal?.id ?? '',
+        animalNome: item.venda.animal?.nome ?? '',
         produtoId: item.produtoId,
         produtoNome: item.produto.nome,
         diasRecompra: item.produto.diasRecompra,

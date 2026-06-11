@@ -123,6 +123,7 @@ model Venda {
   formaPag    String
   taxaCartao  Float      @default(0)
   taxaEntrega Float      @default(0)
+  desconto    Float      @default(0)
   total       Decimal    @db.Decimal(10, 2)
   obs        String?
   itens      VendaItem[]

@@ -1,7 +1,7 @@
 import { api } from "./client";
 import type { ApiResponse, ApiMeta } from "@/lib/types/api";
 import type { Venda } from "@/lib/types/venda";
-import type { CreateVendaInput } from "@/lib/schemas/venda.schema";
+import type { CreateVendaInput, UpdateVendaInput } from "@/lib/schemas/venda.schema";
 
 interface ListParams {
   clienteId?: string;
@@ -29,6 +29,11 @@ export const apiVendas = {
       data: input.data || undefined,
     };
     const { data } = await api.post<ApiResponse<Venda>>("/vendas", payload);
+    return data.data;
+  },
+
+  update: async (id: string, input: UpdateVendaInput): Promise<Venda> => {
+    const { data } = await api.patch<ApiResponse<Venda>>(`/vendas/${id}`, input);
     return data.data;
   },
 

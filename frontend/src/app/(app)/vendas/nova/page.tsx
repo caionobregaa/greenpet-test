@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Search, X, FileText, CreditCard, Banknote, QrCode, Wallet, ChevronDown } from "lucide-react";
+import { ArrowLeft, Loader2, Search, X, FileText, CreditCard, Banknote, QrCode, Wallet, ChevronDown, PawPrint } from "lucide-react";
 import { CreateVendaSchema, type CreateVendaInput } from "@/lib/schemas/venda.schema";
 import { useCreateVenda } from "@/lib/hooks/use-vendas";
 import { useConverterOrcamento } from "@/lib/hooks/use-orcamentos";
@@ -228,15 +228,26 @@ export default function NovaVendaPage() {
   const [cobrarEntrega, setCobrarEntrega] = useState(false);
   const [valorEntrega, setValorEntrega] = useState(0);
 
+  // Discount state
+  const [cobrarDesconto, setCobrarDesconto] = useState(false);
+  const [valorDesconto, setValorDesconto] = useState(0);
+
+  // New animal inline state
+  const [showNovoAnimal, setShowNovoAnimal] = useState(false);
+  const [novoAnimalNome, setNovoAnimalNome] = useState("");
+  const [novoAnimalEspecie, setNovoAnimalEspecie] = useState<"Cão" | "Gato" | "">("");
+  const [savingAnimal, setSavingAnimal] = useState(false);
+
   // Compute total from itens for profit display
   const [formTotal, setFormTotal] = useState(0);
 
   const selectedOpcao = OPCOES_PAG.find((o) => o.value === formaPagKey);
   const taxaPct = selectedOpcao?.taxaKey ? TAXAS[selectedOpcao.taxaKey].pct : 0;
   const entrega = cobrarEntrega ? (valorEntrega || 0) : 0;
+  const desconto = cobrarDesconto ? (valorDesconto || 0) : 0;
   const totalBruto = orcamentoSelecionado
-    ? orcamentoSelecionado.total + entrega
-    : formTotal + entrega;
+    ? Math.max(0, orcamentoSelecionado.total + entrega - desconto)
+    : Math.max(0, formTotal + entrega - desconto);
   const lucroLiquido = totalBruto * (1 - taxaPct / 100);
 
   function searchClientes(q: string) {
@@ -318,6 +329,28 @@ export default function NovaVendaPage() {
     onChange(null);
   }
 
+  async function handleSalvarNovoAnimal(onChange: (v: string | null) => void) {
+    if (!novoAnimalNome.trim() || !novoAnimalEspecie || !clienteSelected) return;
+    setSavingAnimal(true);
+    try {
+      const animal = await apiAnimais.create({
+        nome: novoAnimalNome.trim(),
+        especie: novoAnimalEspecie,
+        clienteId: clienteSelected.id,
+        sexo: "Indefinido",
+      });
+      selectAnimal(animal, onChange);
+      setShowNovoAnimal(false);
+      setNovoAnimalNome("");
+      setNovoAnimalEspecie("");
+      toast.success(`Animal "${animal.nome}" cadastrado!`);
+    } catch {
+      toast.error("Erro ao cadastrar animal.");
+    } finally {
+      setSavingAnimal(false);
+    }
+  }
+
   // Import an orçamento: fill the form OR use converter flow
   function handleImportOrcamento(o: Orcamento) {
     setOrcamentoSelecionado(o);
@@ -334,7 +367,7 @@ export default function NovaVendaPage() {
     try {
       const result = await converterOrcamento.mutateAsync({
         id: orcamentoSelecionado.id,
-        input: { formaPag: opcao.backend, taxaCartao: taxaPctVal, taxaEntrega: entrega },
+        input: { formaPag: opcao.backend, taxaCartao: taxaPctVal, taxaEntrega: entrega, desconto },
       });
       toast.success("Venda registrada com sucesso!");
       router.push(`/vendas/${result.vendaId}`);
@@ -355,6 +388,7 @@ export default function NovaVendaPage() {
         formaPag: opcao.backend,
         taxaCartao: taxaPctVal,
         taxaEntrega: entrega,
+        desconto,
       });
       toast.success("Venda registrada com sucesso!");
       router.push(`/vendas/${venda.id}`);
@@ -432,6 +466,30 @@ export default function NovaVendaPage() {
             )}
           </div>
 
+          {/* Desconto */}
+          <div className="mt-3 flex items-center gap-3">
+            <label className="flex items-center gap-2 cursor-pointer select-none text-sm">
+              <input
+                type="checkbox"
+                checked={cobrarDesconto}
+                onChange={(e) => { setCobrarDesconto(e.target.checked); if (!e.target.checked) setValorDesconto(0); }}
+                className="w-4 h-4 rounded border-input accent-primary"
+              />
+              Aplicar desconto?
+            </label>
+            {cobrarDesconto && (
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={valorDesconto || ""}
+                onChange={(e) => setValorDesconto(Number(e.target.value) || 0)}
+                placeholder="R$ 0,00"
+                className="w-32 h-8 text-sm"
+              />
+            )}
+          </div>
+
           {formaPagKey && (
             <div className="mt-3 rounded-lg border border-border bg-accent/30 p-3 flex flex-wrap gap-4 text-sm">
               <span className="text-muted-foreground">Itens:</span>
@@ -442,6 +500,12 @@ export default function NovaVendaPage() {
                 <>
                   <span className="text-muted-foreground">+ entrega:</span>
                   <span className="font-mono font-semibold">{formatBRL(entrega)}</span>
+                </>
+              )}
+              {desconto > 0 && (
+                <>
+                  <span className="text-primary/80">− desconto:</span>
+                  <span className="font-mono font-semibold text-primary/80">{formatBRL(desconto)}</span>
                 </>
               )}
               <span className="text-muted-foreground">= Total:</span>
@@ -511,39 +575,98 @@ export default function NovaVendaPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Animal</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>Animal</Label>
+                    {clienteSelected && !animalSelected && !showNovoAnimal && (
+                      <button
+                        type="button"
+                        onClick={() => setShowNovoAnimal(true)}
+                        className="text-[11px] text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
+                      >
+                        <PawPrint className="w-3 h-3" />
+                        Cadastrar novo animal
+                      </button>
+                    )}
+                  </div>
                   <Controller
                     control={control}
                     name="animalId"
                     render={({ field }) => (
-                      <div className="relative">
+                      <div className="space-y-2">
                         <div className="relative">
-                          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                          <Input
-                            value={animalQ}
-                            onChange={(e) => {
-                              if (animalSelected) { setAnimalSelected(null); field.onChange(null); }
-                              searchAnimais(e.target.value);
-                            }}
-                            onBlur={() => setTimeout(() => setAnimalOpen(false), 150)}
-                            placeholder={clienteSelected ? "Buscar animal pelo nome..." : "Selecione um cliente primeiro"}
-                            disabled={!clienteSelected}
-                            className="pl-9 pr-8"
-                          />
-                          {animalSelected && (
-                            <button type="button" onClick={() => clearAnimal(field.onChange)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                              <X className="w-4 h-4" />
-                            </button>
+                          <div className="relative">
+                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                            <Input
+                              value={animalQ}
+                              onChange={(e) => {
+                                if (animalSelected) { setAnimalSelected(null); field.onChange(null); }
+                                searchAnimais(e.target.value);
+                              }}
+                              onBlur={() => setTimeout(() => setAnimalOpen(false), 150)}
+                              placeholder={clienteSelected ? "Buscar animal pelo nome..." : "Selecione um cliente primeiro"}
+                              disabled={!clienteSelected}
+                              className="pl-9 pr-8"
+                            />
+                            {animalSelected && (
+                              <button type="button" onClick={() => clearAnimal(field.onChange)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                                <X className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                          {animalOpen && animalOptions.length > 0 && (
+                            <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
+                              {animalOptions.map((a) => (
+                                <button key={a.id} type="button" className="w-full text-left px-3 py-2.5 text-sm hover:bg-accent transition-colors border-b border-border last:border-0" onMouseDown={(e) => e.preventDefault()} onClick={() => selectAnimal(a, field.onChange)}>
+                                  <p className="font-medium">{a.nome}</p>
+                                  <p className="text-xs text-muted-foreground">{a.especie}{a.raca ? ` · ${a.raca}` : ""}</p>
+                                </button>
+                              ))}
+                            </div>
                           )}
                         </div>
-                        {animalOpen && animalOptions.length > 0 && (
-                          <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
-                            {animalOptions.map((a) => (
-                              <button key={a.id} type="button" className="w-full text-left px-3 py-2.5 text-sm hover:bg-accent transition-colors border-b border-border last:border-0" onMouseDown={(e) => e.preventDefault()} onClick={() => selectAnimal(a, field.onChange)}>
-                                <p className="font-medium">{a.nome}</p>
-                                <p className="text-xs text-muted-foreground">{a.especie}{a.raca ? ` · ${a.raca}` : ""}</p>
-                              </button>
-                            ))}
+                        {showNovoAnimal && (
+                          <div className="border border-primary/30 bg-primary/5 rounded-md p-3 space-y-2">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-primary/70 flex items-center gap-1">
+                              <PawPrint className="w-3 h-3" /> Novo Animal
+                            </p>
+                            <div className="flex gap-2">
+                              <Input
+                                value={novoAnimalNome}
+                                onChange={(e) => setNovoAnimalNome(e.target.value)}
+                                placeholder="Nome do animal"
+                                className="h-8 text-sm flex-1"
+                              />
+                              <select
+                                value={novoAnimalEspecie}
+                                onChange={(e) => setNovoAnimalEspecie(e.target.value as "Cão" | "Gato" | "")}
+                                className="h-8 px-2 rounded-md border border-input bg-background text-sm"
+                              >
+                                <option value="">Espécie</option>
+                                <option value="Cão">Cão</option>
+                                <option value="Gato">Gato</option>
+                              </select>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                type="button"
+                                size="sm"
+                                className="h-7 text-xs"
+                                disabled={!novoAnimalNome.trim() || !novoAnimalEspecie || savingAnimal}
+                                onClick={() => handleSalvarNovoAnimal(field.onChange)}
+                              >
+                                {savingAnimal ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                                Salvar
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 text-xs text-muted-foreground"
+                                onClick={() => { setShowNovoAnimal(false); setNovoAnimalNome(""); setNovoAnimalEspecie(""); }}
+                              >
+                                Cancelar
+                              </Button>
+                            </div>
                           </div>
                         )}
                       </div>

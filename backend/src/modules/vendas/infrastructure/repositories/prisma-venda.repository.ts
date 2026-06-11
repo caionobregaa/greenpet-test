@@ -39,6 +39,7 @@ export class PrismaVendaRepository implements IVendaRepository {
         formaPag: venda.formaPag,
         taxaCartao: venda.taxaCartao,
         taxaEntrega: venda.taxaEntrega,
+        desconto: venda.desconto,
         total: venda.total,
         obs: venda.obs ?? null,
         itens: {
@@ -52,7 +53,28 @@ export class PrismaVendaRepository implements IVendaRepository {
           })),
         },
       },
-      update: {},
+      update: {
+        data: venda.data,
+        clienteId: venda.clienteId,
+        animalId: venda.animalId ?? null,
+        formaPag: venda.formaPag,
+        taxaCartao: venda.taxaCartao,
+        taxaEntrega: venda.taxaEntrega,
+        desconto: venda.desconto,
+        total: venda.total,
+        obs: venda.obs ?? null,
+        itens: {
+          deleteMany: {},
+          create: venda.itens.map((i) => ({
+            id: i.id,
+            produtoId: i.produtoId ?? null,
+            nome: i.nome,
+            qtd: i.qtd,
+            valorUnitario: i.valorUnitario,
+            total: i.total,
+          })),
+        },
+      },
     })
   }
 
@@ -68,6 +90,7 @@ export class PrismaVendaRepository implements IVendaRepository {
     formaPag: string
     taxaCartao: number
     taxaEntrega: number
+    desconto: number
     total: unknown
     obs: string | null
     createdAt: Date
@@ -88,6 +111,7 @@ export class PrismaVendaRepository implements IVendaRepository {
       formaPag: row.formaPag,
       taxaCartao: row.taxaCartao ?? 0,
       taxaEntrega: row.taxaEntrega ?? 0,
+      desconto: row.desconto ?? 0,
       obs: row.obs ?? undefined,
       itens: row.itens.map((i) => ({
         id: i.id,

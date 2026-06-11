@@ -146,7 +146,7 @@ export default function ProdutosPage() {
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Produto</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden md:table-cell">Categoria</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden lg:table-cell">Distribuidora</th>
-                <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Custo</th>
+                <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Estoque</th>
                 <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Venda</th>
                 <th className="px-4 py-3 w-24"></th>
               </tr>
@@ -192,7 +192,7 @@ export default function ProdutosPage() {
                       {p.especie && <div className="text-xs text-muted-foreground/70">{p.especie}</div>}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{p.fornecedor ?? "—"}</td>
-                    <td className="px-4 py-3 text-right font-mono text-muted-foreground">{formatBRL(p.valorCusto)}</td>
+                    <td className="px-4 py-3 text-right font-mono text-muted-foreground">{p.estoque}</td>
                     <td className="px-4 py-3 text-right font-mono font-semibold text-foreground">{formatBRL(p.valorVenda)}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">

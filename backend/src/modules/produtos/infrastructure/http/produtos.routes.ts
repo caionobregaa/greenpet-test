@@ -15,7 +15,7 @@ import { ValidationError } from '@/shared/errors/validation.error.js'
 import { NotFoundError } from '@/shared/errors/not-found.error.js'
 import type { Produto } from '../../domain/entities/produto.entity.js'
 
-function toResponse(p: Produto) {
+function toResponse(p: Produto, estoque = 0) {
   return {
     id: p.id,
     nome: p.nome,
@@ -35,6 +35,7 @@ function toResponse(p: Produto) {
     diasRecompra: p.diasRecompra,
     descricao: p.descricao,
     imagemUrl: p.imagemUrl ?? null,
+    estoque,
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
   }
@@ -52,7 +53,19 @@ export function registerProdutosRoutes(app: FastifyInstance, prisma: PrismaClien
     const q = ListProdutosQuerySchema.safeParse(req.query)
     if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.errors[0].message)
     const result = await listUC.execute(q.data)
-    rep.send({ data: result.produtos.map(toResponse), meta: { page: q.data.page, limit: q.data.limit, total: result.total } })
+    const ids = result.produtos.map((p) => p.id)
+    const estoqueGroups = ids.length > 0
+      ? await prisma.estoqueItem.groupBy({
+          by: ['produtoId'],
+          where: { produtoId: { in: ids } },
+          _sum: { quantidade: true },
+        })
+      : []
+    const estoqueMap = new Map(estoqueGroups.map((g) => [g.produtoId, g._sum.quantidade ?? 0]))
+    rep.send({
+      data: result.produtos.map((p) => toResponse(p, estoqueMap.get(p.id) ?? 0)),
+      meta: { page: q.data.page, limit: q.data.limit, total: result.total },
+    })
   })
 
   app.post('/api/v1/produtos', async (req, rep) => {

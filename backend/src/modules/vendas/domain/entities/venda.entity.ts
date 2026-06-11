@@ -29,6 +29,7 @@ interface VendaProps {
   formaPag: FormaPag
   taxaCartao: number
   taxaEntrega: number
+  desconto: number
   total: Money
   obs?: string
   itens: VendaItemReadOnly[]
@@ -43,6 +44,7 @@ export class Venda extends AggregateRoot<VendaProps> {
     formaPag: string
     taxaCartao?: number
     taxaEntrega?: number
+    desconto?: number
     obs?: string
     itens: VendaItemData[]
   }): Venda {
@@ -69,7 +71,8 @@ export class Venda extends AggregateRoot<VendaProps> {
     })
 
     const entrega = data.taxaEntrega ?? 0
-    const totalValue = itens.reduce((sum, i) => sum + i.total, 0) + entrega
+    const desconto = data.desconto ?? 0
+    const totalValue = Math.max(0, itens.reduce((sum, i) => sum + i.total, 0) + entrega - desconto)
 
     return new Venda(
       {
@@ -79,6 +82,7 @@ export class Venda extends AggregateRoot<VendaProps> {
         formaPag: data.formaPag as FormaPag,
         taxaCartao: data.taxaCartao ?? 0,
         taxaEntrega: entrega,
+        desconto,
         total: Money.create(totalValue),
         obs: data.obs,
         itens,
@@ -93,6 +97,7 @@ export class Venda extends AggregateRoot<VendaProps> {
   get formaPag(): string { return this.props.formaPag }
   get taxaCartao(): number { return this.props.taxaCartao }
   get taxaEntrega(): number { return this.props.taxaEntrega }
+  get desconto(): number { return this.props.desconto }
   get total(): number { return this.props.total.value }
   get obs(): string | undefined { return this.props.obs }
   get itens(): VendaItemReadOnly[] { return this.props.itens }

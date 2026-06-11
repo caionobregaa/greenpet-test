@@ -15,7 +15,7 @@ const QuerySchema = z.object({
 const DismissSchema = z.object({
   produtoId: z.string().uuid(),
   clienteId: z.string().uuid(),
-  animalId: z.string().uuid(),
+  animalId: z.string().optional().default(''),
   reason: z.enum(['ok', 'cancelado']),
 })
 

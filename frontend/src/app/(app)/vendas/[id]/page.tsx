@@ -2,10 +2,11 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 import { useVenda, useDeleteVenda } from "@/lib/hooks/use-vendas";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { formatDate, formatBRL } from "@/lib/utils/format";
@@ -44,6 +45,10 @@ export default function VendaDetailPage({ params }: Props) {
           <h1 className="text-xl font-bold">Venda #{id.slice(-6).toUpperCase()}</h1>
           <p className="text-sm text-muted-foreground">{formatDate(venda.data)}</p>
         </div>
+        <Link href={`/vendas/${id}/editar`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+          <Pencil className="w-3.5 h-3.5 mr-1.5" />
+          Editar
+        </Link>
         <Button variant="outline" size="sm" className="text-destructive border-destructive hover:bg-destructive/10" onClick={() => setDeleteOpen(true)}>
           <Trash2 className="w-3.5 h-3.5 mr-1.5" />
           Excluir

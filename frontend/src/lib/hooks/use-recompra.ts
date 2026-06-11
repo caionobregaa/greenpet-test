@@ -19,8 +19,8 @@ export function useRecompra(params?: ListParams) {
 export function useDismissRecompra() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (params: { produtoId: string; clienteId: string; animalId: string; reason: "ok" | "cancelado" }) =>
-      apiRecompra.dismiss(params),
+    mutationFn: (params: { produtoId: string; clienteId: string; animalId?: string; reason: "ok" | "cancelado" }) =>
+      apiRecompra.dismiss({ ...params, animalId: params.animalId ?? '' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["recompra"] }),
   });
 }
