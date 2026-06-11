@@ -140,7 +140,10 @@
       "Read(//etc/nginx/**)",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\)[0]; env=d['Config']['Env']; [print\\(e\\) for e in env if 'URL' in e.upper\\(\\) or 'PORT' in e.upper\\(\\) or 'HOST' in e.upper\\(\\)]\")",
       "Bash(cat .gitmodules)",
-      "Bash(git submodule *)"
+      "Bash(git submodule *)",
+      "Bash(git commit -m 'fix: remove .optional\\(\\) em formasPag para resolver type error no build *)",
+      "Bash(git commit -m 'fix: remover .default\\(\\) dos schemas frontend para alinhar tipos input/output Zod *)",
+      "Bash(node -e \"const p = require\\('./package.json'\\); console.log\\('type:', p.type\\); console.log\\('main:', p.main\\)\")"
     ]
   }
 }
