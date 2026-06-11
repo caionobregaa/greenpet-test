@@ -23,6 +23,7 @@ async function main(): Promise<void> {
   await seedProdutosBasso(prisma)
   await seedProdutosCentralPec(prisma)
   await seedProdutosMarket(prisma)
+  await seedProdutosZooCenter(prisma)
   console.log('✅ Seed concluído.')
 }
 
@@ -33,6 +34,9 @@ const M_SUPLEMENTO    = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 
 const M_ROYAL_CANINE  = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 45 }
 const M_CENTRAL_PEC   = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 30 }
 const M_MARKET        = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 15 }
+const M_ZOO_CENTER    = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 31 }
+const M_ZOO_CENTER_G  = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 40 }
+const M_ZOO_CENTER_S  = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 45 }
 
 interface ProdutoSeed {
   nome: string; categoria: string; especie?: string; subCategoria?: string
@@ -184,6 +188,109 @@ const PRODUTOS_MARKET: ProdutoSeed[] = [
   { nome: 'Bravecto 1000mg (20 a 40kg)',    categoria: 'Medicamento', especie: 'Cão', subCategoria: 'Antiparasitário', marca: 'Bravecto', fornecedor: 'Market', valorCusto: 260.00, valorVenda: 333, ...M_MARKET },
   { nome: 'Bravecto 1400mg (40 a 56kg)',    categoria: 'Medicamento', especie: 'Cão', subCategoria: 'Antiparasitário', marca: 'Bravecto', fornecedor: 'Market', valorCusto: 286.00, valorVenda: 366, ...M_MARKET },
 ]
+
+// ─── Zoo Center – Fórmula Natural ────────────────────────────────────────────
+const PRODUTOS_ZOO_CENTER: ProdutoSeed[] = [
+  // ── FN Fresh Meat Cães ───────────────────────────────────────────────────
+  { nome: 'FN Fresh Meat Adulto Grande/Gigante 2,5kg',       categoria: 'Ração', especie: 'Cão', subCategoria: 'Fresh Meat Adulto', marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem:  2.5, valorCusto:  77.23, valorVenda: 111,    ...M_ZOO_CENTER },
+  { nome: 'FN Fresh Meat Adulto Médio 12kg',                 categoria: 'Ração', especie: 'Cão', subCategoria: 'Fresh Meat Adulto', marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem: 12,   valorCusto: 283.13, valorVenda: 408,    ...M_ZOO_CENTER },
+  { nome: 'FN Fresh Meat Adulto Mini/Pequeno 10,1kg',        categoria: 'Ração', especie: 'Cão', subCategoria: 'Fresh Meat Adulto', marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem: 10.1, valorCusto: 254.04, valorVenda: 366,    ...M_ZOO_CENTER },
+  { nome: 'FN Fresh Meat Adulto Mini/Pequeno 2,5kg',         categoria: 'Ração', especie: 'Cão', subCategoria: 'Fresh Meat Adulto', marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem:  2.5, valorCusto:  77.23, valorVenda: 111,    ...M_ZOO_CENTER },
+  { nome: 'FN Fresh Meat Controle Peso MG 12kg',             categoria: 'Ração', especie: 'Cão', subCategoria: 'Fresh Meat Adulto', marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem: 12,   valorCusto: 293.78, valorVenda: 423,    ...M_ZOO_CENTER },
+  { nome: 'FN Fresh Meat Sensi Adulto MP Cordeiro 2,5kg',    categoria: 'Ração', especie: 'Cão', subCategoria: 'Fresh Meat Sensi',  marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem:  2.5, valorCusto: 118.30, valorVenda: 170,    ...M_ZOO_CENTER },
+  { nome: 'FN Fresh Meat Sensi Adulto MP Cordeiro 7kg',      categoria: 'Ração', especie: 'Cão', subCategoria: 'Fresh Meat Sensi',  marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem:  7,   valorCusto: 296.80, valorVenda: 428,    ...M_ZOO_CENTER },
+  // ── FN Life Filhotes ─────────────────────────────────────────────────────
+  { nome: 'FN Life Filhote Porte Mini/Pequeno 2,5kg',        categoria: 'Ração', especie: 'Cão', subCategoria: 'Life Filhote',     marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem:  2.5, valorCusto:  66.49, valorVenda:  96,    ...M_ZOO_CENTER },
+  { nome: 'FN Life Filhote Porte Mini/Pequeno 10,1kg',       categoria: 'Ração', especie: 'Cão', subCategoria: 'Life Filhote',     marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem: 10.1, valorCusto: 189.49, valorVenda: 273,    ...M_ZOO_CENTER },
+  // ── FN Life Adultos ──────────────────────────────────────────────────────
+  { nome: 'FN Life Adulto Porte Mini/Pequeno 2,5kg',         categoria: 'Ração', especie: 'Cão', subCategoria: 'Life Adulto',      marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem:  2.5, valorCusto:  65.26, valorVenda:  94,    ...M_ZOO_CENTER },
+  { nome: 'FN Life Adulto Porte Médio/Grande 15kg',          categoria: 'Ração', especie: 'Cão', subCategoria: 'Life Adulto',      marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem: 15,   valorCusto: 180.09, valorVenda: 259.49, ...M_ZOO_CENTER },
+  { nome: 'FN Life Adulto Porte Mini/Pequeno 10,1kg',        categoria: 'Ração', especie: 'Cão', subCategoria: 'Life Adulto',      marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem: 10.1, valorCusto: 216.36, valorVenda: 312,    ...M_ZOO_CENTER },
+  { nome: 'FN Life Adulto Porte Mini/Pequeno 15kg',          categoria: 'Ração', especie: 'Cão', subCategoria: 'Life Adulto',      marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem: 15,   valorCusto: 222.67, valorVenda: 321,    ...M_ZOO_CENTER },
+  // ── FN Life Sênior ───────────────────────────────────────────────────────
+  { nome: 'FN Life Sênior Porte Mini/Pequeno 7kg',           categoria: 'Ração', especie: 'Cão', subCategoria: 'Life Sênior',      marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem:  7,   valorCusto: 112.82, valorVenda: 163,    ...M_ZOO_CENTER },
+]
+
+const PRODUTOS_ZOO_CENTER_SUPL: ProdutoSeed[] = [
+  { nome: 'Lactobac Dog Plus 13ml',                              categoria: 'Suplemento', especie: 'Cão',        subCategoria: 'Probiótico',   marca: 'Organnact', fornecedor: 'Zoo Center', valorCusto:  39.11, valorVenda:  62, ...M_ZOO_CENTER_S },
+  { nome: 'Ômega 3 Dog Organnact 500mg 30 Cápsulas',            categoria: 'Suplemento', especie: 'Cão',        subCategoria: 'Ômega 3',      marca: 'Organnact', fornecedor: 'Zoo Center', valorCusto:  76.28, valorVenda: 121, ...M_ZOO_CENTER_S },
+  { nome: 'Ômega 3 Dog Organnact 1000mg 30 Cápsulas',           categoria: 'Suplemento', especie: 'Cão',        subCategoria: 'Ômega 3',      marca: 'Organnact', fornecedor: 'Zoo Center', valorCusto:  93.89, valorVenda: 148, ...M_ZOO_CENTER_S },
+  { nome: 'Organnact Mammy Dog para Cães 120g',                  categoria: 'Suplemento', especie: 'Cão',        subCategoria: 'Gestação',     marca: 'Organnact', fornecedor: 'Zoo Center', valorCusto:  62.83, valorVenda:  99, ...M_ZOO_CENTER_S },
+  { nome: 'Organnact Mammy Dog para Cães 300g',                  categoria: 'Suplemento', especie: 'Cão',        subCategoria: 'Gestação',     marca: 'Organnact', fornecedor: 'Zoo Center', valorCusto:  85.96, valorVenda: 136, ...M_ZOO_CENTER_S },
+  { nome: 'Organnact Mammy Dog Tabs 100g',                       categoria: 'Suplemento', especie: 'Cão',        subCategoria: 'Gestação',     marca: 'Organnact', fornecedor: 'Zoo Center', valorCusto:  70.77, valorVenda: 112, ...M_ZOO_CENTER_S },
+  { nome: 'Organnact Calmyn & Susse para Cães 15g',              categoria: 'Suplemento', especie: 'Cão',        subCategoria: 'Calmante',     marca: 'Organnact', fornecedor: 'Zoo Center', valorCusto:  70.44, valorVenda: 111, ...M_ZOO_CENTER_S },
+]
+
+const PRODUTOS_ZOO_CENTER_BISCOITO: ProdutoSeed[] = [
+  // ── Biscoitos Be Nature 150g ─────────────────────────────────────────────
+  { nome: 'Be Nature Biscoito Ameixa 150g',      categoria: 'Petisco', especie: 'Cão e Gato', subCategoria: 'Biscoito', marca: 'Be Nature', fornecedor: 'Zoo Center', pesoEmbalagem: 0.15, valorCusto: 16.41, valorVenda: 25, ...M_ZOO_CENTER_G },
+  { nome: 'Be Nature Biscoito Banana 150g',      categoria: 'Petisco', especie: 'Cão e Gato', subCategoria: 'Biscoito', marca: 'Be Nature', fornecedor: 'Zoo Center', pesoEmbalagem: 0.15, valorCusto: 16.41, valorVenda: 25, ...M_ZOO_CENTER_G },
+  { nome: 'Be Nature Biscoito Beterraba 150g',   categoria: 'Petisco', especie: 'Cão e Gato', subCategoria: 'Biscoito', marca: 'Be Nature', fornecedor: 'Zoo Center', pesoEmbalagem: 0.15, valorCusto: 16.41, valorVenda: 25, ...M_ZOO_CENTER_G },
+  { nome: 'Be Nature Biscoito Coco 150g',        categoria: 'Petisco', especie: 'Cão e Gato', subCategoria: 'Biscoito', marca: 'Be Nature', fornecedor: 'Zoo Center', pesoEmbalagem: 0.15, valorCusto: 16.41, valorVenda: 25, ...M_ZOO_CENTER_G },
+  { nome: 'Be Nature Biscoito Maçã 150g',        categoria: 'Petisco', especie: 'Cão e Gato', subCategoria: 'Biscoito', marca: 'Be Nature', fornecedor: 'Zoo Center', pesoEmbalagem: 0.15, valorCusto: 16.41, valorVenda: 25, ...M_ZOO_CENTER_G },
+  { nome: 'Be Nature Biscoito Maracujá 150g',    categoria: 'Petisco', especie: 'Cão e Gato', subCategoria: 'Biscoito', marca: 'Be Nature', fornecedor: 'Zoo Center', pesoEmbalagem: 0.15, valorCusto: 16.41, valorVenda: 25, ...M_ZOO_CENTER_G },
+  { nome: 'Be Nature Biscoito Morango 150g',     categoria: 'Petisco', especie: 'Cão e Gato', subCategoria: 'Biscoito', marca: 'Be Nature', fornecedor: 'Zoo Center', pesoEmbalagem: 0.15, valorCusto: 16.41, valorVenda: 25, ...M_ZOO_CENTER_G },
+  // ── Patê Cão Be Nature 300g ──────────────────────────────────────────────
+  { nome: 'Be Nature Day By Day Cães Filhotes Frango, Mandioquinha, Cenoura e Espinafre 300g', categoria: 'Petisco', especie: 'Cão', subCategoria: 'Patê', marca: 'Be Nature', fornecedor: 'Zoo Center', pesoEmbalagem: 0.3, valorCusto: 20.95, valorVenda: 32, ...M_ZOO_CENTER_G },
+  { nome: 'Be Nature Day By Day Cães Adultos Carne Bovina, Batata Doce e Abóbora 300g',        categoria: 'Petisco', especie: 'Cão', subCategoria: 'Patê', marca: 'Be Nature', fornecedor: 'Zoo Center', pesoEmbalagem: 0.3, valorCusto: 20.95, valorVenda: 32, ...M_ZOO_CENTER_G },
+  { nome: 'Be Nature Day By Day Cães Idosos Salmão, Arroz Integral, Cenoura e Espinafre 300g', categoria: 'Petisco', especie: 'Cão', subCategoria: 'Patê', marca: 'Be Nature', fornecedor: 'Zoo Center', pesoEmbalagem: 0.3, valorCusto: 20.95, valorVenda: 32, ...M_ZOO_CENTER_G },
+  // ── Patê Gato Be Nature 120g ─────────────────────────────────────────────
+  { nome: 'Be Nature Day By Day Gatos Filhotes Frango, Fígado e Vegetais 120g',                categoria: 'Petisco', especie: 'Gato', subCategoria: 'Patê', marca: 'Be Nature', fornecedor: 'Zoo Center', pesoEmbalagem: 0.12, valorCusto: 17.21, valorVenda: 26, ...M_ZOO_CENTER_G },
+  { nome: 'Be Nature Day By Day Gatos Idosos Carne e Fígado Bovino com Vegetais 120g',         categoria: 'Petisco', especie: 'Gato', subCategoria: 'Patê', marca: 'Be Nature', fornecedor: 'Zoo Center', pesoEmbalagem: 0.12, valorCusto: 17.21, valorVenda: 26, ...M_ZOO_CENTER_G },
+  { nome: 'Be Nature Day By Day Gatos Adultos Atum e Sardinha com Vegetais 120g',              categoria: 'Petisco', especie: 'Gato', subCategoria: 'Patê', marca: 'Be Nature', fornecedor: 'Zoo Center', pesoEmbalagem: 0.12, valorCusto: 17.21, valorVenda: 26, ...M_ZOO_CENTER_G },
+]
+
+const PRODUTOS_ZOO_CENTER_GATOS: ProdutoSeed[] = [
+  // ── FN Fresh Meat Felino ─────────────────────────────────────────────────
+  { nome: 'FN Fresh Meat Felino Adulto Frango 10,1kg',                    categoria: 'Ração', especie: 'Gato', subCategoria: 'Fresh Meat Adulto',  marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem: 10.1, valorCusto: 285.27, valorVenda: 437,    ...M_ZOO_CENTER_G },
+  { nome: 'FN Fresh Meat Felino Castrado Salmão 10,1kg',                  categoria: 'Ração', especie: 'Gato', subCategoria: 'Fresh Meat Adulto',  marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem: 10.1, valorCusto: 369.39, valorVenda: 565.50, ...M_ZOO_CENTER_G },
+  { nome: 'FN Fresh Meat para Felino Filhotes Sabor Frango 7kg',          categoria: 'Ração', especie: 'Gato', subCategoria: 'Fresh Meat Filhote', marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem:  7,   valorCusto: 217.59, valorVenda: 333,    ...M_ZOO_CENTER_G },
+  { nome: 'FN Fresh Meat para Felino Filhotes Sabor Frango 1kg',          categoria: 'Ração', especie: 'Gato', subCategoria: 'Fresh Meat Filhote', marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem:  1,   valorCusto:  46.45, valorVenda:  71,    ...M_ZOO_CENTER_G },
+  // ── FN Life Felino ───────────────────────────────────────────────────────
+  { nome: 'FN Life Felino Adulto Frango/Salmão 7kg',                      categoria: 'Ração', especie: 'Gato', subCategoria: 'Life Adulto',        marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem:  7,   valorCusto: 167.81, valorVenda: 257,    ...M_ZOO_CENTER_G },
+  { nome: 'FN Life Felino Castrado 7+ Frango/Salmão 7kg',                 categoria: 'Ração', especie: 'Gato', subCategoria: 'Life Adulto',        marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem:  7,   valorCusto: 186.35, valorVenda: 285,    ...M_ZOO_CENTER_G },
+  { nome: 'FN Life para Felino Filhote Frango e Salmão 10kg',             categoria: 'Ração', especie: 'Gato', subCategoria: 'Life Filhote',       marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem: 10,   valorCusto: 228.89, valorVenda: 350,    ...M_ZOO_CENTER_G },
+  { nome: 'FN Life para Felino Filhote Frango e Salmão 1kg',              categoria: 'Ração', especie: 'Gato', subCategoria: 'Life Filhote',       marca: 'Fórmula Natural', fornecedor: 'Zoo Center', pesoEmbalagem:  1,   valorCusto:  38.71, valorVenda:  59,    ...M_ZOO_CENTER_G },
+]
+
+async function seedProdutosZooCenter(prisma: PrismaClient): Promise<void> {
+  const todos = [
+    ...PRODUTOS_ZOO_CENTER,
+    ...PRODUTOS_ZOO_CENTER_GATOS,
+    ...PRODUTOS_ZOO_CENTER_SUPL,
+    ...PRODUTOS_ZOO_CENTER_BISCOITO,
+  ]
+  console.log(`📦 Seeding ${todos.length} produtos Zoo Center (FN + Organnact + Be Nature)...`)
+  let criados = 0
+  let atualizados = 0
+
+  for (const p of todos) {
+    const data = {
+      categoria:      p.categoria,
+      especie:        p.especie ?? null,
+      subCategoria:   p.subCategoria ?? null,
+      marca:          p.marca ?? null,
+      fornecedor:     p.fornecedor ?? null,
+      pesoEmbalagem:  p.pesoEmbalagem ?? null,
+      valorCusto:     p.valorCusto,
+      valorVenda:     p.valorVenda,
+      margemCartao:   p.margemCartao ?? 0,
+      margemImposto:  p.margemImposto ?? 0,
+      margemOperacao: p.margemOperacao ?? 0,
+      margemLucro:    p.margemLucro ?? 0,
+    }
+    const existing = await prisma.produto.findUnique({ where: { nome: p.nome } })
+    if (existing) {
+      await prisma.produto.update({ where: { nome: p.nome }, data })
+      atualizados++
+    } else {
+      await prisma.produto.create({ data: { nome: p.nome, ...data } })
+      criados++
+    }
+  }
+
+  console.log(`✅ Zoo Center: ${criados} criados, ${atualizados} atualizados`)
+}
 
 async function seedProdutosMarket(prisma: PrismaClient): Promise<void> {
   console.log(`📦 Seeding ${PRODUTOS_MARKET.length} produtos Bravecto (Market)...`)
