@@ -19,8 +19,8 @@ import { ImageUpload } from "@/components/shared/image-upload";
 import { formatBRL } from "@/lib/utils/format";
 import type { Produto } from "@/lib/types/produto";
 
-const CATEGORIAS = ["Ração", "Petisco", "Medicamento", "Acessório", "Higiene", "Serviço"];
-const ESPECIES = ["Cão", "Gato", "Ambos"];
+const CATEGORIAS = ["Ração", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"];
+const ESPECIES = ["Cão", "Gato", "Cão e Gato", "Ambos"];
 
 interface ProdutoFormProps {
   produto?: Produto;

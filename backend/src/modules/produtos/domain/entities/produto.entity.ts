@@ -2,7 +2,7 @@ import { AggregateRoot } from '@/shared/domain/aggregate-root.base.js'
 import { Money } from '@/shared/domain/value-objects/money.vo.js'
 import { ValidationError } from '@/shared/errors/validation.error.js'
 
-const CATEGORIAS_VALIDAS = ['Ração', 'Petisco', 'Medicamento', 'Acessório', 'Higiene', 'Serviço'] as const
+const CATEGORIAS_VALIDAS = ['Ração', 'Petisco', 'Suplemento', 'Medicamento', 'Acessório', 'Higiene', 'Serviço'] as const
 type Categoria = (typeof CATEGORIAS_VALIDAS)[number]
 
 interface ProdutoProps {

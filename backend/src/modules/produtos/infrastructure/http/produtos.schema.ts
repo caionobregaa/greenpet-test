@@ -2,8 +2,8 @@ import { z } from 'zod'
 
 export const CreateProdutoSchema = z.object({
   nome: z.string().min(1),
-  categoria: z.enum(['Ração', 'Petisco', 'Medicamento', 'Acessório', 'Higiene', 'Serviço']),
-  especie: z.enum(['Cão', 'Gato', 'Ambos']).optional(),
+  categoria: z.enum(['Ração', 'Petisco', 'Suplemento', 'Medicamento', 'Acessório', 'Higiene', 'Serviço']),
+  especie: z.enum(['Cão', 'Gato', 'Cão e Gato', 'Ambos']).optional(),
   subCategoria: z.string().optional(),
   marca: z.string().optional(),
   fornecedor: z.string().optional(),
