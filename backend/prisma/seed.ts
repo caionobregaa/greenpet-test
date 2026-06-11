@@ -21,6 +21,7 @@ async function main(): Promise<void> {
 
   await seedProdutosPrime(prisma)
   await seedProdutosBasso(prisma)
+  await seedProdutosCentralPec(prisma)
   console.log('✅ Seed concluído.')
 }
 
@@ -29,6 +30,7 @@ const M_MATISSE       = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 
 const M_PETICOS       = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 60 }
 const M_SUPLEMENTO    = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 30 }
 const M_ROYAL_CANINE  = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 45 }
+const M_CENTRAL_PEC   = { margemCartao: 6.09, margemImposto: 5, margemOperacao: 2, margemLucro: 30 }
 
 interface ProdutoSeed {
   nome: string; categoria: string; especie?: string; subCategoria?: string
@@ -164,6 +166,46 @@ const PRODUTOS_BASSO: ProdutoSeed[] = [
   // ── Gato · Raças Específicas ──────────────────────────────────────────────
   { nome: 'Royal Canine Maine Coon 4kg',                               categoria: 'Ração', especie: 'Gato', subCategoria: 'Raça Específica', marca: 'Royal Canine', fornecedor: 'Basso Pancotte', pesoEmbalagem: 4, valorCusto: 278.41, valorVenda: 440, ...M_ROYAL_CANINE },
 ]
+
+// ─── Central Pec ─────────────────────────────────────────────────────────────
+const PRODUTOS_CENTRAL_PEC: ProdutoSeed[] = [
+  { nome: 'Simparic 1 Comp 5mg 1,3 a 2,5kg',   categoria: 'Suplemento', especie: 'Cão', subCategoria: 'Antiparasitário', marca: 'Simparic', fornecedor: 'Central Pec', valorCusto: 61.18, valorVenda:  88, ...M_CENTRAL_PEC },
+  { nome: 'Simparic 1 Comp 10mg 2,6 a 5kg',    categoria: 'Suplemento', especie: 'Cão', subCategoria: 'Antiparasitário', marca: 'Simparic', fornecedor: 'Central Pec', valorCusto: 68.02, valorVenda:  97, ...M_CENTRAL_PEC },
+  { nome: 'Simparic 1 Comp 20mg 5,1 a 10kg',   categoria: 'Suplemento', especie: 'Cão', subCategoria: 'Antiparasitário', marca: 'Simparic', fornecedor: 'Central Pec', valorCusto: 71.50, valorVenda: 102, ...M_CENTRAL_PEC },
+]
+
+async function seedProdutosCentralPec(prisma: PrismaClient): Promise<void> {
+  console.log(`📦 Seeding ${PRODUTOS_CENTRAL_PEC.length} produtos Simparic (Central Pec)...`)
+  let criados = 0
+  let atualizados = 0
+
+  for (const p of PRODUTOS_CENTRAL_PEC) {
+    const data = {
+      categoria:      p.categoria,
+      especie:        p.especie ?? null,
+      subCategoria:   p.subCategoria ?? null,
+      marca:          p.marca ?? null,
+      fornecedor:     p.fornecedor ?? null,
+      pesoEmbalagem:  p.pesoEmbalagem ?? null,
+      valorCusto:     p.valorCusto,
+      valorVenda:     p.valorVenda,
+      margemCartao:   p.margemCartao ?? 0,
+      margemImposto:  p.margemImposto ?? 0,
+      margemOperacao: p.margemOperacao ?? 0,
+      margemLucro:    p.margemLucro ?? 0,
+    }
+    const existing = await prisma.produto.findUnique({ where: { nome: p.nome } })
+    if (existing) {
+      await prisma.produto.update({ where: { nome: p.nome }, data })
+      atualizados++
+    } else {
+      await prisma.produto.create({ data: { nome: p.nome, ...data } })
+      criados++
+    }
+  }
+
+  console.log(`✅ Central Pec: ${criados} criados, ${atualizados} atualizados`)
+}
 
 async function seedProdutosBasso(prisma: PrismaClient): Promise<void> {
   console.log(`📦 Seeding ${PRODUTOS_BASSO.length} produtos Royal Canine (Basso Pancotte)...`)
