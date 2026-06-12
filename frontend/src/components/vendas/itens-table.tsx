@@ -352,7 +352,7 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false, clie
                           </p>
                           <Input
                             type="number" min="1" step="1"
-                            {...control.register(`itens.${index}.consumoDiario` as never, { valueAsNumber: true })}
+                            {...control.register(`itens.${index}.consumoDiario` as never, { setValueAs: (v) => v === "" || v === null || v === undefined ? null : (Number(v) > 0 ? Number(v) : null) })}
                             placeholder="ex: 250"
                             className="w-32 h-8 text-sm"
                           />
@@ -379,7 +379,7 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false, clie
                             <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">Doses por dia</p>
                             <Input
                               type="number" min="0.1" step="0.1"
-                              {...control.register(`itens.${index}.consumoDiario` as never, { valueAsNumber: true })}
+                              {...control.register(`itens.${index}.consumoDiario` as never, { setValueAs: (v) => v === "" || v === null || v === undefined ? null : (Number(v) > 0 ? Number(v) : null) })}
                               placeholder="ex: 1"
                               className="w-28 h-8 text-sm"
                             />
@@ -393,7 +393,7 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false, clie
                           </p>
                           <Input
                             type="number" min="1" step="1"
-                            {...control.register(`itens.${index}.consumoDiario` as never, { valueAsNumber: true })}
+                            {...control.register(`itens.${index}.consumoDiario` as never, { setValueAs: (v) => v === "" || v === null || v === undefined ? null : (Number(v) > 0 ? Number(v) : null) })}
                             placeholder="ex: 250"
                             className="w-32 h-8 text-sm"
                           />
