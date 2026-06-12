@@ -149,7 +149,8 @@
       "Bash(findstr \"schema\\\\|produto\")",
       "Bash(mkdir -p \"c:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\greenpet-test\\\\frontend\\\\src\\\\app\\\\\\(app\\)\\\\vendas\\\\[id]\\\\editar\" 2>/dev/null; echo \"done\")",
       "Bash(grep -v \".js$\")",
-      "Bash(xargs grep -l \"TopProdutos\\\\|animais\\\\|formatDate\\\\|Animals\")"
+      "Bash(xargs grep -l \"TopProdutos\\\\|animais\\\\|formatDate\\\\|Animals\")",
+      "Bash(git commit -m 'fix: consumoDiario TypeScript type error — replace z.preprocess with setValueAs *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\Administrator\\Documents\\GitHub\\greenpet-test\\frontend\\src\\app\\(app)\\vendas\\[id]"
