@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Search, X, FileText, CreditCard, Banknote, QrCode, Wallet, ChevronDown, PawPrint } from "lucide-react";
@@ -234,8 +234,12 @@ export default function NovaVendaPage() {
   const [novoAnimalEspecie, setNovoAnimalEspecie] = useState<"Cão" | "Gato" | "">("");
   const [savingAnimal, setSavingAnimal] = useState(false);
 
-  // Compute total from itens for profit display
-  const [formTotal, setFormTotal] = useState(0);
+  // Compute total from itens reactively
+  const watchedItens = useWatch({ control, name: "itens" }) as Array<{ qtd?: number; valorUnitario?: number; desconto?: number }> | undefined;
+  const formTotal = (watchedItens ?? []).reduce(
+    (s, i) => s + Math.max(0, (Number(i?.qtd) || 0) * (Number(i?.valorUnitario) || 0) - (Number(i?.desconto) || 0)),
+    0
+  );
 
   const selectedOpcao = OPCOES_PAG.find((o) => o.value === formaPagKey);
   const taxaPct = selectedOpcao?.taxaKey ? TAXAS[selectedOpcao.taxaKey].pct : 0;
@@ -350,7 +354,6 @@ export default function NovaVendaPage() {
   function handleImportOrcamento(o: Orcamento) {
     setOrcamentoSelecionado(o);
     setFormaPagKey("");
-    setFormTotal(o.total);
   }
 
   // Converter flow: bypass form validation
