@@ -27,10 +27,7 @@ export class PrismaRecompraRepository {
     const vendaItens = await this.prisma.vendaItem.findMany({
       where: {
         produtoId: { not: null },
-        OR: [
-          { produto: { diasRecompra: { not: null } } },
-          { consumoDiario: { not: null } },
-        ],
+        consumoDiario: { not: null },
         venda: {
           cliente: { deletedAt: null },
           ...(params.clienteId ? { clienteId: params.clienteId } : {}),
@@ -43,7 +40,7 @@ export class PrismaRecompraRepository {
             animal: { select: { id: true, nome: true } },
           },
         },
-        produto: { select: { id: true, nome: true, diasRecompra: true, pesoEmbalagem: true } },
+        produto: { select: { id: true, nome: true, pesoEmbalagem: true } },
       },
       orderBy: { venda: { data: 'desc' } },
     })
@@ -67,15 +64,9 @@ export class PrismaRecompraRepository {
     for (const item of vendaItens) {
       if (!item.produtoId) continue
 
-      // Compute diasRecompra: prefer consumoDiario-based calculation
-      let diasRecompra: number
-      if (item.consumoDiario && item.consumoDiario > 0 && item.produto?.pesoEmbalagem) {
-        diasRecompra = Math.round((Number(item.produto.pesoEmbalagem) * 1000) / item.consumoDiario)
-      } else if (item.produto?.diasRecompra) {
-        diasRecompra = item.produto.diasRecompra
-      } else {
-        continue
-      }
+      // Only compute via consumoDiario: requires both consumoDiario and pesoEmbalagem
+      if (!item.consumoDiario || item.consumoDiario <= 0 || !item.produto?.pesoEmbalagem) continue
+      const diasRecompra = Math.round((Number(item.produto.pesoEmbalagem) * 1000) / item.consumoDiario)
 
       const animalId = item.itemAnimalId ?? item.venda.animal?.id ?? ''
       const key = `${item.venda.clienteId}:${item.produtoId}:${animalId}`
