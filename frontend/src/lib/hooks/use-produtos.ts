@@ -31,7 +31,10 @@ export function useCreateProduto() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateProdutoInput) => apiProdutos.create(input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["produtos"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["produtos"] });
+      qc.invalidateQueries({ queryKey: ["estoque"] });
+    },
   });
 }
 

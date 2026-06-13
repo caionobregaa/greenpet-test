@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ProdutoForm } from "./produto-form";
 import { useCreateProduto, useUpdateProduto } from "@/lib/hooks/use-produtos";
+import { apiEstoque } from "@/lib/api/estoque";
 import type { Produto } from "@/lib/types/produto";
 import type { CreateProdutoInput } from "@/lib/schemas/produto.schema";
 
@@ -18,18 +19,29 @@ export function ProdutoDialog({ open, onOpenChange, produto }: ProdutoDialogProp
   const update = useUpdateProduto();
   const isLoading = create.isPending || update.isPending;
 
-  async function onSubmit(data: CreateProdutoInput & { imagemUrl?: string | null }) {
+  async function onSubmit(data: CreateProdutoInput & { imagemUrl?: string | null; estoqueInicial?: number }) {
     try {
+      const { estoqueInicial, ...rest } = data;
       const payload = Object.fromEntries(
-        Object.entries(data).filter(([k, v]) => k === "imagemUrl" ? v !== undefined : v !== "" && v !== undefined)
+        Object.entries(rest).filter(([k, v]) => k === "imagemUrl" ? v !== undefined : v !== "" && v !== undefined)
       ) as CreateProdutoInput;
 
       if (produto) {
         await update.mutateAsync({ id: produto.id, input: payload });
         toast.success("Produto atualizado com sucesso!");
       } else {
-        await create.mutateAsync(payload);
-        toast.success("Produto cadastrado com sucesso!");
+        const novo = await create.mutateAsync(payload);
+        if (estoqueInicial && estoqueInicial > 0) {
+          try {
+            await apiEstoque.create({ produtoId: novo.id, quantidade: estoqueInicial });
+            toast.success(`Produto cadastrado! ${estoqueInicial} unidade${estoqueInicial !== 1 ? "s" : ""} lançada${estoqueInicial !== 1 ? "s" : ""} no estoque.`);
+          } catch {
+            toast.success("Produto cadastrado com sucesso!");
+            toast.warning("Não foi possível lançar o estoque inicial. Adicione manualmente na aba Estoque.");
+          }
+        } else {
+          toast.success("Produto cadastrado com sucesso!");
+        }
       }
       onOpenChange(false);
     } catch (err: unknown) {

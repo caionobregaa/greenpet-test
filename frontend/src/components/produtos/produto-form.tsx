@@ -45,7 +45,7 @@ const DISTRIBUIDORAS_PADRAO = [
 
 interface ProdutoFormProps {
   produto?: Produto;
-  onSubmit: (data: CreateProdutoInput & { imagemUrl?: string | null }) => void;
+  onSubmit: (data: CreateProdutoInput & { imagemUrl?: string | null; estoqueInicial?: number }) => void;
   onCancel: () => void;
   isLoading?: boolean;
 }
@@ -136,6 +136,7 @@ function ComboboxComAdicao({
 // ── Form principal ───────────────────────────────────────────────────────────
 
 export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoFormProps) {
+  const [estoqueInicial, setEstoqueInicial] = useState<number | "">("");
   const [distribuidoras, setDistribuidoras] = useState<string[]>(() => {
     const lista = [...DISTRIBUIDORAS_PADRAO];
     // Inclui distribuidora do produto se não estiver na lista
@@ -190,8 +191,13 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
     setValue("fornecedor", valor);
   }
 
+  function handleFormSubmit(data: CreateProdutoInput & { imagemUrl?: string | null }) {
+    const qtd = typeof estoqueInicial === "number" && estoqueInicial > 0 ? estoqueInicial : undefined;
+    onSubmit({ ...data, estoqueInicial: qtd });
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
 
       {/* Imagem + Identificação */}
       <div className="flex flex-col sm:flex-row gap-6 items-start">
@@ -375,20 +381,38 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
             </div>
           )}
 
-          <div className="space-y-1.5">
-            <Label htmlFor="margemImposto">Margem Imposto (%)</Label>
-            <Input id="margemImposto" type="number" step="0.1" min="0" max="100" {...register("margemImposto", { valueAsNumber: true })} placeholder="0" />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="margemOperacao">Margem Operação (%)</Label>
-            <Input id="margemOperacao" type="number" step="0.1" min="0" max="100" {...register("margemOperacao", { valueAsNumber: true })} placeholder="0" />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="margemLucro">Margem Lucro (%)</Label>
-            <Input id="margemLucro" type="number" step="0.1" min="0" max="100" {...register("margemLucro", { valueAsNumber: true })} placeholder="0" />
-          </div>
         </div>
       </div>
+
+      {/* Estoque inicial — apenas ao criar um novo produto */}
+      {!produto && (
+        <div className="space-y-3 pt-2 border-t border-border/60">
+          <span className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Estoque Inicial</span>
+          <div className="flex items-end gap-4 flex-wrap">
+            <div className="space-y-1.5">
+              <Label htmlFor="estoqueInicial">
+                Quantidade em estoque
+                <span className="ml-1 text-muted-foreground font-normal text-xs">(opcional)</span>
+              </Label>
+              <Input
+                id="estoqueInicial"
+                type="number"
+                min="0"
+                step="1"
+                value={estoqueInicial}
+                onChange={(e) => setEstoqueInicial(e.target.value === "" ? "" : Math.max(0, parseInt(e.target.value) || 0))}
+                placeholder="0"
+                className="w-36"
+              />
+            </div>
+            {typeof estoqueInicial === "number" && estoqueInicial > 0 && (
+              <p className="text-xs text-primary font-medium pb-1.5">
+                {estoqueInicial} unidade{estoqueInicial !== 1 ? "s" : ""} serão lançadas no Estoque ao salvar
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="flex justify-end gap-2 pt-4 border-t border-border/60 sticky bottom-0 bg-background pb-2 -mx-1 px-1">
         <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading} className="text-muted-foreground">
