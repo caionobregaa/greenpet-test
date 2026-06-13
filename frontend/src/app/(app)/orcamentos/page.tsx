@@ -92,7 +92,7 @@ function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChan
       };
       await create.mutateAsync(payload);
       toast.success("Orçamento criado com sucesso!");
-      reset({ data: todayISO(), validade: todayPlusDaysISO(7), itens: [] });
+      reset({ data: todayISO(), validade: todayPlusDaysISO(7), itens: [], formasPag: [] });
       setClienteId("");
       onOpenChange(false);
     } catch (err: unknown) {
@@ -103,77 +103,80 @@ function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChan
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-3xl max-h-[90svh] flex flex-col gap-0 p-0">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0">
           <DialogTitle>Novo Orçamento</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label>Cliente <span className="text-muted-foreground font-normal">(opcional)</span></Label>
-              <Controller control={control} name="clienteId" render={({ field }) => {
-                const nomeCliente = clientesData?.data.find(c => c.id === field.value)?.nome;
-                return (
-                  <Select value={field.value ?? ""} onValueChange={(v) => { field.onChange(v ?? ""); setClienteId(v ?? ""); setValue("animalId", null); }}>
-                    <SelectTrigger>
-                      {nomeCliente
-                        ? <span className="flex flex-1 text-left text-sm truncate">{nomeCliente}</span>
-                        : <SelectValue placeholder="Sem cliente" />}
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Sem cliente</SelectItem>
-                      {clientesData?.data.map((c) => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                );
-              }} />
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label>Cliente <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                <Controller control={control} name="clienteId" render={({ field }) => {
+                  const nomeCliente = clientesData?.data.find(c => c.id === field.value)?.nome;
+                  return (
+                    <Select value={field.value ?? ""} onValueChange={(v) => { field.onChange(v ?? ""); setClienteId(v ?? ""); setValue("animalId", null); }}>
+                      <SelectTrigger>
+                        {nomeCliente
+                          ? <span className="flex flex-1 text-left text-sm truncate">{nomeCliente}</span>
+                          : <SelectValue placeholder="Sem cliente" />}
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Sem cliente</SelectItem>
+                        {clientesData?.data.map((c) => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  );
+                }} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Animal <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                <Controller control={control} name="animalId" render={({ field }) => {
+                  const nomeAnimal = animaisData?.data.find(a => a.id === field.value)?.nome;
+                  return (
+                    <Select value={field.value ?? ""} onValueChange={(v) => field.onChange(v || null)} disabled={!clienteId}>
+                      <SelectTrigger>
+                        {nomeAnimal
+                          ? <span className="flex flex-1 text-left text-sm truncate">{nomeAnimal}</span>
+                          : <SelectValue placeholder="Nenhum" />}
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Nenhum</SelectItem>
+                        {animaisData?.data.map((a) => <SelectItem key={a.id} value={a.id}>{a.nome}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  );
+                }} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Data</Label>
+                <Input type="date" {...register("data")} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Validade <span className="text-xs text-muted-foreground">(padrão: 7 dias)</span></Label>
+                <Input type="date" {...register("validade")} />
+                {errors.validade && <p className="text-xs text-destructive">{errors.validade.message}</p>}
+              </div>
+              <div className="space-y-1.5 col-span-1 sm:col-span-2">
+                <Label>Observações</Label>
+                <Textarea {...register("obs")} rows={2} placeholder="Observações opcionais..." />
+              </div>
+              <div className="space-y-2 col-span-1 sm:col-span-2">
+                <Label>Formas de pagamento aceitas <span className="text-muted-foreground font-normal text-xs">(opcional — aparece no PDF)</span></Label>
+                <FormasPagSelector value={formasPagWatch} onChange={(v) => setValue("formasPag", v)} />
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>Animal <span className="text-muted-foreground font-normal">(opcional)</span></Label>
-              <Controller control={control} name="animalId" render={({ field }) => {
-                const nomeAnimal = animaisData?.data.find(a => a.id === field.value)?.nome;
-                return (
-                  <Select value={field.value ?? ""} onValueChange={(v) => field.onChange(v || null)} disabled={!clienteId}>
-                    <SelectTrigger>
-                      {nomeAnimal
-                        ? <span className="flex flex-1 text-left text-sm truncate">{nomeAnimal}</span>
-                        : <SelectValue placeholder="Nenhum" />}
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Nenhum</SelectItem>
-                      {animaisData?.data.map((a) => <SelectItem key={a.id} value={a.id}>{a.nome}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                );
-              }} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Data</Label>
-              <Input type="date" {...register("data")} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Validade <span className="text-xs text-muted-foreground">(padrão: 7 dias)</span></Label>
-              <Input type="date" {...register("validade")} />
-              {errors.validade && <p className="text-xs text-destructive">{errors.validade.message}</p>}
-            </div>
-            <div className="space-y-1.5 col-span-2">
-              <Label>Observações</Label>
-              <Textarea {...register("obs")} rows={2} placeholder="Observações opcionais..." />
-            </div>
-            <div className="space-y-2 col-span-2">
-              <Label>Formas de pagamento aceitas <span className="text-muted-foreground font-normal text-xs">(opcional — aparece no PDF)</span></Label>
-              <FormasPagSelector value={formasPagWatch} onChange={(v) => setValue("formasPag", v)} />
-            </div>
+            <ItensTable
+              control={control as unknown as Parameters<typeof ItensTable>[0]["control"]}
+              setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
+              errors={errors.itens as Parameters<typeof ItensTable>[0]["errors"]}
+            />
+            {(errors.itens as { message?: string } | undefined)?.message && (
+              <p className="text-xs text-destructive">{(errors.itens as { message?: string }).message}</p>
+            )}
           </div>
-          <ItensTable
-            control={control as unknown as Parameters<typeof ItensTable>[0]["control"]}
-            setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
-            errors={errors.itens as Parameters<typeof ItensTable>[0]["errors"]}
-          />
-          {(errors.itens as { message?: string } | undefined)?.message && (
-            <p className="text-xs text-destructive">{(errors.itens as { message?: string }).message}</p>
-          )}
-          <div className="flex justify-end gap-2">
+          {/* Sticky footer */}
+          <div className="shrink-0 flex justify-end gap-2 px-6 py-4 border-t border-border bg-card">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" disabled={create.isPending}>
               {create.isPending ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Salvando...</> : "Salvar Orçamento"}
@@ -228,31 +231,34 @@ function EditarOrcamentoDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-3xl max-h-[90svh] flex flex-col gap-0 p-0">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0">
           <DialogTitle>Editar Orçamento #{orcamento?.id.slice(-6).toUpperCase()}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label>Validade</Label>
-              <Input type="date" {...register("validade")} />
-              {errors.validade && <p className="text-xs text-destructive">{errors.validade.message}</p>}
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label>Validade</Label>
+                <Input type="date" {...register("validade")} />
+                {errors.validade && <p className="text-xs text-destructive">{errors.validade.message}</p>}
+              </div>
+              <div className="space-y-1.5 col-span-1 sm:col-span-2">
+                <Label>Observações</Label>
+                <Textarea {...register("obs")} rows={2} placeholder="Observações opcionais..." />
+              </div>
             </div>
-            <div className="space-y-1.5 col-span-2">
-              <Label>Observações</Label>
-              <Textarea {...register("obs")} rows={2} placeholder="Observações opcionais..." />
-            </div>
+            <ItensTable
+              control={control as unknown as Parameters<typeof ItensTable>[0]["control"]}
+              setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
+              errors={errors.itens as Parameters<typeof ItensTable>[0]["errors"]}
+            />
+            {(errors.itens as { message?: string } | undefined)?.message && (
+              <p className="text-xs text-destructive">{(errors.itens as { message?: string }).message}</p>
+            )}
           </div>
-          <ItensTable
-            control={control as unknown as Parameters<typeof ItensTable>[0]["control"]}
-            setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
-            errors={errors.itens as Parameters<typeof ItensTable>[0]["errors"]}
-          />
-          {(errors.itens as { message?: string } | undefined)?.message && (
-            <p className="text-xs text-destructive">{(errors.itens as { message?: string }).message}</p>
-          )}
-          <div className="flex justify-end gap-2">
+          {/* Sticky footer */}
+          <div className="shrink-0 flex justify-end gap-2 px-6 py-4 border-t border-border bg-card">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" disabled={update.isPending}>
               {update.isPending ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Salvando...</> : "Salvar Alterações"}
@@ -293,15 +299,75 @@ export default function OrcamentosPage() {
         </Button>
       </div>
 
-      <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+      <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+        {/* ── Mobile card list ──────────────────────────────────────────────── */}
+        <div className="md:hidden divide-y divide-border">
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="p-4 space-y-2">
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-3 w-1/3" />
+                <div className="flex gap-2 justify-end mt-1">
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                </div>
+              </div>
+            ))
+          ) : data?.data.length === 0 ? (
+            <EmptyState message="Nenhum orçamento encontrado" />
+          ) : (
+            data?.data.map((o) => (
+              <div key={o.id} className="p-4">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm truncate">
+                      {o.cliente?.nome ?? <span className="text-muted-foreground italic">Sem cliente</span>}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {o.numero ? `Nº ${String(o.numero).padStart(3, "0")} · ` : ""}{formatDate(o.data)}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-bold text-primary font-mono text-sm">{formatBRL(o.total)}</p>
+                    <div className="mt-1">
+                      <StatusPill status={o.status} />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 justify-end">
+                  {o.status === "pendente" && (
+                    <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => setEditOrcamento(o)}>
+                      <Pencil className="w-3.5 h-3.5" />
+                      Editar
+                    </Button>
+                  )}
+                  <Link href={`/orcamentos/${o.id}`} className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-8 gap-1.5")}>
+                    <Eye className="w-3.5 h-3.5" />
+                    Ver
+                  </Link>
+                  <Button
+                    variant="ghost" size="sm"
+                    className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => setDeleteId(o.id)}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* ── Desktop table ─────────────────────────────────────────────────── */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-muted/50">
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Nº</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Data</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Cliente</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden md:table-cell">Validade</th>
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Validade</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Status</th>
                 <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Total</th>
                 <th className="px-4 py-3 w-28"></th>
@@ -319,7 +385,7 @@ export default function OrcamentosPage() {
                   <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{o.numero ? String(o.numero).padStart(3, "0") : "—"}</td>
                   <td className="px-4 py-3">{formatDate(o.data)}</td>
                   <td className="px-4 py-3 font-medium">{o.cliente?.nome ?? <span className="text-muted-foreground">—</span>}</td>
-                  <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{formatDate(o.validade)}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{formatDate(o.validade)}</td>
                   <td className="px-4 py-3"><StatusPill status={o.status} /></td>
                   <td className="px-4 py-3 text-right font-bold text-primary font-mono">{formatBRL(o.total)}</td>
                   <td className="px-4 py-3">
@@ -342,6 +408,7 @@ export default function OrcamentosPage() {
             </tbody>
           </table>
         </div>
+
         {data?.meta && <div className="px-4 pb-4"><PaginationBar meta={data.meta} onPageChange={setPage} /></div>}
       </div>
 
