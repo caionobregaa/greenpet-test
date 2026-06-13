@@ -8,6 +8,7 @@ export const CreateProdutoSchema = z.object({
   marca: z.string().optional(),
   fornecedor: z.string().optional(),
   pesoEmbalagem: z.number().positive().optional(),
+  unidadeEmbalagem: z.string().optional(),
   valorCusto: z.number().min(0).default(0),
   valorVenda: z.number().min(0),
   margemCartao: z.number().min(0).default(0),

@@ -10,6 +10,7 @@ export interface CreateProdutoInput {
   marca?: string
   fornecedor?: string
   pesoEmbalagem?: number
+  unidadeEmbalagem?: string
   valorCusto?: number
   valorVenda: number
   margemCartao?: number

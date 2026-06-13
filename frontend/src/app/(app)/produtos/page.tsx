@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Eye, X } from "lucide-react";
 import { useProdutos, useDeleteProduto } from "@/lib/hooks/use-produtos";
@@ -14,10 +14,10 @@ import { ProdutoDialog } from "@/components/produtos/produto-dialog";
 import { ProdutoInfoDialog } from "@/components/produtos/produto-info-dialog";
 import { formatBRL } from "@/lib/utils/format";
 import type { Produto } from "@/lib/types/produto";
+import { DISTRIBUIDORAS_PADRAO, todasAsDistribuidoras } from "@/lib/utils/distribuidoras";
 
 const CATEGORIAS = ["Ração", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"];
 const ESPECIES   = ["Cão", "Gato", "Cão e Gato", "Ambos"];
-const FORNECEDORES = ["DUNORTE", "PRIME", "Basso Pancotte", "Central Pec", "Market", "Zoo Center"];
 
 function FilterSelect({
   label,
@@ -58,6 +58,12 @@ export default function ProdutosPage() {
   const [especie, setEspecie]       = useState("");
   const [fornecedor, setFornecedor] = useState("");
   const [page, setPage]             = useState(1);
+  const [fornecedoresLista, setFornecedoresLista] = useState<string[]>(DISTRIBUIDORAS_PADRAO);
+
+  // Load custom distributors from localStorage after hydration
+  useEffect(() => {
+    setFornecedoresLista(todasAsDistribuidoras());
+  }, []);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduto, setEditingProduto] = useState<Produto | undefined>();
   const [deleteId, setDeleteId]     = useState<string | null>(null);
@@ -116,7 +122,7 @@ export default function ProdutosPage() {
           label="Distribuidora"
           value={fornecedor}
           onChange={(v) => { setFornecedor(v); setPage(1); }}
-          options={FORNECEDORES}
+          options={fornecedoresLista}
         />
         <FilterSelect
           label="Categoria"

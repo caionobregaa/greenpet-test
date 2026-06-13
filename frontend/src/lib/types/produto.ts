@@ -7,6 +7,7 @@ export interface Produto {
   marca: string | null;
   fornecedor: string | null;
   pesoEmbalagem: number | null;
+  unidadeEmbalagem: string | null;
   valorCusto: number;
   valorVenda: number;
   margemCartao: number | null;

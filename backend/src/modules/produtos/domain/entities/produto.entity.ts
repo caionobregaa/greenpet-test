@@ -13,6 +13,7 @@ interface ProdutoProps {
   marca?: string
   fornecedor?: string
   pesoEmbalagem?: number
+  unidadeEmbalagem?: string
   valorCusto: Money
   valorVenda: Money
   margemCartao: number
@@ -35,6 +36,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     marca?: string
     fornecedor?: string
     pesoEmbalagem?: number
+    unidadeEmbalagem?: string
     valorCusto?: number
     valorVenda: number
     margemCartao?: number
@@ -58,6 +60,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
         marca: data.marca,
         fornecedor: data.fornecedor,
         pesoEmbalagem: data.pesoEmbalagem,
+        unidadeEmbalagem: data.unidadeEmbalagem,
         valorCusto: Money.create(data.valorCusto ?? 0),
         valorVenda: Money.create(data.valorVenda),
         margemCartao: data.margemCartao ?? 0,
@@ -80,6 +83,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
   get marca(): string | undefined { return this.props.marca }
   get fornecedor(): string | undefined { return this.props.fornecedor }
   get pesoEmbalagem(): number | undefined { return this.props.pesoEmbalagem }
+  get unidadeEmbalagem(): string | undefined { return this.props.unidadeEmbalagem }
   get valorCusto(): number { return this.props.valorCusto.value }
   get valorVenda(): number { return this.props.valorVenda.value }
   get margemCartao(): number { return this.props.margemCartao }
@@ -112,6 +116,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     marca: string
     fornecedor: string
     pesoEmbalagem: number
+    unidadeEmbalagem: string
     valorCusto: number
     valorVenda: number
     margemCartao: number
@@ -136,6 +141,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     if (fields.marca !== undefined) this.props.marca = fields.marca
     if (fields.fornecedor !== undefined) this.props.fornecedor = fields.fornecedor
     if (fields.pesoEmbalagem !== undefined) this.props.pesoEmbalagem = fields.pesoEmbalagem
+    if (fields.unidadeEmbalagem !== undefined) this.props.unidadeEmbalagem = fields.unidadeEmbalagem
     if (fields.margemCartao !== undefined) this.props.margemCartao = fields.margemCartao
     if (fields.margemImposto !== undefined) this.props.margemImposto = fields.margemImposto
     if (fields.margemOperacao !== undefined) this.props.margemOperacao = fields.margemOperacao

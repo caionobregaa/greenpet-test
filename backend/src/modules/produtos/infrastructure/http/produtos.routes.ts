@@ -25,6 +25,7 @@ function toResponse(p: Produto, estoque = 0) {
     marca: p.marca,
     fornecedor: p.fornecedor,
     pesoEmbalagem: p.pesoEmbalagem,
+    unidadeEmbalagem: p.unidadeEmbalagem ?? null,
     valorCusto: p.valorCusto,
     valorVenda: p.valorVenda,
     margemCalculada: p.margemCalculada,

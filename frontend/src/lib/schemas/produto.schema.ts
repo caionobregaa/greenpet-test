@@ -8,6 +8,7 @@ export const CreateProdutoSchema = z.object({
   marca: z.string().optional().or(z.literal("")),
   fornecedor: z.string().optional().or(z.literal("")),
   pesoEmbalagem: z.number().min(0).optional(),
+  unidadeEmbalagem: z.string().optional().or(z.literal("")),
   valorCusto: z.number().min(0, "Valor de custo inválido"),
   valorVenda: z.number().min(0.01, "Valor de venda deve ser maior que zero"),
   margemCartao: z.number().min(0).max(100).optional(),

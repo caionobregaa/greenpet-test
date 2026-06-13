@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -19,11 +20,15 @@ import { Loader2, Plus, Check, X } from "lucide-react";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { formatBRL } from "@/lib/utils/format";
 import type { Produto } from "@/lib/types/produto";
+import {
+  DISTRIBUIDORAS_PADRAO,
+  carregarDistribuidorasCustomizadas,
+  salvarDistribuidorasCustomizadas,
+} from "@/lib/utils/distribuidoras";
 
 const CATEGORIAS = ["Ração", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"];
 const ESPECIES = ["Cão", "Gato", "Cão e Gato", "Ambos"];
 
-// Sugestões de subcategoria por categoria
 const SUBCATEGORIAS: Record<string, string[]> = {
   "Ração":       ["Seca", "Úmida", "Úmida Sachê", "Úmida Lata", "Natural"],
   "Petisco":     ["Snack", "Ossinho", "Mordedor", "Brinquedo Comestível", "Funcional"],
@@ -34,14 +39,7 @@ const SUBCATEGORIAS: Record<string, string[]> = {
   "Serviço":     ["Consulta", "Cirurgia", "Exame", "Banho e Tosa", "Vacina"],
 };
 
-const DISTRIBUIDORAS_PADRAO = [
-  "DUNORTE",
-  "PRIME",
-  "Basso Pancotte",
-  "Central Pec",
-  "Market",
-  "Zoo Center",
-];
+const UNIDADES_EMBALAGEM = ["kg", "g", "Comprimidos", "mL", "L", "unidade"];
 
 interface ProdutoFormProps {
   produto?: Produto;
@@ -112,7 +110,6 @@ function ComboboxComAdicao({
           >
             <option value="">{placeholder}</option>
             {options.map((o) => <option key={o} value={o}>{o}</option>)}
-            {/* Mostra o valor atual se não estiver na lista */}
             {value && !options.includes(value) && (
               <option value={value}>{value}</option>
             )}
@@ -137,14 +134,29 @@ function ComboboxComAdicao({
 
 export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoFormProps) {
   const [estoqueInicial, setEstoqueInicial] = useState<number | "">("");
+
+  // Load distributors from localStorage + defaults on mount
   const [distribuidoras, setDistribuidoras] = useState<string[]>(() => {
-    const lista = [...DISTRIBUIDORAS_PADRAO];
-    // Inclui distribuidora do produto se não estiver na lista
-    if (produto?.fornecedor && !lista.includes(produto.fornecedor)) {
-      lista.push(produto.fornecedor);
+    const customizadas = carregarDistribuidorasCustomizadas();
+    const todas = [...new Set([...DISTRIBUIDORAS_PADRAO, ...customizadas])];
+    if (produto?.fornecedor && !todas.includes(produto.fornecedor)) {
+      todas.push(produto.fornecedor);
     }
-    return lista;
+    return todas;
   });
+
+  // Reload from localStorage once hydrated (SSR safety)
+  const hydrated = useRef(false);
+  useEffect(() => {
+    if (hydrated.current) return;
+    hydrated.current = true;
+    const customizadas = carregarDistribuidorasCustomizadas();
+    if (customizadas.length === 0) return;
+    setDistribuidoras((prev) => {
+      const todas = [...new Set([...DISTRIBUIDORAS_PADRAO, ...customizadas, ...prev])];
+      return todas;
+    });
+  }, []);
 
   const {
     register,
@@ -155,38 +167,62 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
   } = useForm<CreateProdutoInput & { imagemUrl?: string | null }>({
     resolver: zodResolver(CreateProdutoSchema),
     defaultValues: {
-      nome:           produto?.nome ?? "",
-      categoria:      produto?.categoria as CreateProdutoInput["categoria"] ?? undefined,
-      especie:        (produto?.especie as CreateProdutoInput["especie"]) ?? undefined,
-      subCategoria:   produto?.subCategoria ?? "",
-      marca:          produto?.marca ?? "",
-      fornecedor:     produto?.fornecedor ?? "",
-      pesoEmbalagem:  produto?.pesoEmbalagem ?? undefined,
-      valorCusto:     produto?.valorCusto ?? 0,
-      valorVenda:     produto?.valorVenda ?? 0,
-      margemCartao:   produto?.margemCartao ?? 0,
-      margemImposto:  produto?.margemImposto ?? 0,
-      margemOperacao: produto?.margemOperacao ?? 0,
-      margemLucro:    produto?.margemLucro ?? 0,
-      descricao:      produto?.descricao ?? "",
-      imagemUrl:      produto?.imagemUrl ?? null,
+      nome:              produto?.nome ?? "",
+      categoria:         produto?.categoria as CreateProdutoInput["categoria"] ?? undefined,
+      especie:           (produto?.especie as CreateProdutoInput["especie"]) ?? undefined,
+      subCategoria:      produto?.subCategoria ?? "",
+      marca:             produto?.marca ?? "",
+      fornecedor:        produto?.fornecedor ?? "",
+      pesoEmbalagem:     produto?.pesoEmbalagem ?? undefined,
+      unidadeEmbalagem:  produto?.unidadeEmbalagem ?? "",
+      valorCusto:        produto?.valorCusto ?? 0,
+      valorVenda:        produto?.valorVenda ?? 0,
+      margemCartao:      produto?.margemCartao ?? 0,
+      margemImposto:     produto?.margemImposto ?? 0,
+      margemOperacao:    produto?.margemOperacao ?? 0,
+      margemLucro:       produto?.margemLucro ?? 0,
+      descricao:         produto?.descricao ?? "",
+      imagemUrl:         produto?.imagemUrl ?? null,
     },
   });
 
-  const custo     = useWatch({ control, name: "valorCusto" }) ?? 0;
-  const venda     = useWatch({ control, name: "valorVenda" }) ?? 0;
-  const categoria = useWatch({ control, name: "categoria" }) ?? "";
-  const imagemUrl = useWatch({ control, name: "imagemUrl" as keyof CreateProdutoInput });
+  const custo            = useWatch({ control, name: "valorCusto" }) ?? 0;
+  const venda            = useWatch({ control, name: "valorVenda" }) ?? 0;
+  const categoria        = useWatch({ control, name: "categoria" }) ?? "";
+  const unidadeEmbalagem = useWatch({ control, name: "unidadeEmbalagem" }) ?? "";
+  const imagemUrl        = useWatch({ control, name: "imagemUrl" as keyof CreateProdutoInput });
 
-  // Margem usando a fórmula correta: ((Venda - Custo) / Venda) × 100
-  const margem = venda > 0 ? ((venda - custo) / venda) * 100 : 0;
+  const margem    = venda > 0 ? ((venda - custo) / venda) * 100 : 0;
   const margemCor = margem >= 30 ? "text-primary" : margem >= 15 ? "text-amber-500" : "text-destructive";
 
   const subcategoriasSugeridas = SUBCATEGORIAS[categoria] ?? [];
 
+  // Label and step for the quantidade field based on selected unit
+  const unidadeLabel = unidadeEmbalagem
+    ? unidadeEmbalagem === "kg"         ? "Peso (kg)"
+    : unidadeEmbalagem === "g"          ? "Peso (g)"
+    : unidadeEmbalagem === "Comprimidos"? "Quantidade (comprimidos)"
+    : unidadeEmbalagem === "mL"         ? "Volume (mL)"
+    : unidadeEmbalagem === "L"          ? "Volume (L)"
+    : "Quantidade"
+    : "Quantidade";
+  const unidadeStep = unidadeEmbalagem === "kg" || unidadeEmbalagem === "L" ? "0.01"
+    : unidadeEmbalagem === "g" || unidadeEmbalagem === "mL" ? "1"
+    : "1";
+  const unidadePlaceholder = unidadeEmbalagem === "kg" ? "Ex: 15"
+    : unidadeEmbalagem === "g"           ? "Ex: 500"
+    : unidadeEmbalagem === "Comprimidos" ? "Ex: 30"
+    : unidadeEmbalagem === "mL"          ? "Ex: 250"
+    : unidadeEmbalagem === "L"           ? "Ex: 1"
+    : "Quantidade";
+
   function handleFornecedorChange(valor: string) {
     if (valor && !distribuidoras.includes(valor)) {
-      setDistribuidoras((prev) => [...prev, valor]);
+      const nova = [...distribuidoras, valor];
+      setDistribuidoras(nova);
+      // Persist only the custom ones (beyond the defaults)
+      const customizadas = nova.filter((d) => !DISTRIBUIDORAS_PADRAO.includes(d));
+      salvarDistribuidorasCustomizadas(customizadas);
     }
     setValue("fornecedor", valor);
   }
@@ -262,7 +298,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
           <Input id="marca" {...register("marca")} placeholder="Royal Canin, Pedigree..." />
         </div>
 
-        {/* Distribuidora com "+" */}
+        {/* Distribuidora com "+" e persistência em localStorage */}
         <Controller
           control={control}
           name="fornecedor"
@@ -302,24 +338,47 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
           )}
         />
 
-        <div className="space-y-1.5">
-          <Label htmlFor="pesoEmbalagem">
-            {categoria === "Medicamento" || categoria === "Suplemento"
-              ? "Peso / Qtd. Embalagem"
-              : "Peso Embalagem (kg)"}
-          </Label>
-          <Input
-            id="pesoEmbalagem"
-            type="number"
-            step="0.1"
-            min="0"
-            {...register("pesoEmbalagem", { valueAsNumber: true })}
-            placeholder={
-              categoria === "Medicamento" || categoria === "Suplemento"
-                ? "Ex: 30 (comprimidos) ou 0.5 (kg)"
-                : "1.0"
-            }
-          />
+        {/* Quantidade na embalagem: seletor de unidade + campo de valor */}
+        <div className="space-y-1.5 col-span-1 sm:col-span-2">
+          <Label>Quantidade / Peso da Embalagem</Label>
+          <div className="flex gap-3 items-end flex-wrap sm:flex-nowrap">
+            {/* Unit selector */}
+            <div className="space-y-1 shrink-0">
+              <p className="text-xs text-muted-foreground">Unidade</p>
+              <Controller
+                control={control}
+                name="unidadeEmbalagem"
+                render={({ field }) => (
+                  <select
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    className="h-9 px-3 rounded-md border border-input bg-background text-sm text-foreground appearance-none focus:outline-none focus:ring-2 focus:ring-ring w-36"
+                  >
+                    <option value="">Selecione...</option>
+                    {UNIDADES_EMBALAGEM.map((u) => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                  </select>
+                )}
+              />
+            </div>
+
+            {/* Quantity input */}
+            <div className="space-y-1 flex-1 min-w-[120px]">
+              <p className="text-xs text-muted-foreground">{unidadeLabel}</p>
+              <Input
+                type="number"
+                step={unidadeStep}
+                min="0"
+                {...register("pesoEmbalagem", { valueAsNumber: true })}
+                placeholder={unidadePlaceholder}
+                disabled={!unidadeEmbalagem}
+              />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground/70">
+            Usado para calcular recompra e controle de estoque
+          </p>
         </div>
 
         <div className="space-y-1.5 col-span-1 sm:col-span-2">
@@ -358,7 +417,6 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
             {errors.valorVenda && <p className="text-xs text-destructive">{errors.valorVenda.message}</p>}
           </div>
 
-          {/* Margem calculada — sempre que custo e venda estiverem preenchidos */}
           {venda > 0 && (
             <div className="col-span-1 sm:col-span-2 rounded-lg border border-border bg-accent/40 px-4 py-3">
               <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -380,7 +438,6 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
               </div>
             </div>
           )}
-
         </div>
       </div>
 

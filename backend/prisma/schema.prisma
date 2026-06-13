@@ -91,8 +91,9 @@ model Produto {
   subCategoria   String?
   marca          String?
   fornecedor     String?
-  pesoEmbalagem  Decimal?      @db.Decimal(8, 2)
-  valorCusto     Decimal       @default(0) @db.Decimal(10, 2)
+  pesoEmbalagem     Decimal?      @db.Decimal(8, 2)
+  unidadeEmbalagem  String?
+  valorCusto        Decimal       @default(0) @db.Decimal(10, 2)
   valorVenda     Decimal       @db.Decimal(10, 2)
   margemCartao   Decimal       @default(0) @db.Decimal(5, 2)
   margemImposto  Decimal       @default(0) @db.Decimal(5, 2)
