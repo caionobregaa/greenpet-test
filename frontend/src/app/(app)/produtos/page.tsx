@@ -17,7 +17,7 @@ import type { Produto } from "@/lib/types/produto";
 
 const CATEGORIAS = ["Ração", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"];
 const ESPECIES   = ["Cão", "Gato", "Cão e Gato", "Ambos"];
-const FORNECEDORES = ["PRIME", "Basso Pancotte", "Central Pec", "Market", "Zoo Center"];
+const FORNECEDORES = ["DUNORTE", "PRIME", "Basso Pancotte", "Central Pec", "Market", "Zoo Center"];
 
 function FilterSelect({
   label,
