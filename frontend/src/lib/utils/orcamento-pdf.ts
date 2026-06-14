@@ -14,11 +14,13 @@ function fmtDate(iso: string | null | undefined): string {
   return `${d}/${m}/${y}`;
 }
 
-const GREEN: [number, number, number] = [45, 122, 45];
-const DARK:  [number, number, number] = [30,  30,  30];
-const GRAY:  [number, number, number] = [110, 110, 110];
-const LIGHT: [number, number, number] = [245, 249, 245];
-const WHITE: [number, number, number] = [255, 255, 255];
+const GREEN:       [number, number, number] = [45, 122, 45];
+const LOGO_GREEN:  [number, number, number] = [74, 124, 39];   // "Green" part of wordmark
+const LOGO_BROWN:  [number, number, number] = [62,  44, 26];   // "pet" part of wordmark
+const DARK:        [number, number, number] = [30,  30,  30];
+const GRAY:        [number, number, number] = [110, 110, 110];
+const LIGHT:       [number, number, number] = [245, 249, 245];
+const WHITE:       [number, number, number] = [255, 255, 255];
 
 const EMPRESA = {
   nome:     "GreenPet",
@@ -65,33 +67,27 @@ export function gerarOrcamentoPDF(
   const M = MARGIN;
   let y = M;
 
-  // ── 1. Cabeçalho: Empresa (esquerda) + Contato (direita) ────────────
+  // ── 1. Cabeçalho: Logo wordmark (esquerda) + Dados da empresa ───────
 
-  // Nome da empresa
+  // Logo wordmark: "Green" (verde) + "pet" (marrom), espelhando a marca
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(15);
-  doc.setTextColor(...GREEN);
-  doc.text(EMPRESA.nome, M, y);
-  y += 5.5;
+  doc.setFontSize(22);
+  doc.setTextColor(...LOGO_GREEN);
+  doc.text("Green", M, y);
+  const greenW = doc.getTextWidth("Green");
+  doc.setTextColor(...LOGO_BROWN);
+  doc.text("pet", M + greenW, y);
+  y += 7;
 
-  // Dados da empresa
+  // Dados da empresa abaixo do logo
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...DARK);
-  doc.text(EMPRESA.razao, M, y);          y += 4;
+  doc.text(EMPRESA.razao, M, y);           y += 4;
   doc.text(`CNPJ: ${EMPRESA.cnpj}`, M, y); y += 4;
-  doc.text(EMPRESA.endereco, M, y);        y += 4;
-  doc.text(EMPRESA.bairro, M, y);          y += 4;
+  doc.text(EMPRESA.endereco, M, y);         y += 4;
+  doc.text(EMPRESA.bairro, M, y);           y += 4;
   doc.text(EMPRESA.cep, M, y);
-
-  // Contato (direita)
-  const colR = W - M;
-  doc.setFontSize(8);
-  doc.setTextColor(...GRAY);
-  doc.text(`✉  ${EMPRESA.email}`, colR, M + 6, { align: "right" });
-  doc.setTextColor(37, 211, 102); // WhatsApp green
-  doc.text(`WhatsApp  ${EMPRESA.telefone}`, colR, M + 11, { align: "right" });
-  doc.setTextColor(...GRAY);
 
   y += 9;
 
