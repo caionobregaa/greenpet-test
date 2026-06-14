@@ -3,10 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Plus, Eye, Trash2, Pencil, CreditCard, Banknote, QrCode, Wallet, Loader2 } from "lucide-react";
+import { Plus, Eye, Trash2, Pencil, CreditCard, Banknote, QrCode, Wallet, Loader2, Share2 } from "lucide-react";
 import { useOrcamentos, useDeleteOrcamento, useCreateOrcamento, useUpdateOrcamento } from "@/lib/hooks/use-orcamentos";
 import { useClientes } from "@/lib/hooks/use-clientes";
 import { useAnimais } from "@/lib/hooks/use-animais";
+import { apiClientes } from "@/lib/api/clientes";
+import { apiAnimais } from "@/lib/api/animais";
+import { apiProdutos } from "@/lib/api/produtos";
+import { compartilharOrcamentoPDF } from "@/lib/utils/orcamento-pdf";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -277,8 +281,28 @@ export default function OrcamentosPage() {
   const [newOpen, setNewOpen] = useState(false);
   const [editOrcamento, setEditOrcamento] = useState<Orcamento | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [sharingId, setSharingId] = useState<string | null>(null);
   const { data, isLoading } = useOrcamentos({ page, limit: 20 });
   const deleteOrcamento = useDeleteOrcamento();
+
+  async function handleWhatsApp(o: Orcamento) {
+    setSharingId(o.id);
+    try {
+      const produtoIds = [...new Set(o.itens.filter((i) => i.produtoId).map((i) => i.produtoId!))];
+      const [cliente, animal, ...produtos] = await Promise.all([
+        o.clienteId ? apiClientes.get(o.clienteId) : Promise.resolve(null),
+        o.animalId ? apiAnimais.get(o.animalId) : Promise.resolve(null),
+        ...produtoIds.map((pid) => apiProdutos.get(pid).catch(() => null)),
+      ]);
+      const produtoImages: Record<string, string> = {};
+      produtos.forEach((p) => { if (p && p.imagemUrl?.startsWith("data:image")) produtoImages[p.id] = p.imagemUrl; });
+      await compartilharOrcamentoPDF(o, cliente, animal, produtoImages);
+    } catch (err: unknown) {
+      if ((err as Error)?.name !== "AbortError") toast.error("Erro ao compartilhar orçamento.");
+    } finally {
+      setSharingId(null);
+    }
+  }
 
   async function handleDelete() {
     if (!deleteId) return;
@@ -335,13 +359,24 @@ export default function OrcamentosPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 justify-end">
+                <div className="flex items-center gap-1 justify-end flex-wrap">
                   {o.status === "pendente" && (
                     <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => setEditOrcamento(o)}>
                       <Pencil className="w-3.5 h-3.5" />
                       Editar
                     </Button>
                   )}
+                  <Button
+                    variant="outline" size="sm"
+                    className="h-8 gap-1.5 border-[#25D366] text-[#25D366] hover:bg-[#25D366]/10"
+                    onClick={() => handleWhatsApp(o)}
+                    disabled={sharingId === o.id}
+                  >
+                    {sharingId === o.id
+                      ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      : <Share2 className="w-3.5 h-3.5" />}
+                    WhatsApp
+                  </Button>
                   <Link href={`/orcamentos/${o.id}`} className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-8 gap-1.5")}>
                     <Eye className="w-3.5 h-3.5" />
                     Ver
@@ -395,6 +430,15 @@ export default function OrcamentosPage() {
                           <Pencil className="w-3.5 h-3.5" />
                         </Button>
                       )}
+                      <Button
+                        variant="ghost" size="sm"
+                        className="h-8 w-8 p-0 text-[#25D366] hover:text-[#25D366] hover:bg-[#25D366]/10"
+                        onClick={() => handleWhatsApp(o)}
+                        disabled={sharingId === o.id}
+                        title="Compartilhar no WhatsApp"
+                      >
+                        {sharingId === o.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Share2 className="w-3.5 h-3.5" />}
+                      </Button>
                       <Link href={`/orcamentos/${o.id}`} className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-8 w-8 p-0")}>
                         <Eye className="w-3.5 h-3.5" />
                       </Link>

@@ -3,7 +3,7 @@
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, Trash2, CheckCircle, XCircle, RotateCcw, RefreshCw, FileDown } from "lucide-react";
+import { ArrowLeft, Trash2, CheckCircle, XCircle, RotateCcw, RefreshCw, FileDown, Share2 } from "lucide-react";
 import {
   useOrcamento,
   useDeleteOrcamento,
@@ -22,7 +22,7 @@ import { Loader2 } from "lucide-react";
 import { apiClientes } from "@/lib/api/clientes";
 import { apiAnimais } from "@/lib/api/animais";
 import { apiProdutos } from "@/lib/api/produtos";
-import { gerarOrcamentoPDF } from "@/lib/utils/orcamento-pdf";
+import { gerarOrcamentoPDF, compartilharOrcamentoPDF } from "@/lib/utils/orcamento-pdf";
 
 // ── Taxas de cartão ────────────────────────────────────────────────────────────
 const TAXAS = {
@@ -71,6 +71,7 @@ export default function OrcamentoDetailPage({ params }: Props) {
   const [converterOpen, setConverterOpen] = useState(false);
   const [pagamento, setPagamento] = useState("");
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [waLoading, setWaLoading] = useState(false);
 
   const opcaoSelecionada = OPCOES_PAG.find((o) => o.value === pagamento);
   const taxaKey = opcaoSelecionada?.taxaKey;
@@ -136,6 +137,28 @@ export default function OrcamentoDetailPage({ params }: Props) {
     }
   }
 
+  async function handleWhatsApp() {
+    if (!orcamento) return;
+    setWaLoading(true);
+    try {
+      const produtoIds = [...new Set(orcamento.itens.filter((i) => i.produtoId).map((i) => i.produtoId!))];
+      const [cliente, animal, ...produtos] = await Promise.all([
+        orcamento.clienteId ? apiClientes.get(orcamento.clienteId) : Promise.resolve(null),
+        orcamento.animalId ? apiAnimais.get(orcamento.animalId) : Promise.resolve(null),
+        ...produtoIds.map((pid) => apiProdutos.get(pid).catch(() => null)),
+      ]);
+      const produtoImages: Record<string, string> = {};
+      produtos.forEach((p) => { if (p && p.imagemUrl?.startsWith("data:image")) produtoImages[p.id] = p.imagemUrl; });
+      await compartilharOrcamentoPDF(orcamento, cliente, animal, produtoImages);
+    } catch (err: unknown) {
+      if ((err as Error)?.name !== "AbortError") {
+        toast.error("Erro ao compartilhar orçamento.");
+      }
+    } finally {
+      setWaLoading(false);
+    }
+  }
+
   if (isLoading) return <div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-64 w-full" /></div>;
   if (!orcamento) return <p className="text-muted-foreground">Orçamento não encontrado.</p>;
 
@@ -151,6 +174,17 @@ export default function OrcamentoDetailPage({ params }: Props) {
         <Button variant="outline" size="sm" onClick={handleDownloadPDF} disabled={pdfLoading}>
           {pdfLoading ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5 mr-1.5" />}
           Baixar PDF
+        </Button>
+        <Button
+          variant="outline" size="sm"
+          className="border-[#25D366] text-[#25D366] hover:bg-[#25D366]/10"
+          onClick={handleWhatsApp}
+          disabled={waLoading}
+        >
+          {waLoading
+            ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+            : <Share2 className="w-3.5 h-3.5 mr-1.5" />}
+          WhatsApp
         </Button>
         <Button variant="outline" size="sm" className="text-destructive border-destructive hover:bg-destructive/10" onClick={() => setDeleteOpen(true)}>
           <Trash2 className="w-3.5 h-3.5 mr-1.5" />Excluir

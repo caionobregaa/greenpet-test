@@ -58,7 +58,8 @@ export function gerarOrcamentoPDF(
   cliente: Cliente | null,
   animal: Animal | null,
   produtoImages?: Record<string, string>,
-): void {
+  { returnBlob = false }: { returnBlob?: boolean } = {},
+): Blob | void {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const W = PAGE_W;
   const M = MARGIN;
@@ -337,6 +338,61 @@ export function gerarOrcamentoPDF(
     drawFooter(doc, p, totalPages);
   }
 
-  // ── 12. Salvar ────────────────────────────────────────────────────────
+  // ── 12. Salvar ou retornar blob ──────────────────────────────────────
+  if (returnBlob) return doc.output('blob');
   doc.save(`orcamento-${pedidoNum}.pdf`);
+}
+
+export async function compartilharOrcamentoPDF(
+  orcamento: Orcamento,
+  cliente: Cliente | null,
+  animal: Animal | null,
+  produtoImages?: Record<string, string>,
+): Promise<void> {
+  const pedidoNum = orcamento.numero
+    ? orcamento.numero.toString().padStart(3, "0")
+    : orcamento.id.slice(-6).toUpperCase();
+
+  const blob = gerarOrcamentoPDF(orcamento, cliente, animal, produtoImages, { returnBlob: true }) as Blob;
+  const fileName = `orcamento-greenpet-${pedidoNum}.pdf`;
+  const file = new File([blob], fileName, { type: "application/pdf" });
+
+  const clienteNome = cliente?.nome?.split(" ")[0] ?? "";
+  const msg = [
+    `Olá${clienteNome ? `, ${clienteNome}` : ""}! 🐾`,
+    `Segue o orçamento da *GreenPet* Nº ${pedidoNum}.`,
+    ``,
+    `*Total:* ${brl(orcamento.total)}`,
+    `*Válido até:* ${fmtDate(orcamento.validade)}`,
+  ].join("\n");
+
+  const canShareFiles =
+    typeof navigator !== "undefined" &&
+    !!navigator.share &&
+    !!navigator.canShare &&
+    navigator.canShare({ files: [file] });
+
+  if (canShareFiles) {
+    await navigator.share({
+      title: `Orçamento GreenPet Nº ${pedidoNum}`,
+      text: msg,
+      files: [file],
+    });
+    return;
+  }
+
+  // Desktop fallback: download PDF + open WhatsApp web
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
+
+  const phone = cliente?.telefone ? `55${cliente.telefone.replace(/\D/g, "")}` : "";
+  const fullMsg = `${msg}\n\n📎 O PDF foi baixado automaticamente — por favor anexe ao enviar!`;
+  const waUrl = phone.length > 4
+    ? `https://wa.me/${phone}?text=${encodeURIComponent(fullMsg)}`
+    : `https://wa.me/?text=${encodeURIComponent(fullMsg)}`;
+  window.open(waUrl, "_blank", "noopener,noreferrer");
 }
