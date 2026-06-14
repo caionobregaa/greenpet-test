@@ -148,6 +148,7 @@ model VendaItem {
   total         Decimal  @db.Decimal(10, 2)
   itemAnimalId  String?
   consumoDiario Int?
+  recompraData  DateTime? @db.Date
 
   @@map("venda_itens")
 }

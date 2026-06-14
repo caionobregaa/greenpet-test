@@ -27,7 +27,10 @@ export class PrismaRecompraRepository {
     const vendaItens = await this.prisma.vendaItem.findMany({
       where: {
         produtoId: { not: null },
-        consumoDiario: { not: null },
+        OR: [
+          { consumoDiario: { not: null } },
+          { recompraData: { not: null } },
+        ],
         venda: {
           cliente: { deletedAt: null },
           ...(params.clienteId ? { clienteId: params.clienteId } : {}),
@@ -64,15 +67,28 @@ export class PrismaRecompraRepository {
     for (const item of vendaItens) {
       if (!item.produtoId) continue
 
-      // Only compute via consumoDiario: requires both consumoDiario and pesoEmbalagem
-      if (!item.consumoDiario || item.consumoDiario <= 0 || !item.produto?.pesoEmbalagem) continue
-      const diasRecompra = Math.round((Number(item.produto.pesoEmbalagem) * 1000) / item.consumoDiario)
+      let diasRecompra: number
+      let diasRestantes: number
+
+      if (item.recompraData) {
+        // Explicit date set by user — use it directly
+        const recompraMs = new Date(item.recompraData).getTime()
+        const vendaMs = item.venda.data.getTime()
+        const hojeMs = Date.now()
+        diasRecompra = Math.round((recompraMs - vendaMs) / (1000 * 60 * 60 * 24))
+        diasRestantes = Math.floor((recompraMs - hojeMs) / (1000 * 60 * 60 * 24))
+      } else if (item.consumoDiario && item.consumoDiario > 0 && item.produto?.pesoEmbalagem) {
+        // Auto-calculate from consumoDiario + pesoEmbalagem
+        diasRecompra = Math.round((Number(item.produto.pesoEmbalagem) * 1000) / item.consumoDiario)
+        diasRestantes = calcDiasRestantes(item.venda.data, diasRecompra)
+      } else {
+        continue
+      }
 
       const animalId = item.itemAnimalId ?? item.venda.animal?.id ?? ''
       const key = `${item.venda.clienteId}:${item.produtoId}:${animalId}`
       if (seen.has(key)) continue
 
-      const diasRestantes = calcDiasRestantes(item.venda.data, diasRecompra)
       const urgencia = classifyUrgency(diasRestantes)
 
       seen.set(key, {
@@ -81,7 +97,7 @@ export class PrismaRecompraRepository {
         animalId,
         animalNome: animalId ? (animalNameMap.get(animalId) ?? '') : '',
         produtoId: item.produtoId,
-        produtoNome: item.produto.nome,
+        produtoNome: item.produto!.nome,
         diasRecompra,
         ultimaCompra: item.venda.data,
         diasRestantes,

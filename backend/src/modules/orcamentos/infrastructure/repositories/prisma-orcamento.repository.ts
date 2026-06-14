@@ -40,6 +40,17 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
           vendaId: orcamento.vendaId ?? null,
           total: orcamento.total,
           formasPag: orcamento.formasPag,
+          itens: {
+            deleteMany: {},
+            create: orcamento.itens.map((i) => ({
+              id: i.id,
+              produtoId: i.produtoId ?? null,
+              nome: i.nome,
+              qtd: i.qtd,
+              valorUnitario: i.valorUnitario,
+              total: i.total,
+            })),
+          },
         },
       })
     } else {

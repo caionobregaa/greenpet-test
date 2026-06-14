@@ -14,6 +14,7 @@ export interface VendaItemData {
   desconto?: number
   itemAnimalId?: string
   consumoDiario?: number
+  recompraData?: Date
 }
 
 export interface VendaItemReadOnly {
@@ -26,6 +27,7 @@ export interface VendaItemReadOnly {
   total: number
   itemAnimalId?: string
   consumoDiario?: number
+  recompraData?: Date
 }
 
 interface VendaProps {
@@ -79,6 +81,7 @@ export class Venda extends AggregateRoot<VendaProps> {
         total: itemTotal,
         itemAnimalId: item.itemAnimalId,
         consumoDiario: item.consumoDiario,
+        recompraData: item.recompraData,
       }
     })
 

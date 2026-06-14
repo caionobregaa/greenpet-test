@@ -2,7 +2,7 @@
 
 import { useFieldArray, useWatch, type Control, type UseFormSetValue } from "react-hook-form";
 import { useRef, useState, useEffect, memo } from "react";
-import { Plus, Trash2, Search, Minus, PackageSearch, Timer } from "lucide-react";
+import { Plus, Trash2, Search, Minus, PackageSearch, Timer, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatBRL } from "@/lib/utils/format";
@@ -27,6 +27,7 @@ interface ItemRow {
   desconto?: number;
   itemAnimalId?: string | null;
   consumoDiario?: number | null;
+  recompraData?: string | null;
 }
 
 interface ItemExtra {
@@ -56,6 +57,12 @@ function calcDuracao(consumoDiario: number | null | undefined, extra: ItemExtra)
     return { dias, semanas: Math.round(dias / 7) };
   }
   return null;
+}
+
+function formatDateBR(iso: string): string {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
 }
 
 const ProdutoSearch = memo(function ProdutoSearch({
@@ -175,7 +182,7 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false, clie
 
   function addEmpty() {
     const newIndex = fields.length;
-    append({ produtoId: null, nome: "", qtd: 1, pesoKg: null, valorUnitario: 0, desconto: 0, itemAnimalId: null, consumoDiario: null } as never);
+    append({ produtoId: null, nome: "", qtd: 1, pesoKg: null, valorUnitario: 0, desconto: 0, itemAnimalId: null, consumoDiario: null, recompraData: null } as never);
     setLastAddedIndex(newIndex);
   }
 
@@ -224,6 +231,7 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false, clie
           const consumoDiarioVal = Number(item.consumoDiario) > 0 ? Number(item.consumoDiario) : undefined;
           const duracao = calcDuracao(consumoDiarioVal, extra);
           const showConsumoSection = isRacao || isMedSupl || (consumoDiarioVal !== undefined);
+          const recompraDataVal = item.recompraData ?? null;
 
           return (
             <div key={field.id} className="bg-muted/20 rounded-md border border-border/50 p-3.5 space-y-3">
@@ -342,72 +350,103 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false, clie
                     </div>
                   )}
 
-                  {/* Consumo section */}
+                  {/* Consumo + Recompra section */}
                   {showConsumoSection && (
-                    <div className="flex flex-wrap items-end gap-3">
-                      {isRacao && (
-                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">
-                            Consumo diário (g) <span className="font-normal normal-case tracking-normal">— opcional</span>
-                          </p>
-                          <Input
-                            type="number" min="1" step="1"
-                            {...control.register(`itens.${index}.consumoDiario` as never, { setValueAs: (v) => v === "" || v === null || v === undefined ? null : (Number(v) > 0 ? Number(v) : null) })}
-                            placeholder="ex: 250"
-                            className="w-32 h-8 text-sm"
-                          />
-                          {extra.pesoEmbalagem && (
-                            <p className="text-[10px] text-muted-foreground/60">Embalagem: {extra.pesoEmbalagem * 1000}g</p>
-                          )}
-                        </div>
-                      )}
-                      {isMedSupl && (
-                        <>
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-end gap-3">
+                        {isRacao && (
                           <div className="space-y-1.5">
                             <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">
-                              Qtd na embalagem <span className="font-normal normal-case tracking-normal">— opcional</span>
+                              Consumo diário (g) <span className="font-normal normal-case tracking-normal">— opcional</span>
                             </p>
                             <Input
                               type="number" min="1" step="1"
-                              value={extra.qtdEmbalagem ?? ""}
-                              onChange={(e) => updateExtra(index, { qtdEmbalagem: Number(e.target.value) || undefined })}
-                              placeholder="ex: 30"
-                              className="w-28 h-8 text-sm"
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">Doses por dia</p>
-                            <Input
-                              type="number" min="0.1" step="0.1"
                               {...control.register(`itens.${index}.consumoDiario` as never, { setValueAs: (v) => v === "" || v === null || v === undefined ? null : (Number(v) > 0 ? Number(v) : null) })}
-                              placeholder="ex: 1"
-                              className="w-28 h-8 text-sm"
+                              placeholder="ex: 250"
+                              className="w-32 h-8 text-sm"
+                            />
+                            {extra.pesoEmbalagem && (
+                              <p className="text-[10px] text-muted-foreground/60">Embalagem: {extra.pesoEmbalagem * 1000}g</p>
+                            )}
+                          </div>
+                        )}
+                        {isMedSupl && (
+                          <>
+                            <div className="space-y-1.5">
+                              <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">
+                                Qtd na embalagem <span className="font-normal normal-case tracking-normal">— opcional</span>
+                              </p>
+                              <Input
+                                type="number" min="1" step="1"
+                                value={extra.qtdEmbalagem ?? ""}
+                                onChange={(e) => updateExtra(index, { qtdEmbalagem: Number(e.target.value) || undefined })}
+                                placeholder="ex: 30"
+                                className="w-28 h-8 text-sm"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">Doses por dia</p>
+                              <Input
+                                type="number" min="0.1" step="0.1"
+                                {...control.register(`itens.${index}.consumoDiario` as never, { setValueAs: (v) => v === "" || v === null || v === undefined ? null : (Number(v) > 0 ? Number(v) : null) })}
+                                placeholder="ex: 1"
+                                className="w-28 h-8 text-sm"
+                              />
+                            </div>
+                          </>
+                        )}
+                        {!isRacao && !isMedSupl && consumoDiarioVal !== undefined && (
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">
+                              Consumo diário (g) <span className="font-normal normal-case tracking-normal">— opcional</span>
+                            </p>
+                            <Input
+                              type="number" min="1" step="1"
+                              {...control.register(`itens.${index}.consumoDiario` as never, { setValueAs: (v) => v === "" || v === null || v === undefined ? null : (Number(v) > 0 ? Number(v) : null) })}
+                              placeholder="ex: 250"
+                              className="w-32 h-8 text-sm"
                             />
                           </div>
-                        </>
-                      )}
-                      {!isRacao && !isMedSupl && consumoDiarioVal !== undefined && (
+                        )}
+                        {duracao && !recompraDataVal && (
+                          <div className="flex items-center gap-1.5 pb-0.5 text-primary">
+                            <Timer className="w-4 h-4 shrink-0" />
+                            <span className="text-sm font-semibold">
+                              ~{duracao.dias} dias
+                              {duracao.semanas >= 1 && <span className="text-xs font-normal text-muted-foreground ml-1">({duracao.semanas} sem.)</span>}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Data de recompra manual */}
+                      <div className="flex flex-wrap items-end gap-3 pt-1 border-t border-border/20">
                         <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70">
-                            Consumo diário (g) <span className="font-normal normal-case tracking-normal">— opcional</span>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground/70 flex items-center gap-1">
+                            <CalendarDays className="w-3 h-3" />
+                            Data p/ recompra
+                            <span className="font-normal normal-case tracking-normal">— opcional</span>
                           </p>
                           <Input
-                            type="number" min="1" step="1"
-                            {...control.register(`itens.${index}.consumoDiario` as never, { setValueAs: (v) => v === "" || v === null || v === undefined ? null : (Number(v) > 0 ? Number(v) : null) })}
-                            placeholder="ex: 250"
-                            className="w-32 h-8 text-sm"
+                            type="date"
+                            {...control.register(`itens.${index}.recompraData` as never)}
+                            className="h-8 text-sm w-40"
                           />
                         </div>
-                      )}
-                      {duracao && (
-                        <div className="flex items-center gap-1.5 pb-0.5 text-primary">
-                          <Timer className="w-4 h-4 shrink-0" />
-                          <span className="text-sm font-semibold">
-                            ~{duracao.dias} dias
-                            {duracao.semanas >= 1 && <span className="text-xs font-normal text-muted-foreground ml-1">({duracao.semanas} sem.)</span>}
-                          </span>
-                        </div>
-                      )}
+                        {recompraDataVal && (
+                          <div className="flex items-center gap-1.5 pb-1 text-primary">
+                            <CalendarDays className="w-4 h-4 shrink-0" />
+                            <span className="text-sm font-semibold">
+                              Recompra: {formatDateBR(recompraDataVal)}
+                            </span>
+                          </div>
+                        )}
+                        {!recompraDataVal && duracao && (
+                          <p className="text-[10px] text-muted-foreground/50 pb-1">
+                            Ou preencha para definir uma data fixa (substituirá o cálculo automático)
+                          </p>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
