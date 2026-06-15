@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Search, X, FileText, CreditCard, Banknote, QrCode, Wallet, ChevronDown, PawPrint } from "lucide-react";
+import { ArrowLeft, Loader2, Search, X, FileText, CreditCard, Banknote, QrCode, Wallet, ChevronDown, PawPrint, UserPlus, Check } from "lucide-react";
 import { CreateVendaSchema, type CreateVendaInput } from "@/lib/schemas/venda.schema";
 import { useCreateVenda } from "@/lib/hooks/use-vendas";
 import { useConverterOrcamento } from "@/lib/hooks/use-orcamentos";
+import { useCreateCliente } from "@/lib/hooks/use-clientes";
 import { apiClientes } from "@/lib/api/clientes";
 import { apiAnimais } from "@/lib/api/animais";
 import { apiOrcamentos } from "@/lib/api/orcamentos";
@@ -196,12 +197,20 @@ function ImportarOrcamento({
   );
 }
 
+function formatTelefone(value: string): string {
+  const d = value.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 2) return d;
+  if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
 // ── Page ────────────────────────────────────────────────────────────────────
 
 export default function NovaVendaPage() {
   const router = useRouter();
   const createVenda = useCreateVenda();
   const converterOrcamento = useConverterOrcamento();
+  const createCliente = useCreateCliente();
 
   // Selected orcamento for converter flow
   const [orcamentoSelecionado, setOrcamentoSelecionado] = useState<Orcamento | null>(null);
@@ -228,6 +237,11 @@ export default function NovaVendaPage() {
   const [cobrarEntrega, setCobrarEntrega] = useState(false);
   const [valorEntrega, setValorEntrega] = useState(0);
 
+  // Quick client registration
+  const [showQuickCliente, setShowQuickCliente] = useState(false);
+  const [quickNome, setQuickNome] = useState("");
+  const [quickTelefone, setQuickTelefone] = useState("");
+
   // New animal inline state
   const [showNovoAnimal, setShowNovoAnimal] = useState(false);
   const [novoAnimalNome, setNovoAnimalNome] = useState("");
@@ -248,6 +262,34 @@ export default function NovaVendaPage() {
     ? Math.max(0, orcamentoSelecionado.total + entrega)
     : Math.max(0, formTotal + entrega);
   const lucroLiquido = totalBruto * (1 - taxaPct / 100);
+
+  async function handleQuickCliente(fieldOnChange: (v: string) => void) {
+    const nome = quickNome.trim();
+    const tel = quickTelefone.replace(/\D/g, "");
+    if (nome.length < 2 || tel.length !== 11) {
+      toast.error("Informe nome (mín. 2 letras) e telefone com 11 dígitos.");
+      return;
+    }
+    try {
+      const novo = await createCliente.mutateAsync({ nome, telefone: quickTelefone, cidade: "Manaus" });
+      // Auto-select the new client
+      setClienteSelected(novo);
+      setClienteQ(novo.nome);
+      setClienteOptions([]);
+      setClienteOpen(false);
+      fieldOnChange(novo.id);
+      setAnimalSelected(null);
+      setAnimalQ("");
+      setValue("animalId", null);
+      setShowQuickCliente(false);
+      setQuickNome("");
+      setQuickTelefone("");
+      toast.success(`Cliente "${novo.nome}" cadastrado e selecionado!`);
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
+      toast.error("Erro ao criar cliente", { description: msg });
+    }
+  }
 
   function searchClientes(q: string) {
     setClienteQ(q);
@@ -501,7 +543,19 @@ export default function NovaVendaPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Cliente *</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>Cliente *</Label>
+                    {!clienteSelected && !showQuickCliente && (
+                      <button
+                        type="button"
+                        onClick={() => setShowQuickCliente(true)}
+                        className="text-[11px] text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
+                      >
+                        <UserPlus className="w-3 h-3" />
+                        Cadastrar novo cliente
+                      </button>
+                    )}
+                  </div>
                   <Controller
                     control={control}
                     name="clienteId"
@@ -533,6 +587,48 @@ export default function NovaVendaPage() {
                                 <p className="text-[11px] text-muted-foreground">{c.cidade}{c.telefone ? ` · ${c.telefone}` : ""}</p>
                               </button>
                             ))}
+                          </div>
+                        )}
+                        {showQuickCliente && (
+                          <div className="mt-2 border border-primary/30 bg-primary/5 rounded-md p-3 space-y-2">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-primary/70 flex items-center gap-1">
+                              <UserPlus className="w-3 h-3" /> Novo Cliente
+                            </p>
+                            <div className="flex gap-2">
+                              <Input
+                                placeholder="Nome completo"
+                                value={quickNome}
+                                onChange={(e) => setQuickNome(e.target.value)}
+                                className="h-8 text-sm"
+                              />
+                              <Input
+                                placeholder="(XX) XXXXX-XXXX"
+                                value={quickTelefone}
+                                onChange={(e) => setQuickTelefone(formatTelefone(e.target.value))}
+                                className="h-8 text-sm"
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                type="button"
+                                size="sm"
+                                className="h-7 text-xs gap-1"
+                                disabled={createCliente.isPending}
+                                onClick={() => handleQuickCliente(field.onChange)}
+                              >
+                                {createCliente.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                                Salvar
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 text-xs"
+                                onClick={() => { setShowQuickCliente(false); setQuickNome(""); setQuickTelefone(""); }}
+                              >
+                                Cancelar
+                              </Button>
+                            </div>
                           </div>
                         )}
                       </div>
