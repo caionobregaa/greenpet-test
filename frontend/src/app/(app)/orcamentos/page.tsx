@@ -3,9 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Plus, Eye, Trash2, Pencil, CreditCard, Banknote, QrCode, Wallet, Loader2, Share2 } from "lucide-react";
+import { Plus, Eye, Trash2, Pencil, CreditCard, Banknote, QrCode, Wallet, Loader2, Share2, Check, UserPlus, X as XIcon } from "lucide-react";
 import { useOrcamentos, useDeleteOrcamento, useCreateOrcamento, useUpdateOrcamento } from "@/lib/hooks/use-orcamentos";
-import { useClientes } from "@/lib/hooks/use-clientes";
+import { useClientes, useCreateCliente } from "@/lib/hooks/use-clientes";
 import { useAnimais } from "@/lib/hooks/use-animais";
 import { apiClientes } from "@/lib/api/clientes";
 import { apiAnimais } from "@/lib/api/animais";
@@ -73,11 +73,24 @@ function FormasPagSelector({ value, onChange }: { value: string[]; onChange: (v:
 
 // ── Dialog: Novo Orçamento ───────────────────────────────────────────────────
 
+function formatTelefone(value: string): string {
+  const d = value.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 2) return d;
+  if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
 function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const create = useCreateOrcamento();
+  const createCliente = useCreateCliente();
   const [clienteId, setClienteId] = useState("");
   const { data: clientesData } = useClientes({ limit: 100 });
   const { data: animaisData } = useAnimais({ clienteId: clienteId || undefined, limit: 50 });
+
+  // Quick client registration
+  const [showQuickCliente, setShowQuickCliente] = useState(false);
+  const [quickNome, setQuickNome] = useState("");
+  const [quickTelefone, setQuickTelefone] = useState("");
 
   const { register, handleSubmit, control, setValue, watch: watchNovo, formState: { errors }, reset } = useForm<CreateOrcamentoInput>({
     resolver: zodResolver(CreateOrcamentoSchema),
@@ -85,6 +98,28 @@ function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   });
 
   const formasPagWatch = watchNovo("formasPag") ?? [];
+
+  async function handleQuickCliente() {
+    const nome = quickNome.trim();
+    const tel = quickTelefone.replace(/\D/g, "");
+    if (nome.length < 2 || tel.length !== 11) {
+      toast.error("Informe nome (mín. 2 letras) e telefone com 11 dígitos.");
+      return;
+    }
+    try {
+      const novo = await createCliente.mutateAsync({ nome, telefone: quickTelefone, cidade: "Manaus" });
+      setValue("clienteId", novo.id);
+      setClienteId(novo.id);
+      setValue("animalId", null);
+      setShowQuickCliente(false);
+      setQuickNome("");
+      setQuickTelefone("");
+      toast.success(`Cliente "${nome}" adicionado e selecionado!`);
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
+      toast.error("Erro ao criar cliente", { description: msg });
+    }
+  }
 
   async function onSubmit(data: CreateOrcamentoInput) {
     try {
@@ -98,6 +133,9 @@ function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChan
       toast.success("Orçamento criado com sucesso!");
       reset({ data: todayISO(), validade: todayPlusDaysISO(7), itens: [], formasPag: [] });
       setClienteId("");
+      setShowQuickCliente(false);
+      setQuickNome("");
+      setQuickTelefone("");
       onOpenChange(false);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
@@ -116,22 +154,78 @@ function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChan
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label>Cliente <span className="text-muted-foreground font-normal">(opcional)</span></Label>
-                <Controller control={control} name="clienteId" render={({ field }) => {
-                  const nomeCliente = clientesData?.data.find(c => c.id === field.value)?.nome;
-                  return (
-                    <Select value={field.value ?? ""} onValueChange={(v) => { field.onChange(v ?? ""); setClienteId(v ?? ""); setValue("animalId", null); }}>
-                      <SelectTrigger>
-                        {nomeCliente
-                          ? <span className="flex flex-1 text-left text-sm truncate">{nomeCliente}</span>
-                          : <SelectValue placeholder="Sem cliente" />}
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Sem cliente</SelectItem>
-                        {clientesData?.data.map((c) => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  );
-                }} />
+                {showQuickCliente ? (
+                  <div className="flex flex-col gap-2 p-3 bg-muted/40 rounded-lg border border-border/60">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground flex items-center gap-1">
+                        <UserPlus className="w-3 h-3" />
+                        Novo Cliente Rápido
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => { setShowQuickCliente(false); setQuickNome(""); setQuickTelefone(""); }}
+                        className="text-muted-foreground/50 hover:text-muted-foreground"
+                      >
+                        <XIcon className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <Input
+                      autoFocus
+                      placeholder="Nome completo *"
+                      value={quickNome}
+                      onChange={(e) => setQuickNome(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleQuickCliente(); } }}
+                      className="h-8 text-sm"
+                    />
+                    <Input
+                      placeholder="WhatsApp: (XX) XXXXX-XXXX *"
+                      value={quickTelefone}
+                      onChange={(e) => setQuickTelefone(formatTelefone(e.target.value))}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleQuickCliente(); } }}
+                      className="h-8 text-sm"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button" size="sm"
+                        className="h-7 text-xs gap-1"
+                        onClick={handleQuickCliente}
+                        disabled={createCliente.isPending || quickNome.trim().length < 2 || quickTelefone.replace(/\D/g, "").length !== 11}
+                      >
+                        {createCliente.isPending
+                          ? <Loader2 className="w-3 h-3 animate-spin" />
+                          : <Check className="w-3 h-3" />}
+                        Salvar
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <Controller control={control} name="clienteId" render={({ field }) => {
+                      const nomeCliente = clientesData?.data.find(c => c.id === field.value)?.nome;
+                      return (
+                        <Select value={field.value ?? ""} onValueChange={(v) => { field.onChange(v ?? ""); setClienteId(v ?? ""); setValue("animalId", null); }}>
+                          <SelectTrigger className="flex-1">
+                            {nomeCliente
+                              ? <span className="flex flex-1 text-left text-sm truncate">{nomeCliente}</span>
+                              : <SelectValue placeholder="Sem cliente" />}
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Sem cliente</SelectItem>
+                            {clientesData?.data.map((c) => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      );
+                    }} />
+                    <Button
+                      type="button" size="sm" variant="outline"
+                      className="h-9 w-9 p-0 shrink-0 text-primary border-primary/40 hover:bg-primary/10"
+                      title="Cadastrar novo cliente rapidamente"
+                      onClick={() => setShowQuickCliente(true)}
+                    >
+                      <UserPlus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
               <div className="space-y-1.5">
                 <Label>Animal <span className="text-muted-foreground font-normal">(opcional)</span></Label>
