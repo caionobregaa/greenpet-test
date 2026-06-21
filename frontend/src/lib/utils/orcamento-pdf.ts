@@ -349,7 +349,8 @@ export async function compartilharOrcamentoPDF(
     ? orcamento.numero.toString().padStart(3, "0")
     : orcamento.id.slice(-6).toUpperCase();
 
-  const blob = gerarOrcamentoPDF(orcamento, cliente, animal, produtoImages, { returnBlob: true }) as Blob;
+  const blob = gerarOrcamentoPDF(orcamento, cliente, animal, produtoImages, { returnBlob: true });
+  if (!blob) throw new Error("Falha ao gerar PDF do orçamento");
   const fileName = `orcamento-greenpet-${pedidoNum}.pdf`;
   const file = new File([blob], fileName, { type: "application/pdf" });
 

@@ -534,6 +534,18 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false, clie
     setValue(`itens.${index}.qtd` as never, Math.max(1, current + delta) as never);
   }
 
+  function removeItem(index: number) {
+    remove(index);
+    setItemExtras((prev) => {
+      const arr = Array.from({ length: fields.length }, (_, i) => prev[i] ?? {});
+      arr.splice(index, 1);
+      return Object.fromEntries(arr.map((extra, i) => [i, extra]));
+    });
+    setLastAddedIndex((prev) =>
+      prev === null ? null : prev > index ? prev - 1 : prev === index ? null : prev
+    );
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -597,7 +609,7 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false, clie
                   onSelectProduto={(p) => selectProduto(index, p)}
                   onUpdateExtra={(patch) => updateExtra(index, patch)}
                   onStepQtd={(delta) => stepQtd(index, delta)}
-                  onRemove={() => remove(index)}
+                  onRemove={() => removeItem(index)}
                 />
               );
             })}

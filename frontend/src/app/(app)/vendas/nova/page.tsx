@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ItensTable } from "@/components/vendas/itens-table";
-import { todayISO, formatBRL } from "@/lib/utils/format";
+import { todayISO, formatBRL, formatTelefone } from "@/lib/utils/format";
 import { cn } from "@/lib/utils";
 
 // ── Payment options ──────────────────────────────────────────────────────────
@@ -197,12 +197,6 @@ function ImportarOrcamento({
   );
 }
 
-function formatTelefone(value: string): string {
-  const d = value.replace(/\D/g, "").slice(0, 11);
-  if (d.length <= 2) return d;
-  if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
-  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
-}
 
 // ── Page ────────────────────────────────────────────────────────────────────
 
@@ -272,15 +266,7 @@ export default function NovaVendaPage() {
     }
     try {
       const novo = await createCliente.mutateAsync({ nome, telefone: quickTelefone, cidade: "Manaus" });
-      // Auto-select the new client
-      setClienteSelected(novo);
-      setClienteQ(novo.nome);
-      setClienteOptions([]);
-      setClienteOpen(false);
-      fieldOnChange(novo.id);
-      setAnimalSelected(null);
-      setAnimalQ("");
-      setValue("animalId", null);
+      await selectCliente(novo as Cliente, fieldOnChange);
       setShowQuickCliente(false);
       setQuickNome("");
       setQuickTelefone("");

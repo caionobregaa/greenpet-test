@@ -7,24 +7,13 @@ import {
   Plus,
   ClipboardList,
   BellRing,
-  Loader2,
-  AlertTriangle,
 } from "lucide-react";
 import { useRecompra, useDismissRecompra } from "@/lib/hooks/use-recompra";
+import { DismissRecompraDialog } from "@/components/shared/dismiss-recompra-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UrgencyPill } from "@/components/shared/urgency-pill";
 import { formatDate, formatDiasRestantes } from "@/lib/utils/format";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import type { RecompraAlerta } from "@/lib/types/recompra";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -142,8 +131,8 @@ export default function AvisosPage() {
               </p>
             </div>
           ) : (
-            alertasUrgentes.map((a, i) => (
-              <div key={i} className="p-4 flex items-center gap-3">
+            alertasUrgentes.map((a) => (
+              <div key={`${a.produtoId}-${a.clienteId}-${a.animalId}`} className="p-4 flex items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{a.produtoNome}</p>
                   <p className="text-xs text-muted-foreground">
@@ -220,9 +209,9 @@ export default function AvisosPage() {
                     </td>
                   </tr>
                 ) : (
-                  alertasUrgentes.map((a, i) => (
+                  alertasUrgentes.map((a) => (
                     <tr
-                      key={i}
+                      key={`${a.produtoId}-${a.clienteId}-${a.animalId}`}
                       className="border-t border-border hover:bg-accent/30 transition-colors"
                     >
                       <td className="px-4 py-3 font-medium">{a.clienteNome}</td>
@@ -326,67 +315,13 @@ export default function AvisosPage() {
         </div>
       </section>
 
-      {/* ── Dismiss dialog ─────────────────────────────────────────────────── */}
-      <AlertDialog
-        open={!!pendingAlerta}
-        onOpenChange={(o) => {
-          if (!o) setPendingAlerta(null);
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
-              Confirmar como Resolvido?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2 pt-1">
-              <span className="block">
-                Você está marcando que já cuidou desta recompra. O alerta vai
-                sumir da lista.
-              </span>
-              {pendingAlerta && (
-                <span className="block mt-2 rounded-md bg-muted/40 border border-border px-3 py-2 text-sm text-foreground">
-                  <span className="font-semibold">{pendingAlerta.produtoNome}</span>
-                  <br />
-                  <span className="text-muted-foreground">
-                    {pendingAlerta.clienteNome} · {pendingAlerta.animalNome}
-                  </span>
-                </span>
-              )}
-              <span className="block text-xs text-muted-foreground mt-1">
-                <AlertTriangle className="w-3 h-3 inline mr-1" />
-                O alerta reaparecerá automaticamente se uma nova compra for
-                registrada.
-              </span>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => setPendingAlerta(null)}
-              disabled={dismiss.isPending}
-            >
-              Voltar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                confirmarDismiss();
-              }}
-              disabled={dismiss.isPending}
-              className="bg-green-600 text-white hover:bg-green-700"
-            >
-              {dismiss.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  Processando...
-                </>
-              ) : (
-                "Sim, marcar como OK"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DismissRecompraDialog
+        alerta={pendingAlerta}
+        reason="ok"
+        loading={dismiss.isPending}
+        onClose={() => setPendingAlerta(null)}
+        onConfirm={confirmarDismiss}
+      />
     </div>
   );
 }

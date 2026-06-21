@@ -30,7 +30,7 @@ import {
   UpdateOrcamentoSchema, type UpdateOrcamentoInput,
 } from "@/lib/schemas/orcamento.schema";
 import { ItensTable } from "@/components/vendas/itens-table";
-import { formatDate, formatBRL, todayISO, todayPlusDaysISO } from "@/lib/utils/format";
+import { formatDate, formatBRL, todayISO, todayPlusDaysISO, formatTelefone } from "@/lib/utils/format";
 import type { Orcamento } from "@/lib/types/orcamento";
 
 // ── Payment method toggle ────────────────────────────────────────────────────
@@ -73,12 +73,6 @@ function FormasPagSelector({ value, onChange }: { value: string[]; onChange: (v:
 
 // ── Dialog: Novo Orçamento ───────────────────────────────────────────────────
 
-function formatTelefone(value: string): string {
-  const d = value.replace(/\D/g, "").slice(0, 11);
-  if (d.length <= 2) return d;
-  if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
-  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
-}
 
 function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const create = useCreateOrcamento();
@@ -379,6 +373,11 @@ export default function OrcamentosPage() {
   const { data, isLoading } = useOrcamentos({ page, limit: 20 });
   // Hide orcamentos already converted to a venda (vendaId set after conversion)
   const orcamentosVisiveis = (data?.data ?? []).filter((o) => !o.vendaId);
+  // Adjust meta.total to subtract hidden converted items on this page
+  const hiddenOnPage = (data?.data ?? []).length - orcamentosVisiveis.length;
+  const adjustedMeta = data?.meta
+    ? { ...data.meta, total: Math.max(0, data.meta.total - hiddenOnPage) }
+    : undefined;
   const deleteOrcamento = useDeleteOrcamento();
 
   async function handleWhatsApp(o: Orcamento) {
@@ -549,7 +548,7 @@ export default function OrcamentosPage() {
           </table>
         </div>
 
-        {data?.meta && <div className="px-4 pb-4"><PaginationBar meta={data.meta} onPageChange={setPage} /></div>}
+        {adjustedMeta && <div className="px-4 pb-4"><PaginationBar meta={adjustedMeta} onPageChange={setPage} /></div>}
       </div>
 
       <NovoOrcamentoDialog open={newOpen} onOpenChange={setNewOpen} />

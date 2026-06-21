@@ -169,9 +169,11 @@ export default function ClienteDetailPage({ params }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {orcamentosData?.data.length === 0 ? (
-                  <tr><td colSpan={5} className="text-center py-8 text-muted-foreground text-sm">Nenhum orçamento registrado.</td></tr>
-                ) : orcamentosData?.data.map((o) => (
+                {(() => {
+                  const orcamentosVisiveis = (orcamentosData?.data ?? []).filter((o) => !o.vendaId);
+                  return orcamentosVisiveis.length === 0 ? (
+                    <tr><td colSpan={5} className="text-center py-8 text-muted-foreground text-sm">Nenhum orçamento registrado.</td></tr>
+                  ) : orcamentosVisiveis.map((o) => (
                   <tr key={o.id} className="border-t border-border hover:bg-accent/30">
                     <td className="px-4 py-3">{formatDate(o.data)}</td>
                     <td className="px-4 py-3 text-muted-foreground">{formatDate(o.validade)}</td>
@@ -183,7 +185,8 @@ export default function ClienteDetailPage({ params }: Props) {
                       </Link>
                     </td>
                   </tr>
-                ))}
+                  ));
+                })()}
               </tbody>
             </table>
           </div>
