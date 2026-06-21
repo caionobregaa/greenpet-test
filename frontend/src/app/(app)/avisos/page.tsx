@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useRecompra, useDismissRecompra } from "@/lib/hooks/use-recompra";
 import { DismissRecompraDialog } from "@/components/shared/dismiss-recompra-dialog";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UrgencyPill } from "@/components/shared/urgency-pill";
@@ -56,6 +57,7 @@ export default function AvisosPage() {
   // ── Tarefas ──
   const [tarefas, setTarefas] = useState<Tarefa[]>([]);
   const [novaTarefa, setNovaTarefa] = useState("");
+  const [pendingTarefaId, setPendingTarefaId] = useState<string | null>(null);
 
   useEffect(() => {
     setTarefas(loadTarefas());
@@ -78,9 +80,11 @@ export default function AvisosPage() {
     setNovaTarefa("");
   }
 
-  function concluirTarefa(id: string) {
-    salvarTarefas(tarefas.filter((t) => t.id !== id));
-    toast.success("Tarefa concluída!");
+  function concluirTarefa() {
+    if (!pendingTarefaId) return;
+    salvarTarefas(tarefas.filter((t) => t.id !== pendingTarefaId));
+    setPendingTarefaId(null);
+    toast.success("Lembrete concluído!");
   }
 
   async function confirmarDismiss() {
@@ -304,7 +308,7 @@ export default function AvisosPage() {
                     size="sm"
                     title="Marcar como concluído"
                     className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 shrink-0"
-                    onClick={() => concluirTarefa(t.id)}
+                    onClick={() => setPendingTarefaId(t.id)}
                   >
                     <CheckCircle2 className="w-4 h-4" />
                   </Button>
@@ -321,6 +325,19 @@ export default function AvisosPage() {
         loading={dismiss.isPending}
         onClose={() => setPendingAlerta(null)}
         onConfirm={confirmarDismiss}
+      />
+
+      <ConfirmDialog
+        open={!!pendingTarefaId}
+        onOpenChange={(o) => { if (!o) setPendingTarefaId(null); }}
+        title="Concluir lembrete?"
+        description={
+          pendingTarefaId
+            ? `"${tarefas.find((t) => t.id === pendingTarefaId)?.texto ?? ""}" será removido da lista.`
+            : ""
+        }
+        confirmLabel="Sim, concluir"
+        onConfirm={concluirTarefa}
       />
     </div>
   );
