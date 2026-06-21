@@ -7,6 +7,7 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import { AppTopbar } from "@/components/layout/app-topbar";
 
 const PAGE_TITLES: Record<string, { title: string; subtitle?: string }> = {
+  "/avisos": { title: "Avisos", subtitle: "Alertas urgentes e lembretes" },
   "/dashboard": { title: "Dashboard", subtitle: "Visão geral do negócio" },
   "/clientes": { title: "Clientes", subtitle: "Gerenciamento de clientes" },
   "/animais": { title: "Animais", subtitle: "Gerenciamento de animais" },

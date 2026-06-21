@@ -377,6 +377,8 @@ export default function OrcamentosPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [sharingId, setSharingId] = useState<string | null>(null);
   const { data, isLoading } = useOrcamentos({ page, limit: 20 });
+  // Hide orcamentos already converted to a venda (vendaId set after conversion)
+  const orcamentosVisiveis = (data?.data ?? []).filter((o) => !o.vendaId);
   const deleteOrcamento = useDeleteOrcamento();
 
   async function handleWhatsApp(o: Orcamento) {
@@ -432,10 +434,10 @@ export default function OrcamentosPage() {
                 </div>
               </div>
             ))
-          ) : data?.data.length === 0 ? (
+          ) : orcamentosVisiveis.length === 0 ? (
             <EmptyState message="Nenhum orçamento encontrado" />
           ) : (
-            data?.data.map((o) => (
+            orcamentosVisiveis.map((o) => (
               <div key={o.id} className="p-4">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="min-w-0">
@@ -507,9 +509,9 @@ export default function OrcamentosPage() {
                 <tr key={i} className="border-t border-border">
                   {Array.from({ length: 7 }).map((_, j) => <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-full" /></td>)}
                 </tr>
-              )) : data?.data.length === 0 ? (
+              )) : orcamentosVisiveis.length === 0 ? (
                 <tr><td colSpan={7}><EmptyState message="Nenhum orçamento encontrado" /></td></tr>
-              ) : data?.data.map((o) => (
+              ) : orcamentosVisiveis.map((o) => (
                 <tr key={o.id} className="border-t border-border hover:bg-accent/30 transition-colors">
                   <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{o.numero ? String(o.numero).padStart(3, "0") : "—"}</td>
                   <td className="px-4 py-3">{formatDate(o.data)}</td>

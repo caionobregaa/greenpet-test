@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Warehouse,
   Receipt,
+  Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -27,6 +28,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/vendas/nova", label: "Nova Venda", icon: ShoppingCart, highlight: true },
+  { href: "/avisos", label: "Avisos", icon: Bell },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/clientes", label: "Clientes", icon: Users },
   { href: "/animais", label: "Animais", icon: PawPrint },
