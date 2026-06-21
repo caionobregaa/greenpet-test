@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import type { Urgencia, RecompraAlerta } from "@/lib/types/recompra";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 
 // ── Página principal ──────────────────────────────────────────────────────────
 

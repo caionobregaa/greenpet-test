@@ -300,6 +300,8 @@ export default function NovaVendaPage() {
     onChange(c.id);
     setAnimalSelected(null);
     setAnimalQ("");
+    setAnimalOptions([]);
+    setAnimalOpen(false);
     setValue("animalId", null);
     try {
       const { data } = await apiAnimais.list({ clienteId: c.id, limit: 20 });

@@ -28,9 +28,7 @@ export function DismissRecompraDialog({
   onClose,
   onConfirm,
 }: DismissRecompraDialogProps) {
-  if (!alerta || !reason) return null;
-
-  const isOk = reason === "ok";
+  const isOk = (reason ?? "ok") === "ok";
 
   return (
     <AlertDialog open={!!alerta} onOpenChange={(o) => { if (!o) onClose(); }}>
@@ -50,13 +48,15 @@ export function DismissRecompraDialog({
                 : "Você está cancelando este alerta. Ele será removido da lista."
               }
             </span>
-            <span className="block mt-2 rounded-md bg-muted/40 border border-border px-3 py-2 text-sm text-foreground">
-              <span className="font-semibold">{alerta.produtoNome}</span>
-              <br />
-              <span className="text-muted-foreground">
-                {alerta.clienteNome} · {alerta.animalNome}
+            {alerta && (
+              <span className="block mt-2 rounded-md bg-muted/40 border border-border px-3 py-2 text-sm text-foreground">
+                <span className="font-semibold">{alerta.produtoNome}</span>
+                <br />
+                <span className="text-muted-foreground">
+                  {alerta.clienteNome} · {alerta.animalNome}
+                </span>
               </span>
-            </span>
+            )}
             <span className="block text-xs text-muted-foreground mt-1">
               <AlertTriangle className="w-3 h-3 inline mr-1" />
               O alerta reaparecerá automaticamente se uma nova compra for registrada.

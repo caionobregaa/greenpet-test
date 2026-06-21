@@ -537,9 +537,13 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false, clie
   function removeItem(index: number) {
     remove(index);
     setItemExtras((prev) => {
-      const arr = Array.from({ length: fields.length }, (_, i) => prev[i] ?? {});
-      arr.splice(index, 1);
-      return Object.fromEntries(arr.map((extra, i) => [i, extra]));
+      const next: Record<number, ItemExtra> = {};
+      Object.entries(prev).forEach(([key, val]) => {
+        const k = Number(key);
+        if (k === index) return;
+        next[k < index ? k : k - 1] = val;
+      });
+      return next;
     });
     setLastAddedIndex((prev) =>
       prev === null ? null : prev > index ? prev - 1 : prev === index ? null : prev

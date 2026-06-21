@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Plus, Eye, Trash2, Pencil, CreditCard, Banknote, QrCode, Wallet, Loader2, Share2, Check, UserPlus, X as XIcon } from "lucide-react";
@@ -371,13 +371,18 @@ export default function OrcamentosPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [sharingId, setSharingId] = useState<string | null>(null);
   const { data, isLoading } = useOrcamentos({ page, limit: 20 });
-  // Hide orcamentos already converted to a venda (vendaId set after conversion)
-  const orcamentosVisiveis = (data?.data ?? []).filter((o) => !o.vendaId);
-  // Adjust meta.total to subtract hidden converted items on this page
-  const hiddenOnPage = (data?.data ?? []).length - orcamentosVisiveis.length;
-  const adjustedMeta = data?.meta
-    ? { ...data.meta, total: Math.max(0, data.meta.total - hiddenOnPage) }
-    : undefined;
+  const orcamentosVisiveis = useMemo(
+    () => (data?.data ?? []).filter((o) => !o.vendaId),
+    [data?.data]
+  );
+  // Approximation: subtracts only the hidden items on the current page from the
+  // global total. Accurate for page 1; may overcount when converted items span
+  // multiple pages. Real fix requires a server-side vendaId=null filter.
+  const adjustedMeta = useMemo(() => {
+    if (!data?.meta) return undefined;
+    const hiddenOnPage = (data.data?.length ?? 0) - orcamentosVisiveis.length;
+    return { ...data.meta, total: Math.max(0, data.meta.total - hiddenOnPage) };
+  }, [data, orcamentosVisiveis]);
   const deleteOrcamento = useDeleteOrcamento();
 
   async function handleWhatsApp(o: Orcamento) {

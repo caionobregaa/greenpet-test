@@ -26,7 +26,8 @@ export default function ClienteDetailPage({ params }: Props) {
   const [newAnimalOpen, setNewAnimalOpen] = useState(false);
 
   const { data: cliente, isLoading } = useCliente(id);
-  const { data: orcamentosData } = useOrcamentos({ clienteId: id, limit: 20 });
+  const { data: orcamentosData, isLoading: isOrcamentosLoading } = useOrcamentos({ clienteId: id, limit: 20 });
+  const orcamentosVisiveis = isOrcamentosLoading ? [] : (orcamentosData?.data ?? []).filter((o) => !o.vendaId);
 
   const animais = cliente?.animais ?? [];
   const vendas = cliente?.vendas ?? [];
@@ -169,24 +170,25 @@ export default function ClienteDetailPage({ params }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {(() => {
-                  const orcamentosVisiveis = (orcamentosData?.data ?? []).filter((o) => !o.vendaId);
-                  return orcamentosVisiveis.length === 0 ? (
-                    <tr><td colSpan={5} className="text-center py-8 text-muted-foreground text-sm">Nenhum orçamento registrado.</td></tr>
-                  ) : orcamentosVisiveis.map((o) => (
-                  <tr key={o.id} className="border-t border-border hover:bg-accent/30">
-                    <td className="px-4 py-3">{formatDate(o.data)}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{formatDate(o.validade)}</td>
-                    <td className="px-4 py-3"><StatusPill status={o.status} /></td>
-                    <td className="px-4 py-3 text-right font-bold text-primary font-mono">{formatBRL(o.total)}</td>
-                    <td className="px-4 py-3">
-                      <Link href={`/orcamentos/${o.id}`} className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-7 text-xs")}>
-                        Ver
-                      </Link>
-                    </td>
-                  </tr>
-                  ));
-                })()}
+                {isOrcamentosLoading ? (
+                  <tr><td colSpan={5} className="text-center py-8"><Skeleton className="h-4 w-32 mx-auto" /></td></tr>
+                ) : orcamentosVisiveis.length === 0 ? (
+                  <tr><td colSpan={5} className="text-center py-8 text-muted-foreground text-sm">Nenhum orçamento registrado.</td></tr>
+                ) : (
+                  orcamentosVisiveis.map((o) => (
+                    <tr key={o.id} className="border-t border-border hover:bg-accent/30">
+                      <td className="px-4 py-3">{formatDate(o.data)}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{formatDate(o.validade)}</td>
+                      <td className="px-4 py-3"><StatusPill status={o.status} /></td>
+                      <td className="px-4 py-3 text-right font-bold text-primary font-mono">{formatBRL(o.total)}</td>
+                      <td className="px-4 py-3">
+                        <Link href={`/orcamentos/${o.id}`} className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-7 text-xs")}>
+                          Ver
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

@@ -52,7 +52,8 @@ export function formatDiasRestantes(dias: number): string {
 }
 
 export function formatPhone(phone: string | null | undefined): string {
-  return phone ?? "—";
+  if (!phone) return "—";
+  return formatTelefone(phone);
 }
 
 export function formatTelefone(value: string): string {
