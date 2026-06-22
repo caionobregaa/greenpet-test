@@ -41,6 +41,7 @@ import { registerComprasRoutes } from './modules/compras/infrastructure/http/com
 import { registerEstoqueRoutes } from './modules/estoque/infrastructure/http/estoque.routes.js'
 import { registerRecompraRoutes } from './modules/recompra/infrastructure/http/recompra.routes.js'
 import { registerDashboardRoutes } from './modules/dashboard/infrastructure/http/dashboard.routes.js'
+import { registerLembretesRoutes } from './modules/lembretes/infrastructure/http/lembretes.routes.js'
 
 async function bootstrap(): Promise<void> {
   const app = await buildApp({ jwtSecret: env.JWT_SECRET, logger: env.NODE_ENV !== 'test' })
@@ -86,6 +87,7 @@ async function bootstrap(): Promise<void> {
   registerEstoqueRoutes(app, prisma)
   registerRecompraRoutes(app, prisma)
   registerDashboardRoutes(app, prisma)
+  registerLembretesRoutes(app, prisma)
 
   await app.listen({ port: env.PORT, host: env.HOST })
   console.log(`🚀 GreenPET API rodando em http://${env.HOST}:${env.PORT}`)

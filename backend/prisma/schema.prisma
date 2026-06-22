@@ -226,6 +226,17 @@ model Compra {
   @@map("compras")
 }
 
+// ─────────────── LEMBRETES ───────────────
+
+model Lembrete {
+  id        String   @id @default(uuid())
+  texto     String
+  criadoPor String   // email do usuário autenticado
+  criadoEm  DateTime @default(now())
+
+  @@map("lembretes")
+}
+
 // ─────────────── RECOMPRA DISMISSALS ───────────────
 
 model RecompraDismissal {

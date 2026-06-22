@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
   CheckCircle2,
@@ -9,6 +9,7 @@ import {
   BellRing,
 } from "lucide-react";
 import { useRecompra, useDismissRecompra } from "@/lib/hooks/use-recompra";
+import { useLembretes, useCreateLembrete, useDeleteLembrete } from "@/lib/hooks/use-lembretes";
 import { DismissRecompraDialog } from "@/components/shared/dismiss-recompra-dialog";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -18,29 +19,6 @@ import { formatDate, formatDiasRestantes } from "@/lib/utils/format";
 import type { RecompraAlerta } from "@/lib/types/recompra";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// ── Lembretes (localStorage) ──────────────────────────────────────────────────
-
-interface Tarefa {
-  id: string;
-  texto: string;
-  criadoEm: string;
-}
-
-const TAREFAS_KEY = "avisos-tarefas";
-
-function loadTarefas(): Tarefa[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(TAREFAS_KEY) ?? "[]");
-  } catch {
-    return [];
-  }
-}
-
-function persistTarefas(lista: Tarefa[]) {
-  localStorage.setItem(TAREFAS_KEY, JSON.stringify(lista));
-}
-
 // ── Página ────────────────────────────────────────────────────────────────────
 
 export default function AvisosPage() {
@@ -49,42 +27,38 @@ export default function AvisosPage() {
 
   const [pendingAlerta, setPendingAlerta] = useState<RecompraAlerta | null>(null);
 
-  // Apenas alertas com situação abaixo de 10 dias (vencido, urgente, próximo + até 10 dias)
   const alertasUrgentes = (recompraData?.data ?? []).filter(
     (a) => a.diasRestantes <= 10
   );
 
-  // ── Tarefas ──
-  const [tarefas, setTarefas] = useState<Tarefa[]>([]);
+  // ── Lembretes (backend) ──
+  const { data: tarefas = [], isLoading: isLoadingTarefas } = useLembretes();
+  const createLembrete = useCreateLembrete();
+  const deleteLembrete = useDeleteLembrete();
   const [novaTarefa, setNovaTarefa] = useState("");
   const [pendingTarefaId, setPendingTarefaId] = useState<string | null>(null);
 
-  useEffect(() => {
-    setTarefas(loadTarefas());
-  }, []);
-
-  function salvarTarefas(lista: Tarefa[]) {
-    setTarefas(lista);
-    persistTarefas(lista);
-  }
-
-  function adicionarTarefa() {
+  async function adicionarTarefa() {
     const texto = novaTarefa.trim();
     if (!texto) return;
-    const nova: Tarefa = {
-      id: crypto.randomUUID(),
-      texto,
-      criadoEm: new Date().toISOString(),
-    };
-    salvarTarefas([...tarefas, nova]);
-    setNovaTarefa("");
+    try {
+      await createLembrete.mutateAsync(texto);
+      setNovaTarefa("");
+    } catch {
+      toast.error("Erro ao adicionar lembrete.");
+    }
   }
 
-  function concluirTarefa() {
+  async function concluirTarefa() {
     if (!pendingTarefaId) return;
-    salvarTarefas(tarefas.filter((t) => t.id !== pendingTarefaId));
-    setPendingTarefaId(null);
-    toast.success("Lembrete concluído!");
+    try {
+      await deleteLembrete.mutateAsync(pendingTarefaId);
+      setPendingTarefaId(null);
+      toast.success("Lembrete concluído!");
+    } catch {
+      toast.error("Erro ao concluir lembrete.");
+      setPendingTarefaId(null);
+    }
   }
 
   async function confirmarDismiss() {
@@ -270,10 +244,11 @@ export default function AvisosPage() {
             onChange={(e) => setNovaTarefa(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && adicionarTarefa()}
             className="flex-1"
+            disabled={createLembrete.isPending}
           />
           <Button
             onClick={adicionarTarefa}
-            disabled={!novaTarefa.trim()}
+            disabled={!novaTarefa.trim() || createLembrete.isPending}
             className="gap-1.5"
           >
             <Plus className="w-4 h-4" />
@@ -283,7 +258,19 @@ export default function AvisosPage() {
 
         {/* Task list */}
         <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
-          {tarefas.length === 0 ? (
+          {isLoadingTarefas ? (
+            <div className="divide-y divide-border">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 px-4 py-3">
+                  <div className="flex-1 space-y-1.5">
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-3 w-1/3" />
+                  </div>
+                  <Skeleton className="h-8 w-8 rounded-md shrink-0" />
+                </div>
+              ))}
+            </div>
+          ) : tarefas.length === 0 ? (
             <div className="p-8 text-center">
               <ClipboardList className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground">
@@ -300,7 +287,7 @@ export default function AvisosPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{t.texto}</p>
                     <p className="text-xs text-muted-foreground">
-                      {formatDate(t.criadoEm)}
+                      {formatDate(t.criadoEm)} · {t.criadoPor}
                     </p>
                   </div>
                   <Button
