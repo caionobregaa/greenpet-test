@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Pencil, Package, AlertTriangle, Calendar } from "lucide-react";
+import { Plus, Trash2, Pencil, Package, AlertTriangle, Calendar, Search, X, Loader2 } from "lucide-react";
 import { useEstoque, useCreateEstoqueItem, useUpdateEstoqueItem, useDeleteEstoqueItem } from "@/lib/hooks/use-estoque";
-import { useProdutos } from "@/lib/hooks/use-produtos";
+import { apiProdutos } from "@/lib/api/produtos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,10 +12,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { SearchInput } from "@/components/shared/search-input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatBRL, formatDate } from "@/lib/utils/format";
-import { Loader2 } from "lucide-react";
 import type { EstoqueItem } from "@/lib/types/estoque";
+import type { Produto } from "@/lib/types/produto";
 import { differenceInDays, parseISO, isValid } from "date-fns";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -37,22 +36,66 @@ function AdicionarLoteDialog({
   open,
   onOpenChange,
   produtoIdInicial,
+  nomeProdutoInicial,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   produtoIdInicial?: string;
+  nomeProdutoInicial?: string;
 }) {
   const create = useCreateEstoqueItem();
-  const { data: produtosData } = useProdutos({ limit: 200 });
 
   const [produtoId, setProdutoId] = useState(produtoIdInicial ?? "");
+  const [produtoNome, setProdutoNome] = useState(nomeProdutoInicial ?? "");
+  const [query, setQuery] = useState(nomeProdutoInicial ?? "");
+  const [results, setResults] = useState<Produto[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
   const [quantidade, setQuantidade] = useState("1");
   const [validade, setValidade] = useState("");
   const [lote, setLote] = useState("");
 
+  function handleQueryChange(v: string) {
+    setQuery(v);
+    setProdutoId("");
+    setProdutoNome("");
+    clearTimeout(timer.current);
+    if (!v.trim()) { setResults([]); setDropdownOpen(false); setSearched(false); return; }
+    timer.current = setTimeout(async () => {
+      try {
+        const { data } = await apiProdutos.list({ q: v, limit: 10 });
+        setResults(data);
+        setDropdownOpen(true);
+        setSearched(true);
+      } catch {
+        setResults([]);
+      }
+    }, 300);
+  }
+
+  function selectProduto(p: Produto) {
+    setProdutoId(p.id);
+    setProdutoNome(p.nome);
+    setQuery(p.nome);
+    setResults([]);
+    setDropdownOpen(false);
+    setSearched(false);
+  }
+
+  function clearProduto() {
+    setProdutoId("");
+    setProdutoNome("");
+    setQuery("");
+    setResults([]);
+    setDropdownOpen(false);
+    setSearched(false);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!produtoId) { toast.error("Selecione um produto."); return; }
+    if (!produtoId) { toast.error("Selecione um produto da lista."); return; }
     const qtd = parseInt(quantidade);
     if (!qtd || qtd < 1) { toast.error("Informe uma quantidade válida."); return; }
     try {
@@ -63,7 +106,11 @@ function AdicionarLoteDialog({
         lote: lote || undefined,
       });
       toast.success("Lote adicionado ao estoque!");
-      setProdutoId(produtoIdInicial ?? "");
+      if (!produtoIdInicial) {
+        setProdutoId("");
+        setProdutoNome("");
+        setQuery("");
+      }
       setQuantidade("1");
       setValidade("");
       setLote("");
@@ -82,16 +129,59 @@ function AdicionarLoteDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <Label>Produto *</Label>
-            <Select value={produtoId} onValueChange={(v) => { if (v) setProdutoId(v); }}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione um produto..." />
-              </SelectTrigger>
-              <SelectContent>
-                {produtosData?.data.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {produtoIdInicial ? (
+              <p className="text-sm font-medium py-2 px-3 bg-muted/40 rounded-md border border-border">
+                {nomeProdutoInicial}
+              </p>
+            ) : (
+              <div className="relative">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    value={query}
+                    onChange={(e) => handleQueryChange(e.target.value)}
+                    onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
+                    placeholder="Digite o nome do produto..."
+                    className="pl-9 pr-8"
+                    autoFocus
+                  />
+                  {produtoNome && (
+                    <button
+                      type="button"
+                      onClick={clearProduto}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                {dropdownOpen && (
+                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border/60 rounded-md shadow-md overflow-hidden">
+                    {results.length > 0 ? (
+                      results.map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          className="w-full text-left px-3 py-2.5 text-sm hover:bg-muted/60 transition-colors border-b border-border/40 last:border-0"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => selectProduto(p)}
+                        >
+                          <p className="font-medium text-[13px]">{p.nome}</p>
+                          <p className="text-[11px] text-muted-foreground">{p.categoria}{p.marca ? ` · ${p.marca}` : ""} · {formatBRL(p.valorVenda)}</p>
+                        </button>
+                      ))
+                    ) : searched ? (
+                      <p className="px-3 py-3 text-sm text-muted-foreground text-center">
+                        Nenhum produto encontrado para &quot;{query}&quot;
+                      </p>
+                    ) : null}
+                  </div>
+                )}
+                {produtoNome && (
+                  <p className="text-[11px] text-green-600 font-medium mt-1">✓ {produtoNome} selecionado</p>
+                )}
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -222,7 +312,7 @@ export default function EstoquePage() {
   const [novoOpen, setNovoOpen] = useState(false);
   const [editItem, setEditItem] = useState<EstoqueItem | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [addParaProduto, setAddParaProduto] = useState<string | undefined>();
+  const [addParaProduto, setAddParaProduto] = useState<{ id: string; nome: string } | undefined>();
 
   const { data, isLoading } = useEstoque({ limit: 200 });
   const deleteItem = useDeleteEstoqueItem();
@@ -263,8 +353,8 @@ export default function EstoquePage() {
     }
   }
 
-  function handleAddParaProduto(produtoId: string) {
-    setAddParaProduto(produtoId);
+  function handleAddParaProduto(produtoId: string, produtoNome: string) {
+    setAddParaProduto({ id: produtoId, nome: produtoNome });
     setNovoOpen(true);
   }
 
@@ -277,7 +367,7 @@ export default function EstoquePage() {
             {totalItens} unidade{totalItens !== 1 ? "s" : ""} em estoque
           </p>
         </div>
-        <Button onClick={() => { setAddParaProduto(undefined); setNovoOpen(true); }}>
+        <Button onClick={() => { setAddParaProduto(undefined); setNovoOpen(true); }} >
           <Plus className="w-4 h-4 mr-2" />
           Adicionar ao Estoque
         </Button>
@@ -357,7 +447,7 @@ export default function EstoquePage() {
                       variant="outline"
                       size="sm"
                       className="gap-1.5"
-                      onClick={() => handleAddParaProduto(produto.id)}
+                      onClick={() => handleAddParaProduto(produto.id, produto.nome)}
                     >
                       <Plus className="w-3.5 h-3.5" />
                       Adicionar lote
@@ -412,10 +502,11 @@ export default function EstoquePage() {
       )}
 
       <AdicionarLoteDialog
-        key={addParaProduto ?? "novo"}
+        key={addParaProduto?.id ?? "novo"}
         open={novoOpen}
         onOpenChange={(o) => { setNovoOpen(o); if (!o) setAddParaProduto(undefined); }}
-        produtoIdInicial={addParaProduto}
+        produtoIdInicial={addParaProduto?.id}
+        nomeProdutoInicial={addParaProduto?.nome}
       />
       <EditarLoteDialog
         key={editItem?.id ?? "edit"}
