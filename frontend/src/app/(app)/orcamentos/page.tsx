@@ -304,6 +304,7 @@ function EditarOrcamentoDialog({
             nome: i.nome,
             qtd: i.qtd,
             valorUnitario: i.valorUnitario,
+            desconto: i.desconto ?? 0,
           })),
         }
       : undefined,

@@ -19,6 +19,15 @@ const DismissSchema = z.object({
   reason: z.enum(['ok', 'cancelado']),
 })
 
+const ManualSchema = z.object({
+  clienteId: z.string().uuid(),
+  animalId: z.string().optional().default(''),
+  produtoId: z.string().uuid(),
+  ultimaCompra: z.string().datetime().optional().nullable(),
+  previsaoData: z.string().datetime().optional().nullable(),
+  diasRecompra: z.number().int().min(1).optional().nullable(),
+})
+
 export function registerRecompraRoutes(app: FastifyInstance, prisma: PrismaClient): void {
   const repo = new PrismaRecompraRepository(prisma)
   const listUC = new ListRecompraAlertasUseCase(repo)
@@ -42,6 +51,30 @@ export function registerRecompraRoutes(app: FastifyInstance, prisma: PrismaClien
       create: { id: crypto.randomUUID(), produtoId, clienteId, animalId, reason },
       update: { reason, createdAt: new Date() },
     })
+    rep.status(204).send()
+  })
+
+  app.post('/api/v1/recompra/manual', async (req, rep) => {
+    const body = ManualSchema.safeParse(req.body)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    const { clienteId, animalId, produtoId, ultimaCompra, previsaoData, diasRecompra } = body.data
+    if (!previsaoData && !diasRecompra) {
+      throw new ValidationError('VALIDATION_ERROR', 'Informe a data de previsão ou o número de dias para recompra')
+    }
+    const result = await repo.createManual({
+      clienteId,
+      animalId: animalId ?? '',
+      produtoId,
+      ultimaCompra: ultimaCompra ? new Date(ultimaCompra) : null,
+      previsaoData: previsaoData ? new Date(previsaoData) : null,
+      diasRecompra: diasRecompra ?? null,
+    })
+    rep.status(201).send({ data: result })
+  })
+
+  app.delete('/api/v1/recompra/manual/:id', async (req, rep) => {
+    const { id } = req.params as { id: string }
+    await repo.deleteManual(id)
     rep.status(204).send()
   })
 }

@@ -1,6 +1,8 @@
 export type Urgencia = "vencido" | "urgente" | "proximo" | "ok";
 
 export interface RecompraAlerta {
+  id?: string;
+  isManual?: boolean;
   clienteId: string;
   clienteNome: string;
   animalId?: string;

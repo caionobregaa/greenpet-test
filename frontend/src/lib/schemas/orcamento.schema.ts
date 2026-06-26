@@ -5,6 +5,7 @@ export const OrcamentoItemSchema = z.object({
   nome: z.string().min(1, "Nome do item é obrigatório"),
   qtd: z.number().int().min(1, "Quantidade mínima é 1"),
   valorUnitario: z.number().min(0, "Valor inválido"),
+  desconto: z.number().min(0).optional(),
 });
 
 export const UpdateOrcamentoSchema = z.object({

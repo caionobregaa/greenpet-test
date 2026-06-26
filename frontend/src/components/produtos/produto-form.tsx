@@ -43,7 +43,7 @@ const UNIDADES_EMBALAGEM = ["kg", "g", "Comprimidos", "mL", "L", "unidade"];
 
 interface ProdutoFormProps {
   produto?: Produto;
-  onSubmit: (data: CreateProdutoInput & { imagemUrl?: string | null; estoqueInicial?: number }) => void;
+  onSubmit: (data: CreateProdutoInput & { imagemUrl?: string | null; estoqueInicial?: number; estoqueValidade?: string | null; estoqueLote?: string }) => void;
   onCancel: () => void;
   isLoading?: boolean;
 }
@@ -134,6 +134,8 @@ function ComboboxComAdicao({
 
 export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoFormProps) {
   const [estoqueInicial, setEstoqueInicial] = useState<number | "">("");
+  const [estoqueValidade, setEstoqueValidade] = useState("");
+  const [estoqueLote, setEstoqueLote] = useState("");
 
   // Load distributors from localStorage + defaults on mount
   const [distribuidoras, setDistribuidoras] = useState<string[]>(() => {
@@ -229,7 +231,12 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
 
   function handleFormSubmit(data: CreateProdutoInput & { imagemUrl?: string | null }) {
     const qtd = typeof estoqueInicial === "number" && estoqueInicial > 0 ? estoqueInicial : undefined;
-    onSubmit({ ...data, estoqueInicial: qtd });
+    onSubmit({
+      ...data,
+      estoqueInicial: qtd,
+      estoqueValidade: qtd ? (estoqueValidade || null) : undefined,
+      estoqueLote: qtd ? (estoqueLote || undefined) : undefined,
+    });
   }
 
   return (
@@ -445,10 +452,10 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
       {!produto && (
         <div className="space-y-3 pt-2 border-t border-border/60">
           <span className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Estoque Inicial</span>
-          <div className="flex items-end gap-4 flex-wrap">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="estoqueInicial">
-                Quantidade em estoque
+                Quantidade
                 <span className="ml-1 text-muted-foreground font-normal text-xs">(opcional)</span>
               </Label>
               <Input
@@ -459,15 +466,42 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
                 value={estoqueInicial}
                 onChange={(e) => setEstoqueInicial(e.target.value === "" ? "" : Math.max(0, parseInt(e.target.value) || 0))}
                 placeholder="0"
-                className="w-36"
               />
             </div>
-            {typeof estoqueInicial === "number" && estoqueInicial > 0 && (
-              <p className="text-xs text-primary font-medium pb-1.5">
-                {estoqueInicial} unidade{estoqueInicial !== 1 ? "s" : ""} serão lançadas no Estoque ao salvar
-              </p>
-            )}
+            <div className="space-y-1.5">
+              <Label htmlFor="estoqueValidade">
+                Validade
+                <span className="ml-1 text-muted-foreground font-normal text-xs">(opcional)</span>
+              </Label>
+              <Input
+                id="estoqueValidade"
+                type="date"
+                value={estoqueValidade}
+                onChange={(e) => setEstoqueValidade(e.target.value)}
+                disabled={!estoqueInicial || estoqueInicial === 0}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="estoqueLote">
+                Lote / Referência
+                <span className="ml-1 text-muted-foreground font-normal text-xs">(opcional)</span>
+              </Label>
+              <Input
+                id="estoqueLote"
+                value={estoqueLote}
+                onChange={(e) => setEstoqueLote(e.target.value)}
+                placeholder="Ex: LOT-2025-01"
+                disabled={!estoqueInicial || estoqueInicial === 0}
+              />
+            </div>
           </div>
+          {typeof estoqueInicial === "number" && estoqueInicial > 0 && (
+            <p className="text-xs text-primary font-medium">
+              {estoqueInicial} unidade{estoqueInicial !== 1 ? "s" : ""} serão lançadas no estoque ao salvar
+              {estoqueValidade ? ` · Validade: ${new Date(estoqueValidade + "T00:00:00").toLocaleDateString("pt-BR")}` : ""}
+              {estoqueLote ? ` · Lote: ${estoqueLote}` : ""}
+            </p>
+          )}
         </div>
       )}
 

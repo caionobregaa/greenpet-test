@@ -10,6 +10,7 @@ export interface OrcamentoItemData {
   nome: string
   qtd: number
   valorUnitario: number
+  desconto?: number
 }
 
 export interface OrcamentoItemReadOnly {
@@ -18,6 +19,7 @@ export interface OrcamentoItemReadOnly {
   nome: string
   qtd: number
   valorUnitario: number
+  desconto: number
   total: number
 }
 
@@ -58,7 +60,8 @@ export class Orcamento extends AggregateRoot<OrcamentoProps> {
       nome: item.nome,
       qtd: item.qtd,
       valorUnitario: item.valorUnitario,
-      total: Money.create(item.valorUnitario).multiply(item.qtd).value,
+      desconto: item.desconto ?? 0,
+      total: Math.max(0, Money.create(item.valorUnitario).multiply(item.qtd).value - (item.desconto ?? 0)),
     }))
 
     const totalValue = itens.reduce((s, i) => s + i.total, 0)
@@ -143,7 +146,8 @@ export class Orcamento extends AggregateRoot<OrcamentoProps> {
         nome: item.nome,
         qtd: item.qtd,
         valorUnitario: item.valorUnitario,
-        total: Money.create(item.valorUnitario).multiply(item.qtd).value,
+        desconto: item.desconto ?? 0,
+        total: Math.max(0, Money.create(item.valorUnitario).multiply(item.qtd).value - (item.desconto ?? 0)),
       }))
       this.props.total = Money.create(this.props.itens.reduce((s, i) => s + i.total, 0))
     }

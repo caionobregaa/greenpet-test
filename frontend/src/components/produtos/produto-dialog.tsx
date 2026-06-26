@@ -26,9 +26,9 @@ export function ProdutoDialog({ open, onOpenChange, produto }: ProdutoDialogProp
     ? (freshProduto ?? produto) // freshProduto takes precedence once loaded
     : undefined;
 
-  async function onSubmit(data: CreateProdutoInput & { imagemUrl?: string | null; estoqueInicial?: number }) {
+  async function onSubmit(data: CreateProdutoInput & { imagemUrl?: string | null; estoqueInicial?: number; estoqueValidade?: string | null; estoqueLote?: string }) {
     try {
-      const { estoqueInicial, ...rest } = data;
+      const { estoqueInicial, estoqueValidade, estoqueLote, ...rest } = data;
       const payload = Object.fromEntries(
         Object.entries(rest).filter(([k, v]) => k === "imagemUrl" ? v !== undefined : v !== "" && v !== undefined)
       ) as CreateProdutoInput;
@@ -40,7 +40,12 @@ export function ProdutoDialog({ open, onOpenChange, produto }: ProdutoDialogProp
         const novo = await create.mutateAsync(payload);
         if (estoqueInicial && estoqueInicial > 0) {
           try {
-            await apiEstoque.create({ produtoId: novo.id, quantidade: estoqueInicial });
+            await apiEstoque.create({
+              produtoId: novo.id,
+              quantidade: estoqueInicial,
+              validade: estoqueValidade ?? null,
+              lote: estoqueLote || undefined,
+            });
             toast.success(`Produto cadastrado! ${estoqueInicial} unidade${estoqueInicial !== 1 ? "s" : ""} lançada${estoqueInicial !== 1 ? "s" : ""} no estoque.`);
           } catch {
             toast.success("Produto cadastrado com sucesso!");

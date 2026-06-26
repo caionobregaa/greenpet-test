@@ -185,6 +185,7 @@ model OrcamentoItem {
   nome          String
   qtd           Int
   valorUnitario Decimal   @db.Decimal(10, 2)
+  desconto      Float     @default(0)
   total         Decimal   @db.Decimal(10, 2)
 
   @@map("orcamento_itens")
@@ -249,6 +250,19 @@ model RecompraDismissal {
 
   @@unique([produtoId, clienteId, animalId])
   @@map("recompra_dismissals")
+}
+
+model RecompraManual {
+  id           String    @id @default(uuid())
+  clienteId    String
+  animalId     String    @default("")
+  produtoId    String
+  ultimaCompra DateTime?
+  previsaoData DateTime? // modo data explícita
+  diasRecompra Int?      // modo dias
+  createdAt    DateTime  @default(now())
+
+  @@map("recompra_manuais")
 }
 
 model CompraItem {

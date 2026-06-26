@@ -1,6 +1,28 @@
-import type { PrismaClient } from '@prisma/client'
+import type { PrismaClient, Prisma } from '@prisma/client'
 import type { IVendaRepository } from '../../domain/repositories/venda.repository.interface.js'
 import { Venda } from '../../domain/entities/venda.entity.js'
+
+type TxClient = Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>
+
+async function decrementarEstoque(tx: TxClient, produtoId: string, qtd: number): Promise<void> {
+  const lotes = await tx.estoqueItem.findMany({
+    where: { produtoId, quantidade: { gt: 0 } },
+    orderBy: [{ validade: { sort: 'asc', nulls: 'last' } }, { createdAt: 'asc' }],
+  })
+
+  let restante = qtd
+  for (const lote of lotes) {
+    if (restante <= 0) break
+    const consumir = Math.min(lote.quantidade, restante)
+    restante -= consumir
+    const novaQtd = lote.quantidade - consumir
+    if (novaQtd <= 0) {
+      await tx.estoqueItem.delete({ where: { id: lote.id } })
+    } else {
+      await tx.estoqueItem.update({ where: { id: lote.id }, data: { quantidade: novaQtd } })
+    }
+  }
+}
 
 export class PrismaVendaRepository implements IVendaRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -29,60 +51,72 @@ export class PrismaVendaRepository implements IVendaRepository {
   }
 
   async save(venda: Venda): Promise<void> {
-    await this.prisma.venda.upsert({
-      where: { id: venda.id },
-      create: {
-        id: venda.id,
-        data: venda.data,
-        clienteId: venda.clienteId,
-        animalId: venda.animalId ?? null,
-        formaPag: venda.formaPag,
-        taxaCartao: venda.taxaCartao,
-        taxaEntrega: venda.taxaEntrega,
-        desconto: venda.desconto,
-        total: venda.total,
-        obs: venda.obs ?? null,
-        itens: {
-          create: venda.itens.map((i) => ({
-            id: i.id,
-            produtoId: i.produtoId ?? null,
-            nome: i.nome,
-            qtd: i.qtd,
-            valorUnitario: i.valorUnitario,
-            desconto: i.desconto,
-            total: i.total,
-            itemAnimalId: i.itemAnimalId ?? null,
-            consumoDiario: i.consumoDiario ?? null,
-            recompraData: i.recompraData ?? null,
-          })),
+    await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.venda.findUnique({ where: { id: venda.id }, select: { id: true } })
+      const isNew = !existing
+
+      await tx.venda.upsert({
+        where: { id: venda.id },
+        create: {
+          id: venda.id,
+          data: venda.data,
+          clienteId: venda.clienteId,
+          animalId: venda.animalId ?? null,
+          formaPag: venda.formaPag,
+          taxaCartao: venda.taxaCartao,
+          taxaEntrega: venda.taxaEntrega,
+          desconto: venda.desconto,
+          total: venda.total,
+          obs: venda.obs ?? null,
+          itens: {
+            create: venda.itens.map((i) => ({
+              id: i.id,
+              produtoId: i.produtoId ?? null,
+              nome: i.nome,
+              qtd: i.qtd,
+              valorUnitario: i.valorUnitario,
+              desconto: i.desconto,
+              total: i.total,
+              itemAnimalId: i.itemAnimalId ?? null,
+              consumoDiario: i.consumoDiario ?? null,
+              recompraData: i.recompraData ?? null,
+            })),
+          },
         },
-      },
-      update: {
-        data: venda.data,
-        clienteId: venda.clienteId,
-        animalId: venda.animalId ?? null,
-        formaPag: venda.formaPag,
-        taxaCartao: venda.taxaCartao,
-        taxaEntrega: venda.taxaEntrega,
-        desconto: venda.desconto,
-        total: venda.total,
-        obs: venda.obs ?? null,
-        itens: {
-          deleteMany: {},
-          create: venda.itens.map((i) => ({
-            id: i.id,
-            produtoId: i.produtoId ?? null,
-            nome: i.nome,
-            qtd: i.qtd,
-            valorUnitario: i.valorUnitario,
-            desconto: i.desconto,
-            total: i.total,
-            itemAnimalId: i.itemAnimalId ?? null,
-            consumoDiario: i.consumoDiario ?? null,
-            recompraData: i.recompraData ?? null,
-          })),
+        update: {
+          data: venda.data,
+          clienteId: venda.clienteId,
+          animalId: venda.animalId ?? null,
+          formaPag: venda.formaPag,
+          taxaCartao: venda.taxaCartao,
+          taxaEntrega: venda.taxaEntrega,
+          desconto: venda.desconto,
+          total: venda.total,
+          obs: venda.obs ?? null,
+          itens: {
+            deleteMany: {},
+            create: venda.itens.map((i) => ({
+              id: i.id,
+              produtoId: i.produtoId ?? null,
+              nome: i.nome,
+              qtd: i.qtd,
+              valorUnitario: i.valorUnitario,
+              desconto: i.desconto,
+              total: i.total,
+              itemAnimalId: i.itemAnimalId ?? null,
+              consumoDiario: i.consumoDiario ?? null,
+              recompraData: i.recompraData ?? null,
+            })),
+          },
         },
-      },
+      })
+
+      if (isNew) {
+        for (const item of venda.itens) {
+          if (!item.produtoId || item.qtd <= 0) continue
+          await decrementarEstoque(tx as unknown as TxClient, item.produtoId, item.qtd)
+        }
+      }
     })
   }
 

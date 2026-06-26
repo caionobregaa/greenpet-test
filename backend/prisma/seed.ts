@@ -19,6 +19,32 @@ async function main(): Promise<void> {
   })
   console.log('✅ Usuário admin criado: admin@greenpet.com / admin123')
 
+  const senhaCaio = await bcrypt.hash('Caio!225', 12)
+  await prisma.user.upsert({
+    where: { email: 'caionobrega@greenpet.com' },
+    update: {},
+    create: {
+      nome: 'Caio Nóbrega (ADMIN)',
+      email: 'caionobrega@greenpet.com',
+      senhaHash: senhaCaio,
+      papel: 'admin',
+    },
+  })
+  console.log('✅ Usuário criado: caionobrega@greenpet.com')
+
+  const senhaLucy = await bcrypt.hash('124578', 12)
+  await prisma.user.upsert({
+    where: { email: 'lucynobrega@greenpet.com' },
+    update: {},
+    create: {
+      nome: 'Lucy Nóbrega (ADMIN)',
+      email: 'lucynobrega@greenpet.com',
+      senhaHash: senhaLucy,
+      papel: 'admin',
+    },
+  })
+  console.log('✅ Usuário criado: lucynobrega@greenpet.com')
+
   await seedProdutosPrime(prisma)
   await seedProdutosBasso(prisma)
   await seedProdutosCentralPec(prisma)

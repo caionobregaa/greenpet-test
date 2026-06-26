@@ -4,6 +4,7 @@ export interface DashboardKPIs {
   totalLucroLiquido: number;
   totalVendas: number;
   ticketMedio: number;
+  totalCustoAquisicao: number;
   topClientes: Array<{
     clienteId: string;
     nome: string;

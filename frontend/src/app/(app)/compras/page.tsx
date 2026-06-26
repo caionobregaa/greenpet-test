@@ -3,8 +3,8 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Plus, Eye, Trash2, Settings2, X, Tag, PackagePlus, PackageX } from "lucide-react";
-import { useCompras, useDeleteCompra, useCreateCompra, useImportarEstoque } from "@/lib/hooks/use-compras";
+import { Plus, Eye, Trash2, Settings2, X, Tag, PackagePlus, PackageX, Pencil } from "lucide-react";
+import { useCompras, useCompra, useDeleteCompra, useCreateCompra, useUpdateCompra, useImportarEstoque } from "@/lib/hooks/use-compras";
 import type { Compra } from "@/lib/types/compra";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateCompraSchema, FORMAS_PAG, type CreateCompraInput } from "@/lib/schemas/compra.schema";
+import { CreateCompraSchema, UpdateCompraSchema, FORMAS_PAG, type CreateCompraInput, type UpdateCompraInput } from "@/lib/schemas/compra.schema";
 import { ItensTable } from "@/components/vendas/itens-table";
 import { formatDate, formatBRL, todayISO } from "@/lib/utils/format";
 import { Loader2 } from "lucide-react";
@@ -256,6 +256,7 @@ function NovaDespesaDialog({
                 setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
                 errors={errors.itens as Parameters<typeof ItensTable>[0]["errors"]}
                 showPesoKg
+                useCusto
               />
               {(errors.itens as { message?: string } | undefined)?.message && (
                 <p className="text-xs text-destructive">{(errors.itens as { message?: string }).message}</p>
@@ -308,6 +309,171 @@ function NovaDespesaDialog({
             </Button>
           </div>
         </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Dialog: Editar Despesa ────────────────────────────────────────────────────
+
+function EditarDespesaDialog({
+  id,
+  onOpenChange,
+  categorias,
+}: {
+  id: string | null;
+  onOpenChange: (o: boolean) => void;
+  categorias: string[];
+}) {
+  const { data: compra, isLoading } = useCompra(id ?? "");
+  const update = useUpdateCompra();
+
+  const { register, handleSubmit, control, setValue, formState: { errors }, reset, watch } = useForm<UpdateCompraInput>({
+    resolver: zodResolver(UpdateCompraSchema),
+  });
+
+  // Populate form when compra loads
+  const [categoria, setCategoria] = useState("Produtos Pets");
+  const isProdutos = categoria === "Produtos Pets";
+
+  // Sync form when compra data arrives
+  const [synced, setSynced] = useState(false);
+  if (compra && !synced) {
+    setCategoria(compra.categoria);
+    reset({
+      fornecedor: compra.fornecedor ?? "",
+      dataPedido: compra.dataPedido?.slice(0, 10) ?? "",
+      categoria: compra.categoria,
+      descricaoSimples: compra.descricaoSimples ?? "",
+      formaPag: (compra.formaPag as typeof FORMAS_PAG[number]) ?? undefined,
+      totalManual: !isProdutos ? compra.total : undefined,
+      obs: compra.obs ?? "",
+      itens: compra.categoria === "Produtos Pets"
+        ? compra.itens.map((i) => ({ produtoId: i.produtoId ?? undefined, nome: i.nome, qtd: i.qtd, pesoKg: i.pesoKg ?? null, valorUnitario: i.valorUnitario }))
+        : [],
+    });
+    setSynced(true);
+  }
+
+  const watchedItens = watch("itens");
+  const totalItens = (watchedItens ?? []).reduce((s: number, i: { qtd?: number; valorUnitario?: number }) => s + (Number(i?.qtd ?? 0) * Number(i?.valorUnitario ?? 0)), 0);
+
+  const onSubmit = useCallback(async (data: UpdateCompraInput) => {
+    if (!id) return;
+    try {
+      await update.mutateAsync({
+        id,
+        input: { ...data, fornecedor: data.fornecedor || categoria, categoria },
+      });
+      toast.success("Despesa atualizada!");
+      setSynced(false);
+      onOpenChange(false);
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
+      toast.error("Erro ao atualizar despesa", { description: msg });
+    }
+  }, [id, update, onOpenChange, categoria]);
+
+  function handleClose() {
+    setSynced(false);
+    onOpenChange(false);
+  }
+
+  return (
+    <Dialog open={!!id} onOpenChange={(o) => { if (!o) handleClose(); }}>
+      <DialogContent className="sm:max-w-[820px] sm:p-8 max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Editar Despesa</DialogTitle>
+        </DialogHeader>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <Label>Categoria *</Label>
+                <Select value={categoria} onValueChange={(v) => { if (v) { setCategoria(v); setValue("categoria", v); } }}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {categorias.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Data</Label>
+                <Input type="date" {...register("dataPedido")} />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Forma de Pagamento</Label>
+              <Select
+                value={watch("formaPag") ?? ""}
+                onValueChange={(v) => { if (v) setValue("formaPag", v as typeof FORMAS_PAG[number]); }}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectContent>
+                  {FORMAS_PAG.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {isProdutos ? (
+              <>
+                <div className="space-y-1.5">
+                  <Label>Fornecedor *</Label>
+                  <Input {...register("fornecedor")} placeholder="Nome do fornecedor" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Observações</Label>
+                  <Textarea {...register("obs")} rows={2} />
+                </div>
+                <ItensTable
+                  control={control as unknown as Parameters<typeof ItensTable>[0]["control"]}
+                  setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
+                  errors={errors.itens as Parameters<typeof ItensTable>[0]["errors"]}
+                  showPesoKg
+                  useCusto
+                />
+                <div className="flex justify-end">
+                  <div className="text-right">
+                    <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Total da despesa</p>
+                    <p className="text-xl font-bold text-primary tabular-nums">{formatBRL(totalItens)}</p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-1.5">
+                  <Label>Fonte / Referência</Label>
+                  <Input {...register("fornecedor")} placeholder={`Ex: ${categoria}...`} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Descrição do Gasto</Label>
+                  <Textarea {...register("descricaoSimples")} rows={3} placeholder="Descreva o gasto em detalhes..." />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Valor Total (R$) *</Label>
+                  <Input type="number" step="0.01" min="0" {...register("totalManual", { valueAsNumber: true })} placeholder="0,00" />
+                  {errors.totalManual && <p className="text-xs text-destructive">{errors.totalManual.message}</p>}
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Observações</Label>
+                  <Textarea {...register("obs")} rows={2} />
+                </div>
+              </>
+            )}
+
+            <div className="flex justify-end gap-2 pt-4 mt-1 border-t border-border/60">
+              <Button type="button" variant="ghost" onClick={handleClose} className="text-muted-foreground">Cancelar</Button>
+              <Button type="submit" disabled={update.isPending}>
+                {update.isPending ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Salvando...</> : "Salvar Alterações"}
+              </Button>
+            </div>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -401,6 +567,7 @@ export default function DespesasPage() {
   const [newOpen, setNewOpen] = useState(false);
   const [gerenciarOpen, setGerenciarOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
   const [importarCompra, setImportarCompra] = useState<Compra | null>(null);
   const [categorias, setCategorias] = useState<string[]>(loadCategorias);
 
@@ -479,6 +646,9 @@ export default function DespesasPage() {
                       <Link href={`/compras/${c.id}`} className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-8 w-8 p-0")}>
                         <Eye className="w-3.5 h-3.5" />
                       </Link>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground" onClick={() => setEditId(c.id)}>
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:text-destructive" onClick={() => setDeleteId(c.id)}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
@@ -493,6 +663,7 @@ export default function DespesasPage() {
       </div>
 
       <NovaDespesaDialog open={newOpen} onOpenChange={setNewOpen} categorias={categorias} onCreated={handleCreated} />
+      <EditarDespesaDialog id={editId} onOpenChange={(o) => { if (!o) setEditId(null); }} categorias={categorias} />
       <ImportarEstoqueDialog compra={importarCompra} onClose={() => setImportarCompra(null)} />
       <GerenciarCategoriasDialog
         open={gerenciarOpen}

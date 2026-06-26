@@ -6,6 +6,7 @@ export interface DashboardKPIs {
   totalLucroLiquido: number
   totalVendas: number
   ticketMedio: number
+  totalCustoAquisicao: number
   topClientes: Array<{ clienteId: string; nome: string; totalGasto: number; vendas: number }>
   topProdutos: Array<{ produtoId: string; nome: string; totalVendido: number; quantidade: number }>
   receitaPorMes: Array<{ mes: string; receita: number; vendas: number }>
@@ -89,6 +90,16 @@ export class PrismaDashboardRepository {
       quantidade: Number(g._sum.qtd ?? 0),
     }))
 
+    // Custo de aquisição = soma das despesas/compras no período (exceto canceladas)
+    const custoAggregate = await this.prisma.compra.aggregate({
+      where: {
+        dataPedido: { gte: inicio, lte: fim },
+        status: { not: 'cancelado' },
+      },
+      _sum: { total: true },
+    })
+    const totalCustoAquisicao = Number(custoAggregate._sum.total ?? 0)
+
     // Monthly breakdown
     const vendas = await this.prisma.venda.findMany({
       where: { data: { gte: inicio, lte: fim } },
@@ -119,6 +130,7 @@ export class PrismaDashboardRepository {
       totalLucroLiquido: Math.round(totalLucroLiquido * 100) / 100,
       totalVendas,
       ticketMedio: Math.round(ticketMedio * 100) / 100,
+      totalCustoAquisicao: Math.round(totalCustoAquisicao * 100) / 100,
       topClientes,
       topProdutos,
       receitaPorMes,

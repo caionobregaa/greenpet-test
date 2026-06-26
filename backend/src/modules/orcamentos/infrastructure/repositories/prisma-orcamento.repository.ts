@@ -48,6 +48,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
               nome: i.nome,
               qtd: i.qtd,
               valorUnitario: i.valorUnitario,
+              desconto: i.desconto,
               total: i.total,
             })),
           },
@@ -73,6 +74,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
               nome: i.nome,
               qtd: i.qtd,
               valorUnitario: i.valorUnitario,
+              desconto: i.desconto,
               total: i.total,
             })),
           },
@@ -105,6 +107,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
       nome: string
       qtd: number
       valorUnitario: unknown
+      desconto: number
       total: unknown
     }>
   }): Orcamento {
@@ -124,6 +127,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
         nome: i.nome,
         qtd: i.qtd,
         valorUnitario: Number(i.valorUnitario),
+        desconto: i.desconto ?? 0,
       })),
     })
     entity.applyNumero(row.numero)

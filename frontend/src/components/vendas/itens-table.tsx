@@ -31,6 +31,7 @@ interface ProdutoSelect {
   id: string | null;
   nome: string;
   valorVenda: number;
+  valorCusto?: number;
   categoria?: string;
   pesoEmbalagem?: number | null;
 }
@@ -58,6 +59,7 @@ interface ItensTableProps {
   setValue: UseFormSetValue<{ itens: ItemRow[] } & Record<string, unknown>>;
   errors?: Array<{ nome?: { message?: string }; qtd?: { message?: string }; valorUnitario?: { message?: string } } | undefined>;
   showPesoKg?: boolean;
+  useCusto?: boolean;
   clienteId?: string;
 }
 
@@ -119,7 +121,7 @@ const ProdutoSearch = memo(function ProdutoSearch({
   }
 
   function pick(p: Produto) {
-    onSelect({ id: p.id, nome: p.nome, valorVenda: p.valorVenda, categoria: p.categoria, pesoEmbalagem: p.pesoEmbalagem });
+    onSelect({ id: p.id, nome: p.nome, valorVenda: p.valorVenda, valorCusto: p.valorCusto, categoria: p.categoria, pesoEmbalagem: p.pesoEmbalagem });
     setQuery(p.nome);
     setResults([]); setOpen(false); setSearched(false);
   }
@@ -485,7 +487,7 @@ function SortableItemRow({
 
 // ── Main table ───────────────────────────────────────────────────────────────
 
-export function ItensTable({ control, setValue, errors, showPesoKg = false, clienteId }: ItensTableProps) {
+export function ItensTable({ control, setValue, errors, showPesoKg = false, useCusto = false, clienteId }: ItensTableProps) {
   const { fields, append, remove, move } = useFieldArray({ control, name: "itens" as never });
   const itens = useWatch({ control, name: "itens" as never }) as unknown as ItemRow[];
   const [lastAddedIndex, setLastAddedIndex] = useState<number | null>(null);
@@ -518,7 +520,7 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false, clie
   function selectProduto(index: number, p: ProdutoSelect) {
     setValue(`itens.${index}.produtoId` as never, p.id as never);
     setValue(`itens.${index}.nome` as never, p.nome as never);
-    setValue(`itens.${index}.valorUnitario` as never, p.valorVenda as never);
+    setValue(`itens.${index}.valorUnitario` as never, (useCusto ? (p.valorCusto ?? 0) : p.valorVenda) as never);
     setItemExtras((prev) => ({
       ...prev,
       [index]: { ...prev[index], categoria: p.categoria, pesoEmbalagem: p.pesoEmbalagem },
