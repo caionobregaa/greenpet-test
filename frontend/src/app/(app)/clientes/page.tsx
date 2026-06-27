@@ -40,8 +40,10 @@ export default function ClientesPage() {
     try {
       await deleteCliente.mutateAsync(deleteId);
       toast.success("Cliente excluído com sucesso!");
-    } catch {
-      toast.error("Erro ao excluir cliente.");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })
+        ?.response?.data?.error?.message;
+      toast.error("Não foi possível excluir o cliente", { description: msg ?? "Tente novamente." });
     } finally {
       setDeleteId(null);
     }
