@@ -268,6 +268,14 @@ export default function VendaDetailPage({ params }: Props) {
             </div>
           </>
         )}
+        {venda.lucroBruto !== undefined && (
+          <div className="border-t border-dashed border-border/40 px-4 py-2.5 flex justify-end items-center gap-6 bg-muted/10">
+            <span className="text-xs text-muted-foreground">Lucro estimado (receita − custo dos produtos)</span>
+            <span className={`text-xs font-semibold font-mono ${venda.lucroBruto >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}`}>
+              {formatBRL(venda.lucroBruto)}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Save recompra */}

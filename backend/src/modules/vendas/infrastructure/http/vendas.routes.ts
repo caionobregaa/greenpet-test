@@ -11,7 +11,7 @@ import { CreateVendaSchema, UpdateVendaSchema, ListVendasQuerySchema } from './v
 import { ValidationError } from '@/shared/errors/validation.error.js'
 import type { Venda } from '../../domain/entities/venda.entity.js'
 
-function toResponse(v: Venda, extra?: { clienteNome?: string | null; animalNome?: string | null }) {
+function toResponse(v: Venda, extra?: { clienteNome?: string | null; animalNome?: string | null; lucroBruto?: number }) {
   return {
     id: v.id,
     numero: v.numero,
@@ -27,6 +27,7 @@ function toResponse(v: Venda, extra?: { clienteNome?: string | null; animalNome?
     itens: v.itens,
     cliente: extra?.clienteNome ? { nome: extra.clienteNome } : undefined,
     animal: extra?.animalNome ? { nome: extra.animalNome } : undefined,
+    lucroBruto: extra?.lucroBruto,
     createdAt: v.createdAt,
   }
 }
@@ -72,14 +73,24 @@ export function registerVendasRoutes(app: FastifyInstance, prisma: PrismaClient)
   app.get('/api/v1/vendas/:id', async (req, rep) => {
     const { id } = req.params as { id: string }
     const venda = await getUC.execute({ id })
-    const row = await prisma.venda.findUnique({
-      where: { id },
-      select: {
-        cliente: { select: { nome: true } },
-        animal: { select: { nome: true } },
-      },
-    })
-    rep.send({ data: toResponse(venda, { clienteNome: row?.cliente?.nome, animalNome: row?.animal?.nome }) })
+    const [row, custoResult] = await Promise.all([
+      prisma.venda.findUnique({
+        where: { id },
+        select: {
+          cliente: { select: { nome: true } },
+          animal: { select: { nome: true } },
+        },
+      }),
+      prisma.$queryRaw<Array<{ custo: string }>>`
+        SELECT COALESCE(SUM(vi.qtd * COALESCE(CAST(p."valorCusto" AS DOUBLE PRECISION), 0)), 0)::text AS custo
+        FROM venda_itens vi
+        LEFT JOIN produtos p ON p.id = vi."produtoId"
+        WHERE vi."vendaId" = ${id}
+      `,
+    ])
+    const custoTotal = Number(custoResult[0]?.custo ?? 0)
+    const lucroBruto = Math.round((venda.total - custoTotal) * 100) / 100
+    rep.send({ data: toResponse(venda, { clienteNome: row?.cliente?.nome, animalNome: row?.animal?.nome, lucroBruto }) })
   })
 
   app.patch('/api/v1/vendas/:id', async (req, rep) => {

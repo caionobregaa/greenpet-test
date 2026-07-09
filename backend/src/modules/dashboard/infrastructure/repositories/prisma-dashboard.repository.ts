@@ -29,10 +29,10 @@ export class PrismaDashboardRepository {
     const totalVendas = vendaAggregate._count.id
     const ticketMedio = totalVendas > 0 ? totalReceita / totalVendas : 0
 
-    // Lucro real = receita líquida (após taxa do cartão) menos custo de aquisição dos produtos
+    // Lucro bruto = receita total menos custo de aquisição dos produtos vendidos
     const lucroResult = await this.prisma.$queryRaw<Array<{ lucro: string }>>`
       SELECT COALESCE(SUM(
-        CAST(v.total AS DOUBLE PRECISION) * (1.0 - v."taxaCartao" / 100.0)
+        CAST(v.total AS DOUBLE PRECISION)
         - COALESCE(ic.custo, 0)
       ), 0)::text AS lucro
       FROM vendas v

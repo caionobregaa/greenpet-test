@@ -26,6 +26,7 @@ export interface Venda {
   taxaEntrega: number;
   desconto: number;
   total: number;
+  lucroBruto?: number;
   obs: string | null;
   createdAt: string;
   itens: VendaItem[];

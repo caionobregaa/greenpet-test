@@ -69,9 +69,9 @@ export default function DashboardPage() {
             sub="no período"
           />
           <KpiCard
-            label="Líquido (após taxas)"
+            label="Lucro Bruto"
             value={v(data?.totalLucroLiquido ?? 0)}
-            sub="receita após cartão"
+            sub="receita − custo dos produtos"
           />
           <KpiCard
             label="Total de Vendas"
