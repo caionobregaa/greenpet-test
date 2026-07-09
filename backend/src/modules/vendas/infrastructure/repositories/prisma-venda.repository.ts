@@ -80,6 +80,7 @@ export class PrismaVendaRepository implements IVendaRepository {
               itemAnimalId: i.itemAnimalId ?? null,
               consumoDiario: i.consumoDiario ?? null,
               recompraData: i.recompraData ?? null,
+              brinde: i.brinde,
             })),
           },
         },
@@ -106,6 +107,7 @@ export class PrismaVendaRepository implements IVendaRepository {
               itemAnimalId: i.itemAnimalId ?? null,
               consumoDiario: i.consumoDiario ?? null,
               recompraData: i.recompraData ?? null,
+              brinde: i.brinde,
             })),
           },
         },
@@ -148,6 +150,7 @@ export class PrismaVendaRepository implements IVendaRepository {
       itemAnimalId: string | null
       consumoDiario: number | null
       recompraData: Date | null
+      brinde?: boolean
     }>
   }): Venda {
     return Venda.create({
@@ -171,6 +174,7 @@ export class PrismaVendaRepository implements IVendaRepository {
         itemAnimalId: i.itemAnimalId ?? undefined,
         consumoDiario: i.consumoDiario ?? undefined,
         recompraData: i.recompraData ?? undefined,
+        brinde: i.brinde ?? false,
       })),
     })
   }

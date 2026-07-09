@@ -9,6 +9,7 @@ export const VendaItemSchema = z.object({
   itemAnimalId: z.string().optional().nullable(),
   consumoDiario: z.number().int().min(1).optional().nullable(),
   recompraData: z.string().date().optional().nullable(),
+  brinde: z.boolean().optional(),
 });
 
 export const CreateVendaSchema = z.object({

@@ -1,0 +1,1 @@
+ALTER TABLE "venda_itens" ADD COLUMN "brinde" BOOLEAN NOT NULL DEFAULT false;

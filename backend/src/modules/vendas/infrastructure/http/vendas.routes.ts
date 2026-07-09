@@ -41,6 +41,48 @@ export function registerVendasRoutes(app: FastifyInstance, prisma: PrismaClient)
   const deleteUC = new DeleteVendaUseCase(vendaRepo)
   const updateUC = new UpdateVendaUseCase(vendaRepo)
 
+  app.get('/api/v1/vendas/sem-custo', async (_req, rep) => {
+    const noventa = new Date()
+    noventa.setDate(noventa.getDate() - 90)
+
+    const rows = await prisma.$queryRaw<Array<{
+      vendaId: string
+      vendaNumero: number
+      vendaData: Date
+      produtoId: string
+      produtoNome: string
+    }>>`
+      SELECT DISTINCT
+        v.id            AS "vendaId",
+        v.numero        AS "vendaNumero",
+        v.data          AS "vendaData",
+        p.id            AS "produtoId",
+        p.nome          AS "produtoNome"
+      FROM venda_itens vi
+      JOIN vendas v ON v.id = vi."vendaId"
+      JOIN produtos p ON p.id = vi."produtoId"
+      WHERE v.data >= ${noventa}
+        AND vi."produtoId" IS NOT NULL
+        AND vi.brinde = false
+        AND (p."valorCusto" IS NULL OR CAST(p."valorCusto" AS DOUBLE PRECISION) = 0)
+      ORDER BY v.data DESC
+      LIMIT 100
+    `
+
+    const vendaMap = new Map<string, { vendaId: string; vendaNumero: number; vendaData: Date; produtos: Array<{ produtoId: string; produtoNome: string }> }>()
+    for (const row of rows) {
+      if (!vendaMap.has(row.vendaId)) {
+        vendaMap.set(row.vendaId, { vendaId: row.vendaId, vendaNumero: row.vendaNumero, vendaData: row.vendaData, produtos: [] })
+      }
+      const entry = vendaMap.get(row.vendaId)!
+      if (!entry.produtos.find((p) => p.produtoId === row.produtoId)) {
+        entry.produtos.push({ produtoId: row.produtoId, produtoNome: row.produtoNome })
+      }
+    }
+
+    rep.send({ data: Array.from(vendaMap.values()) })
+  })
+
   app.get('/api/v1/vendas', async (req, rep) => {
     const q = ListVendasQuerySchema.safeParse(req.query)
     if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.errors[0].message)

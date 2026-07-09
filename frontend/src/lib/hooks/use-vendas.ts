@@ -2,6 +2,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiVendas } from "@/lib/api/vendas";
 import type { CreateVendaInput, UpdateVendaInput } from "@/lib/schemas/venda.schema";
 
+export function useVendasSemCusto() {
+  return useQuery({
+    queryKey: ["vendas-sem-custo"],
+    queryFn: () => apiVendas.semCusto(),
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
 interface ListParams {
   clienteId?: string;
   animalId?: string;

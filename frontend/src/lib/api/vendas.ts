@@ -3,6 +3,13 @@ import type { ApiResponse, ApiMeta } from "@/lib/types/api";
 import type { Venda } from "@/lib/types/venda";
 import type { CreateVendaInput, UpdateVendaInput } from "@/lib/schemas/venda.schema";
 
+export interface VendaSemCusto {
+  vendaId: string;
+  vendaNumero: number;
+  vendaData: string;
+  produtos: Array<{ produtoId: string; produtoNome: string }>;
+}
+
 interface ListParams {
   clienteId?: string;
   animalId?: string;
@@ -39,5 +46,10 @@ export const apiVendas = {
 
   delete: async (id: string): Promise<void> => {
     await api.delete(`/vendas/${id}`);
+  },
+
+  semCusto: async (): Promise<VendaSemCusto[]> => {
+    const { data } = await api.get<{ data: VendaSemCusto[] }>("/vendas/sem-custo");
+    return data.data;
   },
 };

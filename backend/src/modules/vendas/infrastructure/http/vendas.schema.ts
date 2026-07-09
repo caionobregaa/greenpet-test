@@ -9,6 +9,7 @@ const VendaItemSchema = z.object({
   itemAnimalId: z.string().nullable().optional().transform((v) => v || undefined),
   consumoDiario: z.number().int().min(1).nullable().optional().transform((v) => v ?? undefined),
   recompraData: z.string().date().nullable().optional().transform((v) => v ? new Date(v) : undefined),
+  brinde: z.boolean().optional().default(false),
 })
 
 export const CreateVendaSchema = z.object({

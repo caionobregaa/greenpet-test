@@ -2,7 +2,7 @@
 
 import { useFieldArray, useWatch, type Control, type UseFormSetValue } from "react-hook-form";
 import { useRef, useState, useEffect, memo } from "react";
-import { Plus, Trash2, Search, Minus, PackageSearch, Timer, CalendarDays, GripVertical } from "lucide-react";
+import { Plus, Trash2, Search, Minus, PackageSearch, Timer, CalendarDays, GripVertical, Gift } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -46,6 +46,7 @@ interface ItemRow {
   itemAnimalId?: string | null;
   consumoDiario?: number | null;
   recompraData?: string | null;
+  brinde?: boolean;
 }
 
 interface ItemExtra {
@@ -234,6 +235,7 @@ function SortableItemRow({
   const duracao = calcDuracao(consumoDiarioVal, extra);
   const showConsumoSection = isRacao || isMedSupl || (consumoDiarioVal !== undefined);
   const recompraDataVal = item.recompraData ?? null;
+  const isBrinde = !!item.brinde;
 
   return (
     <div
@@ -352,10 +354,30 @@ function SortableItemRow({
             </div>
           </div>
 
+          <button
+            type="button"
+            title={isBrinde ? "Remover brinde" : "Marcar como brinde (custo mantido, sem cobrança)"}
+            onClick={() => {
+              setValue(`itens.${index}.brinde` as never, !isBrinde as never);
+              if (!isBrinde) {
+                setValue(`itens.${index}.valorUnitario` as never, 0 as never);
+                setValue(`itens.${index}.desconto` as never, 0 as never);
+              }
+            }}
+            className={`h-9 w-9 flex items-center justify-center rounded-md transition-colors shrink-0 ${isBrinde ? "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" : "text-muted-foreground/40 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20"}`}
+          >
+            <Gift className="w-3.5 h-3.5" />
+          </button>
           <Button type="button" variant="ghost" className="h-9 w-9 p-0 text-destructive/50 hover:text-destructive hover:bg-destructive/10 shrink-0" onClick={onRemove}>
             <Trash2 className="w-3.5 h-3.5" />
           </Button>
         </div>
+        {isBrinde && (
+          <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 text-[11px] font-medium">
+            <Gift className="w-3 h-3" />
+            Brinde — custo registrado, sem cobrança ao cliente
+          </div>
+        )}
 
         {/* Row 3 — Animal + Consumo (conditional) */}
         {(clienteAnimais.length > 0 || showConsumoSection) && (
@@ -513,7 +535,7 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false, useC
 
   function addEmpty() {
     const newIndex = fields.length;
-    append({ produtoId: null, nome: "", qtd: 1, pesoKg: null, valorUnitario: 0, desconto: 0, itemAnimalId: null, consumoDiario: null, recompraData: null } as never);
+    append({ produtoId: null, nome: "", qtd: 1, pesoKg: null, valorUnitario: 0, desconto: 0, itemAnimalId: null, consumoDiario: null, recompraData: null, brinde: false } as never);
     setLastAddedIndex(newIndex);
   }
 

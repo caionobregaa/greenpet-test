@@ -7,9 +7,12 @@ import {
   Plus,
   ClipboardList,
   BellRing,
+  AlertTriangle,
 } from "lucide-react";
 import { useRecompra, useDismissRecompra } from "@/lib/hooks/use-recompra";
 import { useLembretes, useCreateLembrete, useDeleteLembrete } from "@/lib/hooks/use-lembretes";
+import { useVendasSemCusto } from "@/lib/hooks/use-vendas";
+import Link from "next/link";
 import { DismissRecompraDialog } from "@/components/shared/dismiss-recompra-dialog";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -23,6 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AvisosPage() {
   const { data: recompraData, isLoading } = useRecompra({ limit: 100 });
+  const { data: semCustoData, isLoading: isLoadingSemCusto } = useVendasSemCusto();
   const dismiss = useDismissRecompra();
 
   const [pendingAlerta, setPendingAlerta] = useState<RecompraAlerta | null>(null);
@@ -221,6 +225,79 @@ export default function AvisosPage() {
               </tbody>
             </table>
           </div>
+        </div>
+      </section>
+
+      {/* ── Produtos sem custo ─────────────────────────────────────────────── */}
+      <section>
+        <div className="flex items-center gap-2 mb-4">
+          <AlertTriangle className="w-5 h-5 text-orange-500" />
+          <h2 className="text-base font-semibold">Produtos sem custo cadastrado</h2>
+          {!isLoadingSemCusto && (semCustoData?.length ?? 0) > 0 && (
+            <span className="bg-orange-500 text-white text-[11px] font-bold rounded-full px-2 py-0.5">
+              {semCustoData!.length}
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground mb-3">
+          Vendas dos últimos 90 dias com itens sem valor de custo — o lucro estimado pode estar incorreto.
+          Cadastre o custo do produto e re-salve a venda.
+        </p>
+
+        <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
+          {isLoadingSemCusto ? (
+            <div className="divide-y divide-border">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className="px-4 py-3 space-y-1.5">
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-3 w-2/3" />
+                </div>
+              ))}
+            </div>
+          ) : (semCustoData?.length ?? 0) === 0 ? (
+            <div className="p-8 text-center">
+              <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-green-500/60" />
+              <p className="text-sm text-muted-foreground">Todos os produtos têm custo cadastrado!</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {semCustoData!.map((v) => (
+                <div key={v.vendaId} className="px-4 py-3 flex items-start gap-3">
+                  <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium">
+                        Venda V{String(v.vendaNumero).padStart(5, "0")}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(v.vendaData).toLocaleDateString("pt-BR")}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Sem custo:{" "}
+                      <span className="font-medium text-foreground">
+                        {v.produtos.map((p) => p.produtoNome).join(", ")}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <Link
+                      href={`/produtos?q=${encodeURIComponent(v.produtos[0]?.produtoNome ?? "")}`}
+                      className="text-xs text-primary underline underline-offset-2 hover:no-underline"
+                    >
+                      Cadastrar custo
+                    </Link>
+                    <Link
+                      href={`/vendas/${v.vendaId}`}
+                      className="text-xs text-muted-foreground underline underline-offset-2 hover:no-underline"
+                    >
+                      Ver venda
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

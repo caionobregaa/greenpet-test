@@ -149,6 +149,7 @@ model VendaItem {
   itemAnimalId  String?
   consumoDiario Int?
   recompraData  DateTime? @db.Date
+  brinde        Boolean  @default(false)
 
   @@map("venda_itens")
 }

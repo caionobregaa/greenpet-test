@@ -11,6 +11,7 @@ export interface VendaItem {
   itemAnimalId?: string | null;
   consumoDiario?: number | null;
   recompraData?: string | null;
+  brinde?: boolean;
 }
 
 export interface Venda {

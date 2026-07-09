@@ -15,6 +15,7 @@ export interface VendaItemData {
   itemAnimalId?: string
   consumoDiario?: number
   recompraData?: Date
+  brinde?: boolean
 }
 
 export interface VendaItemReadOnly {
@@ -28,6 +29,7 @@ export interface VendaItemReadOnly {
   itemAnimalId?: string
   consumoDiario?: number
   recompraData?: Date
+  brinde: boolean
 }
 
 interface VendaProps {
@@ -82,6 +84,7 @@ export class Venda extends AggregateRoot<VendaProps> {
         itemAnimalId: item.itemAnimalId,
         consumoDiario: item.consumoDiario,
         recompraData: item.recompraData,
+        brinde: item.brinde ?? false,
       }
     })
 
