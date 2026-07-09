@@ -10,6 +10,7 @@ export interface VendaItem {
   total: number;
   itemAnimalId?: string | null;
   consumoDiario?: number | null;
+  recompraData?: string | null;
 }
 
 export interface Venda {

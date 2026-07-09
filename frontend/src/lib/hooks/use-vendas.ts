@@ -44,6 +44,7 @@ export function useUpdateVenda() {
       qc.invalidateQueries({ queryKey: ["vendas"] });
       qc.invalidateQueries({ queryKey: ["vendas", vars.id] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: ["recompra"] });
     },
   });
 }
