@@ -40,6 +40,7 @@ import { registerOrcamentosRoutes } from './modules/orcamentos/infrastructure/ht
 import { registerComprasRoutes } from './modules/compras/infrastructure/http/compras.routes.js'
 import { registerEstoqueRoutes } from './modules/estoque/infrastructure/http/estoque.routes.js'
 import { registerRecompraRoutes } from './modules/recompra/infrastructure/http/recompra.routes.js'
+import { registerCurvaVendaRoutes } from './modules/curva-venda/infrastructure/http/curva-venda.routes.js'
 import { registerDashboardRoutes } from './modules/dashboard/infrastructure/http/dashboard.routes.js'
 import { registerLembretesRoutes } from './modules/lembretes/infrastructure/http/lembretes.routes.js'
 
@@ -86,6 +87,7 @@ async function bootstrap(): Promise<void> {
   registerComprasRoutes(app, prisma)
   registerEstoqueRoutes(app, prisma)
   registerRecompraRoutes(app, prisma)
+  registerCurvaVendaRoutes(app, prisma)
   registerDashboardRoutes(app, prisma)
   registerLembretesRoutes(app, prisma)
 

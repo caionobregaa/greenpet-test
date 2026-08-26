@@ -270,7 +270,7 @@ export default function AvisosPage() {
                         Venda V{String(v.vendaNumero).padStart(5, "0")}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        {new Date(v.vendaData).toLocaleDateString("pt-BR")}
+                        {formatDate(v.vendaData)}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
@@ -280,13 +280,16 @@ export default function AvisosPage() {
                       </span>
                     </p>
                   </div>
-                  <div className="flex gap-2 shrink-0">
-                    <Link
-                      href={`/produtos?q=${encodeURIComponent(v.produtos[0]?.produtoNome ?? "")}`}
-                      className="text-xs text-primary underline underline-offset-2 hover:no-underline"
-                    >
-                      Cadastrar custo
-                    </Link>
+                  <div className="flex flex-col gap-1 shrink-0 items-end">
+                    {v.produtos.map((p) => (
+                      <Link
+                        key={p.produtoId}
+                        href={`/produtos?q=${encodeURIComponent(p.produtoNome)}`}
+                        className="text-xs text-primary underline underline-offset-2 hover:no-underline"
+                      >
+                        Cadastrar custo — {p.produtoNome}
+                      </Link>
+                    ))}
                     <Link
                       href={`/vendas/${v.vendaId}`}
                       className="text-xs text-muted-foreground underline underline-offset-2 hover:no-underline"

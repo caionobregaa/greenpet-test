@@ -146,7 +146,7 @@ export default function EditarVendaPage({ params }: Props) {
       taxaCartao: venda.taxaCartao,
       taxaEntrega: venda.taxaEntrega,
       obs: venda.obs ?? "",
-      itens: venda.itens.map((i) => ({ produtoId: i.produtoId, nome: i.nome, qtd: i.qtd, valorUnitario: i.valorUnitario, desconto: i.desconto, itemAnimalId: i.itemAnimalId ?? null, consumoDiario: i.consumoDiario ?? null })),
+      itens: venda.itens.map((i) => ({ produtoId: i.produtoId, nome: i.nome, qtd: i.qtd, valorUnitario: i.valorUnitario, desconto: i.desconto, itemAnimalId: i.itemAnimalId ?? null, consumoDiario: i.consumoDiario ?? null, brinde: i.brinde ?? false })),
     });
     if (venda.animalId) {
       setAnimalSelected({ id: venda.animalId, nome: venda.animal?.nome ?? "", especie: "" } as unknown as Animal);
