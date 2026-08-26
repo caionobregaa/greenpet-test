@@ -9,6 +9,8 @@ const QuerySchema = z.object({
   dataInicio: z.string().datetime().optional(),
   dataFim: z.string().datetime().optional(),
   categoria: z.string().optional(),
+  sortBy: z.enum(['categoria', 'quantidadeVendida', 'receitaTotal', 'percentualReceita', 'percentualAcumulado']).optional(),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(200).default(50),
 })
@@ -25,6 +27,8 @@ export function registerCurvaVendaRoutes(app: FastifyInstance, prisma: PrismaCli
       dataInicio: q.data.dataInicio ? new Date(q.data.dataInicio) : undefined,
       dataFim: q.data.dataFim ? new Date(q.data.dataFim) : undefined,
       categoria: q.data.categoria,
+      sortBy: q.data.sortBy,
+      sortOrder: q.data.sortOrder,
       page: q.data.page,
       limit: q.data.limit,
     })

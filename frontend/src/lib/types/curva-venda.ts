@@ -17,3 +17,12 @@ export interface CurvaVendaMeta {
   total: number;
   resumo: Record<CurvaClasse, number>;
 }
+
+export type CurvaVendaSortField =
+  | "categoria"
+  | "quantidadeVendida"
+  | "receitaTotal"
+  | "percentualReceita"
+  | "percentualAcumulado";
+
+export type SortOrder = "asc" | "desc";

@@ -1,10 +1,12 @@
 import { api } from "./client";
-import type { CurvaVendaItem, CurvaVendaMeta } from "@/lib/types/curva-venda";
+import type { CurvaVendaItem, CurvaVendaMeta, CurvaVendaSortField, SortOrder } from "@/lib/types/curva-venda";
 
 interface ListParams {
   dataInicio?: string;
   dataFim?: string;
   categoria?: string;
+  sortBy?: CurvaVendaSortField;
+  sortOrder?: SortOrder;
   page?: number;
   limit?: number;
 }

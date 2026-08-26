@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { useCurvaVenda } from "@/lib/hooks/use-curva-venda";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import { CurvaPill } from "@/components/curva-venda/curva-pill";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { PeriodFilter } from "@/components/dashboard/period-filter";
 import { formatBRL } from "@/lib/utils/format";
+import { cn } from "@/lib/utils/cn";
+import type { CurvaVendaSortField, SortOrder } from "@/lib/types/curva-venda";
 
 const CATEGORIAS = ["Ração", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"];
 
@@ -51,10 +53,52 @@ function formatPercent(value: number): string {
   return `${value.toFixed(1)}%`;
 }
 
+interface SortableThProps {
+  label: string;
+  field: CurvaVendaSortField;
+  sortBy: CurvaVendaSortField | undefined;
+  sortOrder: SortOrder;
+  onSort: (field: CurvaVendaSortField) => void;
+  align?: "left" | "right";
+  className?: string;
+}
+
+function SortableTh({ label, field, sortBy, sortOrder, onSort, align = "left", className }: SortableThProps) {
+  const active = sortBy === field;
+  const Icon = !active ? ArrowUpDown : sortOrder === "asc" ? ArrowUp : ArrowDown;
+
+  return (
+    <th
+      className={cn(
+        "px-4 py-3 font-semibold text-xs uppercase tracking-wide",
+        align === "right" ? "text-right" : "text-left",
+        className
+      )}
+    >
+      <button
+        type="button"
+        onClick={() => onSort(field)}
+        title={`Ordenar por ${label}`}
+        aria-label={`Ordenar por ${label}`}
+        className={cn(
+          "inline-flex items-center gap-1 hover:text-foreground transition-colors",
+          align === "right" && "flex-row-reverse",
+          active ? "text-foreground" : "text-muted-foreground"
+        )}
+      >
+        {label}
+        <Icon className="w-3 h-3" />
+      </button>
+    </th>
+  );
+}
+
 export default function CurvaVendaPage() {
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
   const [categoria, setCategoria] = useState("");
+  const [sortBy, setSortBy] = useState<CurvaVendaSortField | undefined>(undefined);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [page, setPage] = useState(1);
 
   const hasFilters = !!(dataInicio || dataFim || categoria);
@@ -66,10 +110,22 @@ export default function CurvaVendaPage() {
     setPage(1);
   }
 
+  function handleSort(field: CurvaVendaSortField) {
+    if (sortBy === field) {
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(field);
+      setSortOrder("desc");
+    }
+    setPage(1);
+  }
+
   const { data, isLoading, isError } = useCurvaVenda({
     dataInicio: dataInicio ? new Date(dataInicio).toISOString() : undefined,
     dataFim: dataFim ? new Date(dataFim).toISOString() : undefined,
     categoria: categoria || undefined,
+    sortBy,
+    sortOrder,
     page,
     limit: 20,
   });
@@ -130,11 +186,49 @@ export default function CurvaVendaPage() {
             <thead>
               <tr className="bg-muted/50">
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Produto</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden md:table-cell">Categoria</th>
-                <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden lg:table-cell">Qtd. Vendida</th>
-                <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Receita Total</th>
-                <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden lg:table-cell">% Receita</th>
-                <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden lg:table-cell">% Acumulado</th>
+                <SortableTh
+                  label="Categoria"
+                  field="categoria"
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSort={handleSort}
+                  className="hidden md:table-cell"
+                />
+                <SortableTh
+                  label="Qtd. Vendida"
+                  field="quantidadeVendida"
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSort={handleSort}
+                  align="right"
+                  className="hidden lg:table-cell"
+                />
+                <SortableTh
+                  label="Receita Total"
+                  field="receitaTotal"
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSort={handleSort}
+                  align="right"
+                />
+                <SortableTh
+                  label="% Receita"
+                  field="percentualReceita"
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSort={handleSort}
+                  align="right"
+                  className="hidden lg:table-cell"
+                />
+                <SortableTh
+                  label="% Acumulado"
+                  field="percentualAcumulado"
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSort={handleSort}
+                  align="right"
+                  className="hidden lg:table-cell"
+                />
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Curva</th>
               </tr>
             </thead>

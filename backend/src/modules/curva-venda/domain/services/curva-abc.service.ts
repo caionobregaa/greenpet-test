@@ -41,3 +41,43 @@ export function calcularCurvaAbc(itens: CurvaAbcInput[]): CurvaAbcItem[] {
     }
   })
 }
+
+/**
+ * Campos pelos quais a listagem (já classificada em A/B/C) pode ser reordenada
+ * para exibição. Não afeta o cálculo do % acumulado — isso é sempre feito por
+ * calcularCurvaAbc() com base na receita, antes de qualquer reordenação aqui.
+ */
+export type CurvaVendaSortField =
+  | 'categoria'
+  | 'quantidadeVendida'
+  | 'receitaTotal'
+  | 'percentualReceita'
+  | 'percentualAcumulado'
+
+export type SortOrder = 'asc' | 'desc'
+
+export interface Ordenavel {
+  categoria: string
+  quantidadeVendida: number
+  receitaTotal: number
+  percentualReceita: number
+  percentualAcumulado: number
+}
+
+export function ordenarCurvaVenda<T extends Ordenavel>(
+  itens: T[],
+  sortBy?: CurvaVendaSortField,
+  sortOrder: SortOrder = 'desc',
+): T[] {
+  if (!sortBy) return itens
+
+  const dir = sortOrder === 'asc' ? 1 : -1
+  return [...itens].sort((a, b) => {
+    const va = a[sortBy]
+    const vb = b[sortBy]
+    if (typeof va === 'string' && typeof vb === 'string') {
+      return va.localeCompare(vb, 'pt-BR') * dir
+    }
+    return ((va as number) - (vb as number)) * dir
+  })
+}

@@ -1,5 +1,11 @@
 import type { PrismaClient } from '@prisma/client'
-import { calcularCurvaAbc, type Curva } from '../../domain/services/curva-abc.service.js'
+import {
+  calcularCurvaAbc,
+  ordenarCurvaVenda,
+  type Curva,
+  type CurvaVendaSortField,
+  type SortOrder,
+} from '../../domain/services/curva-abc.service.js'
 
 export interface CurvaVendaProduto {
   produtoId: string
@@ -19,6 +25,8 @@ export class PrismaCurvaVendaRepository {
     dataInicio?: Date
     dataFim?: Date
     categoria?: string
+    sortBy?: CurvaVendaSortField
+    sortOrder?: SortOrder
     page: number
     limit: number
   }): Promise<{ produtos: CurvaVendaProduto[]; total: number; resumo: Record<Curva, number> }> {
@@ -79,8 +87,10 @@ export class PrismaCurvaVendaRepository {
     const resumo: Record<Curva, number> = { A: 0, B: 0, C: 0 }
     for (const item of resultado) resumo[item.curva]++
 
-    const total = resultado.length
-    const paginado = resultado.slice((params.page - 1) * params.limit, params.page * params.limit)
+    const ordenado = ordenarCurvaVenda(resultado, params.sortBy, params.sortOrder)
+
+    const total = ordenado.length
+    const paginado = ordenado.slice((params.page - 1) * params.limit, params.page * params.limit)
 
     return { produtos: paginado, total, resumo }
   }
