@@ -22,4 +22,9 @@ export interface DashboardKPIs {
     receita: number;
     vendas: number;
   }>;
+  comprasPorFornecedor: Array<{
+    fornecedor: string;
+    totalComprado: number;
+    compras: number;
+  }>;
 }
