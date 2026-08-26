@@ -10,6 +10,7 @@ import { PeriodFilter } from "@/components/dashboard/period-filter";
 import { ReceitaPorMesChart } from "@/components/dashboard/receita-por-mes-chart";
 import { TopClientesChart } from "@/components/dashboard/top-clientes-chart";
 import { TopProdutosChart } from "@/components/dashboard/top-produtos-chart";
+import { ComprasPorFornecedorChart } from "@/components/dashboard/compras-por-fornecedor-chart";
 import { formatBRL, todayISO } from "@/lib/utils/format";
 
 const MASK = "R$ ••••••";
@@ -100,10 +101,11 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Top Clientes + Top Produtos — side by side */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Top Clientes + Top Produtos + Compras por Distribuidora */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {isLoading ? (
           <>
+            <Skeleton className="h-64 rounded-xl" />
             <Skeleton className="h-64 rounded-xl" />
             <Skeleton className="h-64 rounded-xl" />
           </>
@@ -114,6 +116,9 @@ export default function DashboardPage() {
             </div>
             <div className={valoresVisiveis ? "" : "blur-sm select-none pointer-events-none"}>
               <TopProdutosChart produtos={data?.topProdutos ?? []} />
+            </div>
+            <div className={valoresVisiveis ? "" : "blur-sm select-none pointer-events-none"}>
+              <ComprasPorFornecedorChart fornecedores={data?.comprasPorFornecedor ?? []} />
             </div>
           </>
         )}

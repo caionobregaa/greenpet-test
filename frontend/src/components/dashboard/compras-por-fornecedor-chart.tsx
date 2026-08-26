@@ -11,18 +11,17 @@ import {
 } from "recharts";
 import { formatBRL } from "@/lib/utils/format";
 
-interface TopCliente {
-  clienteId: string;
-  nome: string;
-  totalGasto: number;
-  vendas: number;
+interface CompraPorFornecedor {
+  fornecedor: string;
+  totalComprado: number;
+  compras: number;
 }
 
-interface TopClientesChartProps {
-  clientes: TopCliente[];
+interface ComprasPorFornecedorChartProps {
+  fornecedores: CompraPorFornecedor[];
 }
 
-const COLORS = ["#1e5c30", "#2a7a44", "#3a9a58", "#5cbf7a", "#9adcaa"];
+const COLORS = ["#8a4a1c", "#b06424", "#d68638", "#e8ac6c", "#f2cfa3"];
 
 const STEP = 500;
 
@@ -33,21 +32,21 @@ function buildTicks(maxValue: number): number[] {
   return ticks;
 }
 
-export function TopClientesChart({ clientes }: TopClientesChartProps) {
-  const data = clientes.slice(0, 5).map((c) => ({
-    nome: c.nome.split(" ")[0],
-    nomeCompleto: c.nome,
-    totalGasto: c.totalGasto,
-    vendas: c.vendas,
+export function ComprasPorFornecedorChart({ fornecedores }: ComprasPorFornecedorChartProps) {
+  const data = fornecedores.slice(0, 5).map((f) => ({
+    nome: f.fornecedor.length > 12 ? f.fornecedor.slice(0, 12) + "…" : f.fornecedor,
+    nomeCompleto: f.fornecedor,
+    totalComprado: f.totalComprado,
+    compras: f.compras,
   }));
 
-  const maxValue = Math.max(0, ...data.map((d) => d.totalGasto));
+  const maxValue = Math.max(0, ...data.map((d) => d.totalComprado));
   const ticks = buildTicks(maxValue);
 
   return (
     <div className="bg-card rounded-lg border border-border/50 p-5 shadow-sm shadow-black/5">
       <h3 className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-widest mb-5">
-        Top Clientes
+        Compras por Distribuidora
       </h3>
       {data.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-8">Nenhum dado no período</p>
@@ -73,15 +72,15 @@ export function TopClientesChart({ clientes }: TopClientesChartProps) {
               tick={{ fontSize: 11, fill: "#6b6460" }}
               axisLine={false}
               tickLine={false}
-              width={64}
+              width={80}
             />
             <Tooltip
-              formatter={(value) => [formatBRL(Number(value ?? 0)), "Total gasto"]}
+              formatter={(value) => [formatBRL(Number(value ?? 0)), "Total comprado"]}
               labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? ""}
               labelStyle={{ color: "#1c1917", fontWeight: 600 }}
               contentStyle={{ borderColor: "#dbd5cc", borderRadius: 6, fontSize: 12, background: "#fefcf8" }}
             />
-            <Bar dataKey="totalGasto" radius={[0, 4, 4, 0]} maxBarSize={24}>
+            <Bar dataKey="totalComprado" radius={[0, 4, 4, 0]} maxBarSize={24}>
               {data.map((_, i) => (
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}

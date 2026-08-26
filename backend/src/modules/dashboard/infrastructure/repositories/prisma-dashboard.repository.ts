@@ -10,6 +10,7 @@ export interface DashboardKPIs {
   topClientes: Array<{ clienteId: string; nome: string; totalGasto: number; vendas: number }>
   topProdutos: Array<{ produtoId: string; nome: string; totalVendido: number; quantidade: number }>
   receitaPorMes: Array<{ mes: string; receita: number; vendas: number }>
+  comprasPorFornecedor: Array<{ fornecedor: string; totalComprado: number; compras: number }>
 }
 
 export class PrismaDashboardRepository {
@@ -100,6 +101,25 @@ export class PrismaDashboardRepository {
     })
     const totalCustoAquisicao = Number(custoAggregate._sum.total ?? 0)
 
+    // Compras por fornecedor/distribuidora (mesmo filtro de período/status do custo de aquisição)
+    const fornecedorGroups = await this.prisma.compra.groupBy({
+      by: ['fornecedor'],
+      where: {
+        dataPedido: { gte: inicio, lte: fim },
+        status: { not: 'cancelado' },
+      },
+      _sum: { total: true },
+      _count: { id: true },
+      orderBy: { _sum: { total: 'desc' } },
+      take: 10,
+    })
+
+    const comprasPorFornecedor = fornecedorGroups.map((g) => ({
+      fornecedor: g.fornecedor,
+      totalComprado: Number(g._sum.total ?? 0),
+      compras: g._count.id,
+    }))
+
     // Monthly breakdown
     const vendas = await this.prisma.venda.findMany({
       where: { data: { gte: inicio, lte: fim } },
@@ -134,6 +154,7 @@ export class PrismaDashboardRepository {
       topClientes,
       topProdutos,
       receitaPorMes,
+      comprasPorFornecedor,
     }
   }
 }
