@@ -88,9 +88,11 @@ export default function VendaDetailPage({ params }: Props) {
           itemAnimalId: item.itemAnimalId ?? undefined,
           consumoDiario: cd && cd >= 1 ? cd : undefined,
           recompraData: edit?.recompraData || undefined,
+          brinde: item.brinde ?? false,
         };
       });
       await updateVenda.mutateAsync({ id, input: { itens } });
+      setInitialized(false);
       toast.success("Recompra salva! O alerta aparecerá na aba de Recompra.");
     } catch {
       toast.error("Erro ao salvar recompra.");

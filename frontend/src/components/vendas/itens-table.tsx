@@ -236,6 +236,7 @@ function SortableItemRow({
   const showConsumoSection = isRacao || isMedSupl || (consumoDiarioVal !== undefined);
   const recompraDataVal = item.recompraData ?? null;
   const isBrinde = !!item.brinde;
+  const originalValorUnitario = useRef<number | null>(null);
 
   return (
     <div
@@ -354,20 +355,27 @@ function SortableItemRow({
             </div>
           </div>
 
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             title={isBrinde ? "Remover brinde" : "Marcar como brinde (custo mantido, sem cobrança)"}
             onClick={() => {
-              setValue(`itens.${index}.brinde` as never, !isBrinde as never);
-              if (!isBrinde) {
+              const nextBrinde = !isBrinde;
+              setValue(`itens.${index}.brinde` as never, nextBrinde as never);
+              if (nextBrinde) {
+                originalValorUnitario.current = item.valorUnitario;
                 setValue(`itens.${index}.valorUnitario` as never, 0 as never);
                 setValue(`itens.${index}.desconto` as never, 0 as never);
+              } else if (originalValorUnitario.current !== null) {
+                setValue(`itens.${index}.valorUnitario` as never, originalValorUnitario.current as never);
+                originalValorUnitario.current = null;
               }
             }}
-            className={`h-9 w-9 flex items-center justify-center rounded-md transition-colors shrink-0 ${isBrinde ? "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" : "text-muted-foreground/40 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20"}`}
+            className={`h-9 w-9 p-0 shrink-0 ${isBrinde ? "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-200 hover:text-amber-700" : "text-muted-foreground/40 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20"}`}
           >
             <Gift className="w-3.5 h-3.5" />
-          </button>
+          </Button>
           <Button type="button" variant="ghost" className="h-9 w-9 p-0 text-destructive/50 hover:text-destructive hover:bg-destructive/10 shrink-0" onClick={onRemove}>
             <Trash2 className="w-3.5 h-3.5" />
           </Button>
