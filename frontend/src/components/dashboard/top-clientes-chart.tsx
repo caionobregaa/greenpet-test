@@ -34,7 +34,7 @@ export function TopClientesChart({ clientes }: TopClientesChartProps) {
   }));
 
   const maxValue = Math.max(0, ...data.map((d) => d.totalGasto));
-  const ticks = buildTicksStep(maxValue, 500);
+  const ticks = buildTicksStep(maxValue, 100);
 
   return (
     <div className="bg-card rounded-lg border border-border/50 p-5 shadow-sm shadow-black/5">

@@ -48,10 +48,11 @@ export function TopProdutosChart({ produtos }: TopProdutosChartProps) {
           >
             <XAxis
               type="number"
+              allowDecimals={false}
               tick={{ fontSize: 10, fill: "#6b6460" }}
               axisLine={false}
               tickLine={false}
-              tickFormatter={(v) => `${v}`}
+              tickFormatter={(v) => `${Math.round(v)}`}
             />
             <YAxis
               type="category"
