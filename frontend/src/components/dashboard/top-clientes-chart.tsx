@@ -10,6 +10,7 @@ import {
   Cell,
 } from "recharts";
 import { formatBRL } from "@/lib/utils/format";
+import { buildTicksStep } from "@/lib/utils/chart-ticks";
 
 interface TopCliente {
   clienteId: string;
@@ -24,15 +25,6 @@ interface TopClientesChartProps {
 
 const COLORS = ["#1e5c30", "#2a7a44", "#3a9a58", "#5cbf7a", "#9adcaa"];
 
-const STEP = 500;
-
-function buildTicks(maxValue: number): number[] {
-  const top = Math.max(STEP, Math.ceil(maxValue / STEP) * STEP);
-  const ticks: number[] = [];
-  for (let t = 0; t <= top; t += STEP) ticks.push(t);
-  return ticks;
-}
-
 export function TopClientesChart({ clientes }: TopClientesChartProps) {
   const data = clientes.slice(0, 5).map((c) => ({
     nome: c.nome.split(" ")[0],
@@ -42,7 +34,7 @@ export function TopClientesChart({ clientes }: TopClientesChartProps) {
   }));
 
   const maxValue = Math.max(0, ...data.map((d) => d.totalGasto));
-  const ticks = buildTicks(maxValue);
+  const ticks = buildTicksStep(maxValue, 500);
 
   return (
     <div className="bg-card rounded-lg border border-border/50 p-5 shadow-sm shadow-black/5">

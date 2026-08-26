@@ -10,6 +10,7 @@ import {
   Cell,
 } from "recharts";
 import { formatBRL } from "@/lib/utils/format";
+import { buildTicksStep } from "@/lib/utils/chart-ticks";
 
 interface CompraPorFornecedor {
   fornecedor: string;
@@ -23,15 +24,6 @@ interface ComprasPorFornecedorChartProps {
 
 const COLORS = ["#8a4a1c", "#b06424", "#d68638", "#e8ac6c", "#f2cfa3"];
 
-const STEP = 500;
-
-function buildTicks(maxValue: number): number[] {
-  const top = Math.max(STEP, Math.ceil(maxValue / STEP) * STEP);
-  const ticks: number[] = [];
-  for (let t = 0; t <= top; t += STEP) ticks.push(t);
-  return ticks;
-}
-
 export function ComprasPorFornecedorChart({ fornecedores }: ComprasPorFornecedorChartProps) {
   const data = fornecedores.slice(0, 5).map((f) => ({
     nome: f.fornecedor.length > 12 ? f.fornecedor.slice(0, 12) + "…" : f.fornecedor,
@@ -41,7 +33,7 @@ export function ComprasPorFornecedorChart({ fornecedores }: ComprasPorFornecedor
   }));
 
   const maxValue = Math.max(0, ...data.map((d) => d.totalComprado));
-  const ticks = buildTicks(maxValue);
+  const ticks = buildTicksStep(maxValue, 500);
 
   return (
     <div className="bg-card rounded-lg border border-border/50 p-5 shadow-sm shadow-black/5">
