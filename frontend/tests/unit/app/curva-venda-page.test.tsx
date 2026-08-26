@@ -1,0 +1,76 @@
+import { describe, it, expect, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import CurvaVendaPage from "@/app/(app)/curva-venda/page";
+import { useCurvaVenda } from "@/lib/hooks/use-curva-venda";
+
+vi.mock("@/lib/hooks/use-curva-venda", () => ({
+  useCurvaVenda: vi.fn(),
+}));
+
+const mockedUseCurvaVenda = vi.mocked(useCurvaVenda);
+
+describe("CurvaVendaPage", () => {
+  it("mostra os KPIs e as linhas da tabela quando os dados carregam", () => {
+    mockedUseCurvaVenda.mockReturnValue({
+      data: {
+        data: [
+          {
+            produtoId: "p1",
+            produtoNome: "Royal Canin Mini Adult 2,5kg",
+            categoria: "Ração",
+            quantidadeVendida: 120,
+            receitaTotal: 15000,
+            percentualReceita: 60,
+            percentualAcumulado: 60,
+            curva: "A",
+          },
+          {
+            produtoId: "p2",
+            produtoNome: "Petisco X",
+            categoria: "Petisco",
+            quantidadeVendida: 40,
+            receitaTotal: 5000,
+            percentualReceita: 20,
+            percentualAcumulado: 80,
+            curva: "A",
+          },
+        ],
+        meta: { page: 1, limit: 20, total: 2, resumo: { A: 2, B: 0, C: 0 } },
+      },
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useCurvaVenda>);
+
+    render(<CurvaVendaPage />);
+
+    expect(screen.getByText("Curva de Venda")).toBeInTheDocument();
+    expect(screen.getByText("Royal Canin Mini Adult 2,5kg")).toBeInTheDocument();
+    expect(screen.getByText("Petisco X")).toBeInTheDocument();
+    // 2 produtos, ambos classe A -> KpiCard "Curva A" mostra 2
+    expect(screen.getByText("Total de Produtos")).toBeInTheDocument();
+  });
+
+  it("mostra o estado vazio quando não há produtos no período/categoria", () => {
+    mockedUseCurvaVenda.mockReturnValue({
+      data: { data: [], meta: { page: 1, limit: 20, total: 0, resumo: { A: 0, B: 0, C: 0 } } },
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useCurvaVenda>);
+
+    render(<CurvaVendaPage />);
+
+    expect(screen.getByText("Nenhum produto encontrado")).toBeInTheDocument();
+  });
+
+  it("mostra o estado de erro quando a requisição falha", () => {
+    mockedUseCurvaVenda.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    } as unknown as ReturnType<typeof useCurvaVenda>);
+
+    render(<CurvaVendaPage />);
+
+    expect(screen.getByText("Erro ao carregar a curva de venda")).toBeInTheDocument();
+  });
+});
