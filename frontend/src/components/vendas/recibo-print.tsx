@@ -14,8 +14,19 @@ interface ReciboPrintProps {
   className?: string;
 }
 
+/** Monta "Rua X, 123 - Bairro - Cidade" a partir do cadastro do cliente,
+ * pulando qualquer parte vazia. Retorna null se não há nada preenchido. */
+function formatEndereco(cliente?: ClienteDetail): string | null {
+  if (!cliente) return null;
+  const partes = [cliente.endereco, cliente.bairro, cliente.cidade]
+    .map((p) => p?.trim())
+    .filter((p): p is string => !!p);
+  return partes.length > 0 ? partes.join(" - ") : null;
+}
+
 export function ReciboPrint({ venda, clienteDetail, className }: ReciboPrintProps) {
   const subtotal = venda.itens.reduce((s, i) => s + i.total, 0);
+  const endereco = formatEndereco(clienteDetail);
   const descontoRecompra = venda.desconto ?? 0;
   const clienteElegivelRecompra = descontoRecompra > 0;
   const quantidadeComprasAnteriores = clienteDetail
@@ -36,6 +47,7 @@ export function ReciboPrint({ venda, clienteDetail, className }: ReciboPrintProp
       <div className="border-t border-dashed border-black my-1" />
 
       <p>Cliente: {venda.cliente?.nome ?? "—"}</p>
+      {endereco && <p className="break-words">Endereço: {endereco}</p>}
       {venda.animal?.nome && <p>Pet: {venda.animal.nome}</p>}
       <p>Data: {formatDate(venda.data)}</p>
       <p>Venda: {numeroVenda}</p>

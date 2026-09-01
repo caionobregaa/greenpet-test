@@ -92,4 +92,46 @@ describe("ReciboPrint", () => {
     expect(descricao.className).not.toMatch(/\btruncate\b/);
     expect(descricao.className).toMatch(/break-words/);
   });
+
+  it("mostra o endereço completo do cliente quando os dados vêm do cadastro", () => {
+    const clienteDetail = {
+      endereco: "Rua das Flores, 123",
+      bairro: "Centro",
+      cidade: "Manaus",
+      vendas: [],
+    } as unknown as ClienteDetail;
+
+    render(<ReciboPrint venda={buildVenda()} clienteDetail={clienteDetail} />);
+
+    expect(screen.getByText("Endereço: Rua das Flores, 123 - Centro - Manaus")).toBeInTheDocument();
+  });
+
+  it("monta o endereço só com as partes preenchidas, ignorando campos vazios", () => {
+    const clienteDetail = {
+      endereco: null,
+      bairro: "Centro",
+      cidade: "Manaus",
+      vendas: [],
+    } as unknown as ClienteDetail;
+
+    render(<ReciboPrint venda={buildVenda()} clienteDetail={clienteDetail} />);
+
+    expect(screen.getByText("Endereço: Centro - Manaus")).toBeInTheDocument();
+  });
+
+  it("não mostra a linha de endereço quando clienteDetail não foi carregado", () => {
+    render(<ReciboPrint venda={buildVenda()} />);
+    expect(screen.queryByText(/Endereço:/)).not.toBeInTheDocument();
+  });
+
+  it("não mostra a linha de endereço quando o cadastro do cliente está sem endereço/bairro/cidade", () => {
+    const clienteDetail = {
+      endereco: null,
+      bairro: null,
+      cidade: null,
+      vendas: [],
+    } as unknown as ClienteDetail;
+    render(<ReciboPrint venda={buildVenda()} clienteDetail={clienteDetail} />);
+    expect(screen.queryByText(/Endereço:/)).not.toBeInTheDocument();
+  });
 });
