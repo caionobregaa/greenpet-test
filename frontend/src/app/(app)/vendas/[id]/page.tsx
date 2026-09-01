@@ -2,14 +2,16 @@
 
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Trash2, Pencil, CalendarDays, Timer, ChevronDown, ChevronUp, Save } from "lucide-react";
+import { ArrowLeft, Trash2, Pencil, CalendarDays, Timer, ChevronDown, ChevronUp, Save, Printer } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useVenda, useDeleteVenda, useUpdateVenda } from "@/lib/hooks/use-vendas";
+import { useCliente } from "@/lib/hooks/use-clientes";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { ReciboPrint } from "@/components/vendas/recibo-print";
 import { formatDate, formatBRL } from "@/lib/utils/format";
 
 interface Props {
@@ -36,6 +38,7 @@ export default function VendaDetailPage({ params }: Props) {
   const [initialized, setInitialized] = useState(false);
 
   const { data: venda, isLoading } = useVenda(id);
+  const { data: clienteDetail } = useCliente(venda?.clienteId ?? "");
   const deleteVenda = useDeleteVenda();
   const updateVenda = useUpdateVenda();
 
@@ -115,7 +118,8 @@ export default function VendaDetailPage({ params }: Props) {
   if (!venda) return <p className="text-muted-foreground">Venda não encontrada.</p>;
 
   return (
-    <div>
+    <>
+    <div className="print:hidden">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => router.back()}>
@@ -127,6 +131,10 @@ export default function VendaDetailPage({ params }: Props) {
           </h1>
           <p className="text-sm text-muted-foreground">{formatDate(venda.data)}</p>
         </div>
+        <Button variant="outline" size="sm" onClick={() => window.print()}>
+          <Printer className="w-3.5 h-3.5 mr-1.5" />
+          Imprimir Recibo
+        </Button>
         <Link href={`/vendas/${id}/editar`} className={buttonVariants({ variant: "outline", size: "sm" })}>
           <Pencil className="w-3.5 h-3.5 mr-1.5" />
           Editar
@@ -309,5 +317,8 @@ export default function VendaDetailPage({ params }: Props) {
         loading={deleteVenda.isPending}
       />
     </div>
+
+    <ReciboPrint venda={venda} clienteDetail={clienteDetail} className="hidden print:block" />
+    </>
   );
 }
