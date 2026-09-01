@@ -42,11 +42,11 @@ export function ReciboPrint({ venda, clienteDetail, className }: ReciboPrintProp
 
       <div className="border-t border-dashed border-black my-1" />
 
-      <div className="space-y-0.5">
+      <div className="space-y-1">
         {venda.itens.map((item) => (
           <div key={item.id} className="flex justify-between gap-2">
-            <span className="truncate">{item.qtd}x {item.nome}</span>
-            <span className="shrink-0">{formatBRL(item.total)}</span>
+            <span className="flex-1 min-w-0 break-words">{item.qtd}x {item.nome}</span>
+            <span className="shrink-0 text-right">{formatBRL(item.total)}</span>
           </div>
         ))}
       </div>

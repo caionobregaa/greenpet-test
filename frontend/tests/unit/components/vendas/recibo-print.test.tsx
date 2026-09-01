@@ -76,4 +76,20 @@ describe("ReciboPrint", () => {
     render(<ReciboPrint venda={venda} />);
     expect(screen.queryByText(/FRETE GRÁTIS/)).not.toBeInTheDocument();
   });
+
+  it("exibe a descrição completa do produto, mesmo quando o nome é longo (quebra de linha, sem cortar)", () => {
+    const nomeLongo = "Ração Fórmula Natural Vet Life Hipoalergênica Cão Adulto Porte Mini 10,1kg";
+    const venda = buildVenda({
+      itens: [
+        { id: "item-1", produtoId: "p1", nome: nomeLongo, qtd: 2, valorUnitario: 300, desconto: 0, total: 600 },
+      ],
+    });
+    render(<ReciboPrint venda={venda} />);
+
+    const descricao = screen.getByText(new RegExp(nomeLongo.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    expect(descricao).toBeInTheDocument();
+    // Não pode usar truncate (corta com "...") — precisa quebrar linha normalmente.
+    expect(descricao.className).not.toMatch(/\btruncate\b/);
+    expect(descricao.className).toMatch(/break-words/);
+  });
 });
