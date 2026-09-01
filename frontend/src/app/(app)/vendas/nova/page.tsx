@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +25,10 @@ import { todayISO, formatBRL, formatTelefone } from "@/lib/utils/format";
 import { cn } from "@/lib/utils";
 
 // ── Payment options ──────────────────────────────────────────────────────────
+
+// Regra oficial de precificação (ago/2026): desconto de recompra é sempre 5%
+// sobre o subtotal dos itens, independente da forma de pagamento.
+const DESCONTO_RECOMPRA_PCT = 0.05;
 
 const TAXAS = {
   "link-1x":        { label: "Link de Pagamento 1x",          pct: 4.20 },
@@ -231,6 +235,9 @@ export default function NovaVendaPage() {
   const [cobrarEntrega, setCobrarEntrega] = useState(false);
   const [valorEntrega, setValorEntrega] = useState(0);
 
+  // Recompra discount — 5% sobre o subtotal quando o cliente já comprou antes
+  const [clienteRecompra, setClienteRecompra] = useState(false);
+
   // Quick client registration
   const [showQuickCliente, setShowQuickCliente] = useState(false);
   const [quickNome, setQuickNome] = useState("");
@@ -252,10 +259,19 @@ export default function NovaVendaPage() {
   const selectedOpcao = OPCOES_PAG.find((o) => o.value === formaPagKey);
   const taxaPct = selectedOpcao?.taxaKey ? TAXAS[selectedOpcao.taxaKey].pct : 0;
   const entrega = cobrarEntrega ? (valorEntrega || 0) : 0;
+  const descontoRecompra = !orcamentoSelecionado && clienteRecompra
+    ? Math.round(formTotal * DESCONTO_RECOMPRA_PCT * 100) / 100
+    : 0;
   const totalBruto = orcamentoSelecionado
     ? Math.max(0, orcamentoSelecionado.total + entrega)
-    : Math.max(0, formTotal + entrega);
+    : Math.max(0, formTotal - descontoRecompra + entrega);
   const lucroLiquido = totalBruto * (1 - taxaPct / 100);
+
+  // Mantém o campo "desconto" do formulário (já suportado pelo backend) em
+  // sincronia com o desconto de recompra calculado acima.
+  useEffect(() => {
+    setValue("desconto", descontoRecompra);
+  }, [descontoRecompra, setValue]);
 
   async function handleQuickCliente(fieldOnChange: (v: string) => void) {
     const nome = quickNome.trim();
@@ -499,6 +515,12 @@ export default function NovaVendaPage() {
               <span className="font-mono font-semibold">
                 {formatBRL(orcamentoSelecionado ? orcamentoSelecionado.total : formTotal)}
               </span>
+              {descontoRecompra > 0 && (
+                <>
+                  <span className="text-muted-foreground">− recompra (5%):</span>
+                  <span className="font-mono font-semibold text-destructive">−{formatBRL(descontoRecompra)}</span>
+                </>
+              )}
               {entrega > 0 && (
                 <>
                   <span className="text-muted-foreground">+ entrega:</span>
@@ -723,6 +745,18 @@ export default function NovaVendaPage() {
                       </div>
                     )}
                   />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-sm">
+                    <input
+                      type="checkbox"
+                      checked={clienteRecompra}
+                      onChange={(e) => setClienteRecompra(e.target.checked)}
+                      className="w-4 h-4 rounded border-input accent-primary"
+                    />
+                    Cliente já comprou antes (aplicar desconto de recompra 5%)
+                  </label>
                 </div>
 
                 <div className="space-y-1.5 sm:col-span-2">
