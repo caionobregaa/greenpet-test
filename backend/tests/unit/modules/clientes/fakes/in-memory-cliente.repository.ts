@@ -1,16 +1,24 @@
 import type { IClienteRepository } from '@/modules/clientes/domain/repositories/cliente.repository.interface'
 import { Cliente } from '@/modules/clientes/domain/entities/cliente.entity'
 import type { Animal } from '@/modules/animais/domain/entities/animal.entity'
+import type { Venda } from '@/modules/vendas/domain/entities/venda.entity'
 
 export class InMemoryClienteRepository implements IClienteRepository {
   public items: Cliente[] = []
   public simulateActiveSales = false
   /** Quando definido, numeroDeAnimais é computado dinamicamente a partir desta lista. */
   public animalItems?: Animal[]
+  /** Quando definido, numeroDeVendas é computado dinamicamente a partir desta lista. */
+  public vendaItems?: Venda[]
 
   private withCount(c: Cliente): Cliente {
-    if (!this.animalItems) return c
-    const count = this.animalItems.filter((a) => a.clienteId === c.id && a.isActive).length
+    if (!this.animalItems && !this.vendaItems) return c
+    const animaisCount = this.animalItems
+      ? this.animalItems.filter((a) => a.clienteId === c.id && a.isActive).length
+      : c.numeroDeAnimais
+    const vendasCount = this.vendaItems
+      ? this.vendaItems.filter((v) => v.clienteId === c.id).length
+      : c.numeroDeVendas
     return Cliente.create({
       id: c.id,
       nome: c.nome,
@@ -22,7 +30,8 @@ export class InMemoryClienteRepository implements IClienteRepository {
       cidade: c.cidade,
       obs: c.obs,
       deletedAt: c.deletedAt,
-      numeroDeAnimais: count,
+      numeroDeAnimais: animaisCount,
+      numeroDeVendas: vendasCount,
     })
   }
 

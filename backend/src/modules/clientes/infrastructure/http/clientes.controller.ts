@@ -26,6 +26,7 @@ function toResponse(c: Cliente) {
     cidade: c.cidade,
     obs: c.obs,
     numeroDeAnimais: c.numeroDeAnimais,
+    numeroDeVendas: c.numeroDeVendas,
     createdAt: c.createdAt,
     updatedAt: c.updatedAt,
   }

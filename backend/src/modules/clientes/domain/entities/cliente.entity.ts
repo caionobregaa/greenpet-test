@@ -15,6 +15,7 @@ interface ClienteProps {
   obs?: string
   deletedAt?: Date
   numeroDeAnimais?: number
+  numeroDeVendas?: number
 }
 
 export class Cliente extends AggregateRoot<ClienteProps> {
@@ -30,6 +31,7 @@ export class Cliente extends AggregateRoot<ClienteProps> {
     obs?: string
     deletedAt?: Date
     numeroDeAnimais?: number
+  numeroDeVendas?: number
   }): Cliente {
     if (!data.nome || data.nome.trim().length < 3) {
       throw new ValidationError('VALIDATION_ERROR', 'Nome deve ter ao menos 3 caracteres')
@@ -46,6 +48,7 @@ export class Cliente extends AggregateRoot<ClienteProps> {
         obs: data.obs,
         deletedAt: data.deletedAt,
         numeroDeAnimais: data.numeroDeAnimais,
+        numeroDeVendas: data.numeroDeVendas,
       },
       data.id,
     )
@@ -64,6 +67,7 @@ export class Cliente extends AggregateRoot<ClienteProps> {
     obs?: string
     deletedAt?: Date
     numeroDeAnimais?: number
+  numeroDeVendas?: number
   }): Cliente {
     return new Cliente(
       {
@@ -77,6 +81,7 @@ export class Cliente extends AggregateRoot<ClienteProps> {
         obs: data.obs,
         deletedAt: data.deletedAt,
         numeroDeAnimais: data.numeroDeAnimais,
+        numeroDeVendas: data.numeroDeVendas,
       },
       data.id,
     )
@@ -93,6 +98,8 @@ export class Cliente extends AggregateRoot<ClienteProps> {
   get deletedAt(): Date | undefined { return this.props.deletedAt }
   get isActive(): boolean { return !this.props.deletedAt }
   get numeroDeAnimais(): number { return this.props.numeroDeAnimais ?? 0 }
+  /** Quantidade de vendas finalizadas associadas a este cliente (histórico de vendas). */
+  get numeroDeVendas(): number { return this.props.numeroDeVendas ?? 0 }
 
   update(fields: {
     nome?: string

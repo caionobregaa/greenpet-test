@@ -81,6 +81,7 @@ export default function ClientesPage() {
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden md:table-cell">E-mail</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden lg:table-cell">Cidade</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden xl:table-cell">Animais</th>
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden xl:table-cell">Vendas</th>
                 <th className="px-4 py-3 w-28"></th>
               </tr>
             </thead>
@@ -88,7 +89,7 @@ export default function ClientesPage() {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="border-t border-border">
-                    {Array.from({ length: 6 }).map((_, j) => (
+                    {Array.from({ length: 7 }).map((_, j) => (
                       <td key={j} className="px-4 py-3">
                         <Skeleton className="h-4 w-full rounded" />
                       </td>
@@ -97,7 +98,7 @@ export default function ClientesPage() {
                 ))
               ) : data?.data.length === 0 ? (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={7}>
                     <EmptyState message="Nenhum cliente encontrado" />
                   </td>
                 </tr>
@@ -110,6 +111,9 @@ export default function ClientesPage() {
                     <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{c.cidade}</td>
                     <td className="px-4 py-3 text-muted-foreground hidden xl:table-cell">
                       {c.numeroDeAnimais > 0 ? `${c.numeroDeAnimais} ${c.numeroDeAnimais === 1 ? "animal" : "animais"}` : "—"}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground hidden xl:table-cell">
+                      {c.numeroDeVendas > 0 ? `${c.numeroDeVendas} ${c.numeroDeVendas === 1 ? "venda" : "vendas"}` : "—"}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">

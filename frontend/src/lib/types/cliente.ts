@@ -9,6 +9,7 @@ export interface Cliente {
   cidade: string;
   obs: string | null;
   numeroDeAnimais: number;
+  numeroDeVendas: number;
   deletedAt: string | null;
   createdAt: string;
   updatedAt: string;

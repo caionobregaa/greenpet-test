@@ -8,7 +8,7 @@ export class PrismaClienteRepository implements IClienteRepository {
   async findById(id: string): Promise<Cliente | null> {
     const row = await this.prisma.cliente.findFirst({
       where: { id, deletedAt: null },
-      include: { _count: { select: { animais: { where: { deletedAt: null } } } } },
+      include: { _count: { select: { animais: { where: { deletedAt: null } }, vendas: true } } },
     })
     return row ? this.toDomain(row) : null
   }
@@ -37,7 +37,7 @@ export class PrismaClienteRepository implements IClienteRepository {
         skip: (params.page - 1) * params.limit,
         take: params.limit,
         orderBy: { nome: 'asc' },
-        include: { _count: { select: { animais: { where: { deletedAt: null } } } } },
+        include: { _count: { select: { animais: { where: { deletedAt: null } }, vendas: true } } },
       }),
       this.prisma.cliente.count({ where }),
     ])
@@ -84,7 +84,7 @@ export class PrismaClienteRepository implements IClienteRepository {
     cidade: string
     obs: string | null
     deletedAt: Date | null
-    _count?: { animais: number }
+    _count?: { animais: number; vendas: number }
   }): Cliente {
     return Cliente.fromPersistence({
       id: row.id,
@@ -98,6 +98,7 @@ export class PrismaClienteRepository implements IClienteRepository {
       obs: row.obs ?? undefined,
       deletedAt: row.deletedAt ?? undefined,
       numeroDeAnimais: row._count?.animais ?? 0,
+      numeroDeVendas: row._count?.vendas ?? 0,
     })
   }
 }

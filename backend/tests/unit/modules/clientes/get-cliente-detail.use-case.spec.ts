@@ -142,4 +142,46 @@ describe('GetClienteDetailUseCase', () => {
     expect(depois.animais).toHaveLength(0)
     expect(depois.cliente.numeroDeAnimais).toBe(0)
   })
+
+  it('numeroDeVendas conta as vendas finalizadas do cliente no histórico de vendas', async () => {
+    clienteRepo.vendaItems = vendaRepo.items
+
+    const cliente = Cliente.create({ nome: 'Madalena', telefone: '(92) 9 9999-1111' })
+    await clienteRepo.save(cliente)
+
+    const semVendas = await useCase.execute({ id: cliente.id })
+    expect(semVendas.cliente.numeroDeVendas).toBe(0)
+
+    await vendaRepo.save(Venda.create({
+      clienteId: cliente.id,
+      formaPag: 'Pix',
+      itens: [{ nome: 'Ração', qtd: 1, valorUnitario: 100 }],
+    }))
+    await vendaRepo.save(Venda.create({
+      clienteId: cliente.id,
+      formaPag: 'Dinheiro',
+      itens: [{ nome: 'Petisco', qtd: 2, valorUnitario: 20 }],
+    }))
+
+    const comDuasVendas = await useCase.execute({ id: cliente.id })
+    expect(comDuasVendas.cliente.numeroDeVendas).toBe(2)
+  })
+
+  it('não contabiliza vendas de outros clientes em numeroDeVendas', async () => {
+    clienteRepo.vendaItems = vendaRepo.items
+
+    const c1 = Cliente.create({ nome: 'Cliente Um', telefone: '(92) 9 1111-2222' })
+    const c2 = Cliente.create({ nome: 'Cliente Dois', telefone: '(92) 9 3333-4444' })
+    await clienteRepo.save(c1)
+    await clienteRepo.save(c2)
+
+    await vendaRepo.save(Venda.create({
+      clienteId: c2.id,
+      formaPag: 'Pix',
+      itens: [{ nome: 'Ração', qtd: 1, valorUnitario: 100 }],
+    }))
+
+    const result = await useCase.execute({ id: c1.id })
+    expect(result.cliente.numeroDeVendas).toBe(0)
+  })
 })
