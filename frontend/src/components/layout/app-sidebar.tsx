@@ -17,6 +17,7 @@ import {
   Receipt,
   Bell,
   TrendingUp,
+  Gauge,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -32,6 +33,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/avisos", label: "Avisos", icon: Bell },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/curva-venda", label: "Curva de Venda", icon: TrendingUp },
+  { href: "/bi", label: "BI", icon: Gauge },
   { href: "/clientes", label: "Clientes", icon: Users },
   { href: "/animais", label: "Animais", icon: PawPrint },
   { href: "/produtos", label: "Produtos", icon: Package },

@@ -1,7 +1,15 @@
+export interface ComparativoItem {
+  atual: number;
+  anterior: number;
+  variacaoPercentual: number | null;
+}
+
 export interface DashboardKPIs {
   periodo: { inicio: string; fim: string };
   totalReceita: number;
   totalLucroLiquido: number;
+  totalTaxasCartao: number;
+  totalLucroLiquidoReal: number;
   totalVendas: number;
   ticketMedio: number;
   totalCustoAquisicao: number;
@@ -27,4 +35,22 @@ export interface DashboardKPIs {
     totalComprado: number;
     compras: number;
   }>;
+  vendasPorFormaPagamento: Array<{
+    formaPag: string;
+    total: number;
+    vendas: number;
+  }>;
+  despesasPorCategoria: Array<{
+    categoria: string;
+    total: number;
+    compras: number;
+  }>;
+  curvaResumo: { A: number; B: number; C: number };
+  comparativoPeriodoAnterior: {
+    totalReceita: ComparativoItem;
+    totalLucroLiquidoReal: ComparativoItem;
+    totalVendas: ComparativoItem;
+    ticketMedio: ComparativoItem;
+    totalCustoAquisicao: ComparativoItem;
+  };
 }
