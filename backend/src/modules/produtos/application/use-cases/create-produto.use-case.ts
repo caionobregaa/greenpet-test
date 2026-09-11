@@ -18,6 +18,7 @@ export interface CreateProdutoInput {
   margemOperacao?: number
   margemLucro?: number
   diasRecompra?: number
+  estoqueMinimo?: number
   descricao?: string
   imagemUrl?: string | null
 }

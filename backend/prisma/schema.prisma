@@ -101,6 +101,7 @@ model Produto {
   margemOperacao Decimal       @default(0) @db.Decimal(5, 2)
   margemLucro    Decimal       @default(0) @db.Decimal(5, 2)
   diasRecompra   Int?
+  estoqueMinimo  Int?
   descricao      String?
   imagemUrl      String?
   deletedAt      DateTime?

@@ -35,6 +35,7 @@ function toResponse(p: Produto, estoque = 0) {
     margemOperacao: p.margemOperacao,
     margemLucro: p.margemLucro,
     diasRecompra: p.diasRecompra,
+    estoqueMinimo: p.estoqueMinimo ?? null,
     descricao: p.descricao,
     imagemUrl: p.imagemUrl ?? null,
     estoque,

@@ -42,6 +42,8 @@ import { registerEstoqueRoutes } from './modules/estoque/infrastructure/http/est
 import { registerRecompraRoutes } from './modules/recompra/infrastructure/http/recompra.routes.js'
 import { registerCurvaVendaRoutes } from './modules/curva-venda/infrastructure/http/curva-venda.routes.js'
 import { registerDashboardRoutes } from './modules/dashboard/infrastructure/http/dashboard.routes.js'
+import { registerDashboardOperacionalRoutes } from './modules/dashboard-operacional/infrastructure/http/dashboard-operacional.routes.js'
+import { registerBiAvancadoRoutes } from './modules/bi-avancado/infrastructure/http/bi-avancado.routes.js'
 import { registerLembretesRoutes } from './modules/lembretes/infrastructure/http/lembretes.routes.js'
 
 async function bootstrap(): Promise<void> {
@@ -89,6 +91,8 @@ async function bootstrap(): Promise<void> {
   registerRecompraRoutes(app, prisma)
   registerCurvaVendaRoutes(app, prisma)
   registerDashboardRoutes(app, prisma)
+  registerDashboardOperacionalRoutes(app, prisma)
+  registerBiAvancadoRoutes(app, prisma)
   registerLembretesRoutes(app, prisma)
 
   await app.listen({ port: env.PORT, host: env.HOST })

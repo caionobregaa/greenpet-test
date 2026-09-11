@@ -35,6 +35,7 @@ interface ProdutoProps {
   margemOperacao: number
   margemLucro: number
   diasRecompra?: number
+  estoqueMinimo?: number
   descricao?: string
   imagemUrl?: string
   deletedAt?: Date
@@ -59,6 +60,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     margemOperacao?: number
     margemLucro?: number
     diasRecompra?: number
+    estoqueMinimo?: number
     descricao?: string
     imagemUrl?: string
     deletedAt?: Date
@@ -87,6 +89,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
         margemOperacao: data.margemOperacao ?? 0,
         margemLucro: data.margemLucro ?? 0,
         diasRecompra: data.diasRecompra,
+        estoqueMinimo: data.estoqueMinimo,
         descricao: data.descricao,
         imagemUrl: data.imagemUrl,
         deletedAt: data.deletedAt,
@@ -111,6 +114,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
   get margemOperacao(): number { return this.props.margemOperacao }
   get margemLucro(): number { return this.props.margemLucro }
   get diasRecompra(): number | undefined { return this.props.diasRecompra }
+  get estoqueMinimo(): number | undefined { return this.props.estoqueMinimo }
   get descricao(): string | undefined { return this.props.descricao }
   get imagemUrl(): string | undefined { return this.props.imagemUrl }
   get deletedAt(): Date | undefined { return this.props.deletedAt }
@@ -144,6 +148,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     margemOperacao: number
     margemLucro: number
     diasRecompra: number
+    estoqueMinimo: number | null
     descricao: string
     imagemUrl: string | null
   }>): void {
@@ -167,6 +172,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     if (fields.margemOperacao !== undefined) this.props.margemOperacao = fields.margemOperacao
     if (fields.margemLucro !== undefined) this.props.margemLucro = fields.margemLucro
     if (fields.diasRecompra !== undefined) this.props.diasRecompra = fields.diasRecompra
+    if (fields.estoqueMinimo !== undefined) this.props.estoqueMinimo = fields.estoqueMinimo ?? undefined
     if (fields.descricao !== undefined) this.props.descricao = fields.descricao
     if (fields.imagemUrl !== undefined) this.props.imagemUrl = fields.imagemUrl ?? undefined
     this.updatedAt = new Date()

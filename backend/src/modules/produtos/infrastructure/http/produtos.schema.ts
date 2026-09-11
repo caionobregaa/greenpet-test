@@ -16,6 +16,7 @@ export const CreateProdutoSchema = z.object({
   margemOperacao: z.number().min(0).default(0),
   margemLucro: z.number().min(0).default(0),
   diasRecompra: z.number().int().positive().optional(),
+  estoqueMinimo: z.number().int().min(0).optional(),
   descricao: z.string().optional(),
   imagemUrl: z.string().optional().nullable(),
 })

@@ -70,6 +70,26 @@ describe('Produto entity', () => {
     })
   })
 
+  describe('estoqueMinimo', () => {
+    it('fica undefined quando não informado', () => {
+      const p = Produto.create({ nome: 'Ração', sku: 'RAC-0001', categoria: 'Ração', valorVenda: 10 })
+      expect(p.estoqueMinimo).toBeUndefined()
+    })
+
+    it('aceita valor na criação', () => {
+      const p = Produto.create({ nome: 'Ração', sku: 'RAC-0001', categoria: 'Ração', valorVenda: 10, estoqueMinimo: 5 })
+      expect(p.estoqueMinimo).toBe(5)
+    })
+
+    it('pode ser definido e removido via update', () => {
+      const p = Produto.create({ nome: 'Ração', sku: 'RAC-0001', categoria: 'Ração', valorVenda: 10 })
+      p.update({ estoqueMinimo: 8 })
+      expect(p.estoqueMinimo).toBe(8)
+      p.update({ estoqueMinimo: null })
+      expect(p.estoqueMinimo).toBeUndefined()
+    })
+  })
+
   describe('softDelete', () => {
     it('marca deletedAt e isActive fica false', () => {
       const p = Produto.create({ nome: 'Ração', sku: 'RAC-0001', categoria: 'Ração', valorVenda: 10 })
