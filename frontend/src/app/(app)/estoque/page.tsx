@@ -122,7 +122,7 @@ function AdicionarLoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-5xl sm:p-8 max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Adicionar ao Estoque</DialogTitle>
         </DialogHeader>
@@ -261,7 +261,7 @@ function EditarLoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-5xl sm:p-8 max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Lote — {item.produto.nome}</DialogTitle>
         </DialogHeader>

@@ -271,7 +271,7 @@ export default function OrcamentoDetailPage({ params }: Props) {
 
       {/* Converter Dialog */}
       <Dialog open={converterOpen} onOpenChange={(o) => { setConverterOpen(o); if (!o) setPagamento(""); }}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-5xl sm:p-8 max-h-[90dvh] overflow-y-auto">
           <DialogHeader><DialogTitle>Fechar Venda</DialogTitle></DialogHeader>
           <div className="space-y-5">
             <p className="text-sm text-muted-foreground">Selecione como o cliente vai pagar para calcular a taxa e registrar a venda.</p>

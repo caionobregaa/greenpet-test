@@ -139,7 +139,7 @@ function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChan
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90svh] flex flex-col gap-0 p-0">
+      <DialogContent className="sm:max-w-5xl max-h-[90dvh] flex flex-col gap-0 p-0">
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0">
           <DialogTitle>Novo Orçamento</DialogTitle>
         </DialogHeader>
@@ -324,7 +324,7 @@ function EditarOrcamentoDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
-      <DialogContent className="max-w-3xl max-h-[90svh] flex flex-col gap-0 p-0">
+      <DialogContent className="sm:max-w-5xl max-h-[90dvh] flex flex-col gap-0 p-0">
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0">
           <DialogTitle>Editar Orçamento #{orcamento?.id.slice(-6).toUpperCase()}</DialogTitle>
         </DialogHeader>

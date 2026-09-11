@@ -163,7 +163,7 @@ export default function CompraDetailPage({ params }: Props) {
 
       {/* Receber Dialog */}
       <Dialog open={receberOpen} onOpenChange={setReceberOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="sm:max-w-5xl sm:p-8 max-h-[90dvh] overflow-y-auto">
           <DialogHeader><DialogTitle>Marcar como Recebido</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1.5">

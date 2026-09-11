@@ -82,7 +82,7 @@ function GerenciarCategoriasDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="sm:max-w-5xl sm:p-8 max-h-[90dvh] overflow-y-auto">
         <DialogHeader><DialogTitle>Gerenciar Categorias</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
@@ -198,7 +198,7 @@ function NovaDespesaDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[820px] sm:p-8 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-5xl sm:p-8 max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nova Despesa</DialogTitle>
         </DialogHeader>
@@ -381,7 +381,7 @@ function EditarDespesaDialog({
 
   return (
     <Dialog open={!!id} onOpenChange={(o) => { if (!o) handleClose(); }}>
-      <DialogContent className="sm:max-w-[820px] sm:p-8 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-5xl sm:p-8 max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Despesa</DialogTitle>
         </DialogHeader>
@@ -506,7 +506,7 @@ function ImportarEstoqueDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-5xl sm:p-8 max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <PackagePlus className="w-5 h-5 text-primary" />
