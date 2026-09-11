@@ -29,7 +29,9 @@ export class CreateProdutoUseCase {
     const existing = await this.repo.findByNome(input.nome)
     if (existing) throw new ConflictError('NOME_ALREADY_EXISTS', 'Produto com este nome já existe')
 
-    const produto = Produto.create({ ...input, imagemUrl: input.imagemUrl ?? undefined })
+    // SKU é sempre gerado pelo backend a partir da categoria — nunca vem do input do usuário.
+    const sku = await this.repo.generateSkuForCategoria(input.categoria)
+    const produto = Produto.create({ ...input, sku, imagemUrl: input.imagemUrl ?? undefined })
     await this.repo.save(produto)
     return produto
   }

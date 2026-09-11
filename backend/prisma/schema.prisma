@@ -86,6 +86,7 @@ model Animal {
 model Produto {
   id             String        @id @default(uuid())
   nome           String        @unique
+  sku            String        @unique
   categoria      String
   especie        String?
   subCategoria   String?

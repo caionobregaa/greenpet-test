@@ -19,6 +19,7 @@ function toResponse(p: Produto, estoque = 0) {
   return {
     id: p.id,
     nome: p.nome,
+    sku: p.sku,
     categoria: p.categoria,
     especie: p.especie,
     subCategoria: p.subCategoria,

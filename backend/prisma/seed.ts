@@ -1,7 +1,29 @@
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
+
+// Mesma regra usada em produção (migration add_produto_sku + prisma-produto.repository.ts):
+// prefixo de 3 letras por categoria + sequence dedicada no banco.
+const SKU_PREFIXES: Record<string, string> = {
+  'Ração': 'RAC',
+  'Petisco': 'PET',
+  'Suplemento': 'SUP',
+  'Medicamento': 'MED',
+  'Acessório': 'ACE',
+  'Higiene': 'HIG',
+  'Serviço': 'SER',
+}
+
+async function nextSku(categoria: string): Promise<string> {
+  const prefix = SKU_PREFIXES[categoria]
+  if (!prefix) throw new Error(`Categoria sem prefixo de SKU configurado: ${categoria}`)
+  const seqName = `produto_sku_${prefix.toLowerCase()}_seq`
+  const rows = await prisma.$queryRaw<Array<{ nextval: bigint }>>(
+    Prisma.sql`SELECT nextval(${seqName}::regclass)`
+  )
+  return `${prefix}-${String(rows[0].nextval).padStart(4, '0')}`
+}
 
 async function main(): Promise<void> {
   console.log('🌱 Seeding banco de dados...')
@@ -310,7 +332,7 @@ async function seedProdutosZooCenter(prisma: PrismaClient): Promise<void> {
       await prisma.produto.update({ where: { nome: p.nome }, data })
       atualizados++
     } else {
-      await prisma.produto.create({ data: { nome: p.nome, ...data } })
+      await prisma.produto.create({ data: { nome: p.nome, sku: await nextSku(p.categoria), ...data } })
       criados++
     }
   }
@@ -343,7 +365,7 @@ async function seedProdutosMarket(prisma: PrismaClient): Promise<void> {
       await prisma.produto.update({ where: { nome: p.nome }, data })
       atualizados++
     } else {
-      await prisma.produto.create({ data: { nome: p.nome, ...data } })
+      await prisma.produto.create({ data: { nome: p.nome, sku: await nextSku(p.categoria), ...data } })
       criados++
     }
   }
@@ -376,7 +398,7 @@ async function seedProdutosCentralPec(prisma: PrismaClient): Promise<void> {
       await prisma.produto.update({ where: { nome: p.nome }, data })
       atualizados++
     } else {
-      await prisma.produto.create({ data: { nome: p.nome, ...data } })
+      await prisma.produto.create({ data: { nome: p.nome, sku: await nextSku(p.categoria), ...data } })
       criados++
     }
   }
@@ -409,7 +431,7 @@ async function seedProdutosBasso(prisma: PrismaClient): Promise<void> {
       await prisma.produto.update({ where: { nome: p.nome }, data })
       atualizados++
     } else {
-      await prisma.produto.create({ data: { nome: p.nome, ...data } })
+      await prisma.produto.create({ data: { nome: p.nome, sku: await nextSku(p.categoria), ...data } })
       criados++
     }
   }
@@ -442,7 +464,7 @@ async function seedProdutosPrime(prisma: PrismaClient): Promise<void> {
       await prisma.produto.update({ where: { nome: p.nome }, data })
       atualizados++
     } else {
-      await prisma.produto.create({ data: { nome: p.nome, ...data } })
+      await prisma.produto.create({ data: { nome: p.nome, sku: await nextSku(p.categoria), ...data } })
       criados++
     }
   }

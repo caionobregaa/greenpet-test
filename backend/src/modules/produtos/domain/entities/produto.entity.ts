@@ -5,8 +5,22 @@ import { ValidationError } from '@/shared/errors/validation.error.js'
 const CATEGORIAS_VALIDAS = ['Ração', 'Petisco', 'Suplemento', 'Medicamento', 'Acessório', 'Higiene', 'Serviço'] as const
 type Categoria = (typeof CATEGORIAS_VALIDAS)[number]
 
+// Prefixo de 3 letras usado para montar o SKU ("PREFIXO-0001") de cada categoria.
+// Fonte única de verdade: reaproveitado pelo repositório Prisma para escolher
+// a sequence (produto_sku_<prefixo>_seq) que gera o próximo número.
+export const SKU_PREFIXES: Record<Categoria, string> = {
+  'Ração': 'RAC',
+  'Petisco': 'PET',
+  'Suplemento': 'SUP',
+  'Medicamento': 'MED',
+  'Acessório': 'ACE',
+  'Higiene': 'HIG',
+  'Serviço': 'SER',
+}
+
 interface ProdutoProps {
   nome: string
+  sku: string
   categoria: Categoria
   especie?: string
   subCategoria?: string
@@ -30,6 +44,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
   static create(data: {
     id?: string
     nome: string
+    sku: string
     categoria: string
     especie?: string
     subCategoria?: string
@@ -51,9 +66,13 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     if (!CATEGORIAS_VALIDAS.includes(data.categoria as Categoria)) {
       throw new ValidationError('VALIDATION_ERROR', `Categoria inválida: ${data.categoria}. Use: ${CATEGORIAS_VALIDAS.join(', ')}`)
     }
+    if (!data.sku || !data.sku.trim()) {
+      throw new ValidationError('VALIDATION_ERROR', 'SKU é obrigatório')
+    }
     return new Produto(
       {
         nome: data.nome,
+        sku: data.sku,
         categoria: data.categoria as Categoria,
         especie: data.especie,
         subCategoria: data.subCategoria,
@@ -77,6 +96,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
   }
 
   get nome(): string { return this.props.nome }
+  get sku(): string { return this.props.sku }
   get categoria(): string { return this.props.categoria }
   get especie(): string | undefined { return this.props.especie }
   get subCategoria(): string | undefined { return this.props.subCategoria }

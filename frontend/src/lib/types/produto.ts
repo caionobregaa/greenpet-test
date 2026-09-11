@@ -1,6 +1,7 @@
 export interface Produto {
   id: string;
   nome: string;
+  sku: string;
   categoria: string;
   especie: string | null;
   subCategoria: string | null;

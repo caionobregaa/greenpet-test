@@ -260,6 +260,15 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
           </div>
 
           <div className="space-y-1.5">
+            <Label>SKU</Label>
+            {produto ? (
+              <Input value={produto.sku} readOnly disabled className="font-mono" />
+            ) : (
+              <Input value="Gerado automaticamente ao salvar" readOnly disabled className="text-muted-foreground" />
+            )}
+          </div>
+
+          <div className="space-y-1.5">
             <Label>Categoria *</Label>
             <Controller
               control={control}

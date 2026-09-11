@@ -1,6 +1,7 @@
 import { Prisma, type PrismaClient } from '@prisma/client'
 import type { IProdutoRepository } from '../../domain/repositories/produto.repository.interface.js'
-import { Produto } from '../../domain/entities/produto.entity.js'
+import { Produto, SKU_PREFIXES } from '../../domain/entities/produto.entity.js'
+import { ValidationError } from '@/shared/errors/validation.error.js'
 
 export class PrismaProdutoRepository implements IProdutoRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -13,6 +14,25 @@ export class PrismaProdutoRepository implements IProdutoRepository {
   async findByNome(nome: string): Promise<Produto | null> {
     const row = await this.prisma.produto.findFirst({ where: { nome, deletedAt: null } })
     return row ? this.toDomain(row) : null
+  }
+
+  async findBySku(sku: string): Promise<Produto | null> {
+    const row = await this.prisma.produto.findFirst({ where: { sku, deletedAt: null } })
+    return row ? this.toDomain(row) : null
+  }
+
+  async generateSkuForCategoria(categoria: string): Promise<string> {
+    const prefix = SKU_PREFIXES[categoria as keyof typeof SKU_PREFIXES]
+    if (!prefix) throw new ValidationError('VALIDATION_ERROR', `Categoria inválida: ${categoria}`)
+    // Sequence dedicada por categoria (criada na migration add_produto_sku),
+    // ex. "produto_sku_rac_seq" — nextval() é atômico, sem risco de colisão
+    // entre criações concorrentes na mesma categoria.
+    const seqName = `produto_sku_${prefix.toLowerCase()}_seq`
+    const rows = await this.prisma.$queryRaw<Array<{ nextval: bigint }>>(
+      Prisma.sql`SELECT nextval(${seqName}::regclass)`
+    )
+    const numero = Number(rows[0].nextval)
+    return `${prefix}-${String(numero).padStart(4, '0')}`
   }
 
   async findMany(params: { q?: string; categoria?: string; especie?: string; fornecedor?: string; marca?: string; page: number; limit: number }) {
@@ -60,6 +80,7 @@ export class PrismaProdutoRepository implements IProdutoRepository {
   async save(produto: Produto): Promise<void> {
     const data = {
       nome: produto.nome,
+      sku: produto.sku,
       categoria: produto.categoria,
       especie: produto.especie ?? null,
       subCategoria: produto.subCategoria ?? null,
@@ -89,6 +110,7 @@ export class PrismaProdutoRepository implements IProdutoRepository {
     return Produto.create({
       id: row.id as string,
       nome: row.nome as string,
+      sku: row.sku as string,
       categoria: row.categoria as string,
       especie: (row.especie as string | null) ?? undefined,
       subCategoria: (row.subCategoria as string | null) ?? undefined,

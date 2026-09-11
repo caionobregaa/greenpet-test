@@ -189,6 +189,7 @@ export default function ProdutosPage() {
                         )}
                         <div>
                           <p className="font-medium">{p.nome}</p>
+                          <p className="text-[11px] font-mono text-muted-foreground/70">{p.sku}</p>
                           {p.marca && <p className="text-xs text-muted-foreground">{p.marca}</p>}
                         </div>
                       </div>
