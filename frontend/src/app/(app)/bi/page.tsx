@@ -14,6 +14,10 @@ import { ComprasPorFornecedorChart } from "@/components/dashboard/compras-por-fo
 import { VendasPorFormaPagamentoChart } from "@/components/dashboard/vendas-por-forma-pagamento-chart";
 import { DespesasPorCategoriaChart } from "@/components/dashboard/despesas-por-categoria-chart";
 import { CurvaResumoCard } from "@/components/bi/curva-resumo-card";
+import { RankingLtvCard } from "@/components/bi/ranking-ltv-card";
+import { CicloRecompraCard } from "@/components/bi/ciclo-recompra-card";
+import { MargemCategoriaCard } from "@/components/bi/margem-categoria-card";
+import { useBiAvancado } from "@/lib/hooks/use-bi-avancado";
 import { formatBRL, todayISO } from "@/lib/utils/format";
 import type { ComparativoItem } from "@/lib/types/dashboard";
 
@@ -39,6 +43,7 @@ export default function BiPage() {
   const [fim, setFim] = useState(todayISO());
   const [valoresVisiveis, setValoresVisiveis] = useState(false);
   const { data, isLoading } = useDashboard(inicio, fim);
+  const { data: avancado, isLoading: isLoadingAvancado } = useBiAvancado(inicio, fim);
 
   const v = (brl: number) => valoresVisiveis ? formatBRL(brl) : MASK;
   const n = (num: number) => valoresVisiveis ? String(num) : MASK_COUNT;
@@ -159,6 +164,42 @@ export default function BiPage() {
               <ComprasPorFornecedorChart fornecedores={data?.comprasPorFornecedor ?? []} />
             </div>
           </>
+        )}
+      </div>
+
+      {/* Métricas avançadas: LTV, taxa de recompra, ciclo por categoria, margem por categoria */}
+      <div className="pt-2 border-t border-border/60">
+        <h2 className="text-xs font-bold uppercase tracking-[0.07em] text-muted-foreground mb-4">Métricas Avançadas</h2>
+
+        {isLoadingAvancado ? (
+          <Skeleton className="h-24 rounded-xl mb-4" />
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+            <KpiCard
+              label="Taxa Real de Recompra"
+              value={valoresVisiveis ? `${avancado?.taxaRecompra.percentual.toFixed(1) ?? 0}%` : MASK_COUNT}
+              sub={
+                valoresVisiveis
+                  ? `${avancado?.taxaRecompra.clientesComRecompra ?? 0} de ${avancado?.taxaRecompra.totalClientes ?? 0} clientes voltaram`
+                  : "clientes que recompraram"
+              }
+            />
+          </div>
+        )}
+
+        {isLoadingAvancado ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Skeleton className="h-72 rounded-xl" />
+            <Skeleton className="h-72 rounded-xl" />
+          </div>
+        ) : (
+          <div className={valoresVisiveis ? "" : "blur-sm select-none pointer-events-none"}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+              <RankingLtvCard clientes={avancado?.rankingLtv.clientes ?? []} total={avancado?.rankingLtv.total ?? 0} />
+              <CicloRecompraCard ciclos={avancado?.cicloRecompraPorCategoria ?? []} />
+            </div>
+            <MargemCategoriaCard categorias={avancado?.margemPorCategoria ?? []} />
+          </div>
         )}
       </div>
     </div>

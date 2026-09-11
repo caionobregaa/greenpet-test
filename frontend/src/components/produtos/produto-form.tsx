@@ -179,6 +179,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
       unidadeEmbalagem:  produto?.unidadeEmbalagem ?? "",
       valorCusto:        produto?.valorCusto ?? 0,
       valorVenda:        produto?.valorVenda ?? 0,
+      estoqueMinimo:     produto?.estoqueMinimo ?? undefined,
       margemCartao:      produto?.margemCartao ?? 0,
       margemImposto:     produto?.margemImposto ?? 0,
       margemOperacao:    produto?.margemOperacao ?? 0,
@@ -394,6 +395,24 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
           </div>
           <p className="text-xs text-muted-foreground/70">
             Usado para calcular recompra e controle de estoque
+          </p>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="estoqueMinimo">
+            Estoque Mínimo
+            <span className="ml-1 text-muted-foreground font-normal text-xs">(opcional)</span>
+          </Label>
+          <Input
+            id="estoqueMinimo"
+            type="number"
+            min="0"
+            step="1"
+            {...register("estoqueMinimo", { valueAsNumber: true })}
+            placeholder="Ex: 10"
+          />
+          <p className="text-xs text-muted-foreground/70">
+            Abaixo desse valor o produto aparece no alerta de estoque baixo do Dashboard
           </p>
         </div>
 

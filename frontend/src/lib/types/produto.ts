@@ -16,6 +16,7 @@ export interface Produto {
   margemOperacao: number | null;
   margemLucro: number | null;
   diasRecompra: number | null;
+  estoqueMinimo: number | null;
   descricao: string | null;
   imagemUrl: string | null;
   estoque: number;

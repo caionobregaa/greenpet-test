@@ -51,6 +51,9 @@ export function ProdutoInfoDialog({ produto, onOpenChange }: ProdutoInfoDialogPr
             {produto.pesoEmbalagem != null && (
               <InfoRow label="Peso" value={`${produto.pesoEmbalagem} kg`} />
             )}
+            {produto.estoqueMinimo != null && (
+              <InfoRow label="Estoque Mínimo" value={`${produto.estoqueMinimo} un.`} />
+            )}
           </div>
 
           <div className="border-t border-border pt-4 space-y-3">
