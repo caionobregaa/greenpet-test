@@ -14,12 +14,12 @@ export class ConverterOrcamentoUseCase {
     const orcamento = await this.orcamentoRepo.findById(id)
     if (!orcamento) throw new NotFoundError('NOT_FOUND', 'Orçamento não encontrado')
 
-    if (orcamento.status === 'aprovado' && orcamento.vendaId) {
+    if (orcamento.status === 'fechado' && orcamento.vendaId) {
       throw new UnprocessableError('ALREADY_CONVERTED', 'Orçamento já foi convertido em venda')
     }
 
-    if (orcamento.status === 'recusado') {
-      throw new UnprocessableError('INVALID_STATUS', 'Orçamento recusado não pode ser convertido')
+    if (orcamento.status === 'perdido') {
+      throw new UnprocessableError('INVALID_STATUS', 'Orçamento perdido não pode ser convertido')
     }
 
     const clienteId = orcamento.clienteId

@@ -7,12 +7,14 @@ export class ListOrcamentosUseCase {
   async execute(params: {
     clienteId?: string
     status?: string
+    motivoPerda?: string
     page?: number
     limit?: number
   }): Promise<{ orcamentos: Orcamento[]; total: number }> {
     return this.repo.findMany({
       clienteId: params.clienteId,
       status: params.status,
+      motivoPerda: params.motivoPerda,
       page: params.page ?? 1,
       limit: params.limit ?? 20,
     })

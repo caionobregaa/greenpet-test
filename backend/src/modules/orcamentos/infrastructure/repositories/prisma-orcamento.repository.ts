@@ -1,6 +1,6 @@
 import type { PrismaClient } from '@prisma/client'
 import type { IOrcamentoRepository } from '../../domain/repositories/orcamento.repository.interface.js'
-import { Orcamento, type OrcamentoStatus } from '../../domain/entities/orcamento.entity.js'
+import { Orcamento, type OrcamentoStatus, type MotivoPerda } from '../../domain/entities/orcamento.entity.js'
 
 export class PrismaOrcamentoRepository implements IOrcamentoRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -10,10 +10,11 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
     return row ? this.toDomain(row) : null
   }
 
-  async findMany(params: { clienteId?: string; status?: string; page: number; limit: number }) {
+  async findMany(params: { clienteId?: string; status?: string; motivoPerda?: string; page: number; limit: number }) {
     const where = {
       ...(params.clienteId ? { clienteId: params.clienteId } : {}),
       ...(params.status ? { status: params.status } : {}),
+      ...(params.motivoPerda ? { motivoPerda: params.motivoPerda } : {}),
     }
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.orcamento.findMany({
@@ -35,11 +36,14 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
         where: { id: orcamento.id },
         data: {
           status: orcamento.status,
+          motivoPerda: orcamento.motivoPerda ?? null,
           validade: orcamento.validade,
           obs: orcamento.obs ?? null,
           vendaId: orcamento.vendaId ?? null,
           total: orcamento.total,
           formasPag: orcamento.formasPag,
+          descontoRecompraAplicado: orcamento.descontoRecompraAplicado,
+          valorDescontoRecompra: orcamento.valorDescontoRecompra ?? null,
           itens: {
             deleteMany: {},
             create: orcamento.itens.map((i) => ({
@@ -63,10 +67,13 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
           data: orcamento.data,
           validade: orcamento.validade,
           status: orcamento.status,
+          motivoPerda: orcamento.motivoPerda ?? null,
           total: orcamento.total,
           obs: orcamento.obs ?? null,
           vendaId: orcamento.vendaId ?? null,
           formasPag: orcamento.formasPag,
+          descontoRecompraAplicado: orcamento.descontoRecompraAplicado,
+          valorDescontoRecompra: orcamento.valorDescontoRecompra ?? null,
           itens: {
             create: orcamento.itens.map((i) => ({
               id: i.id,
@@ -97,10 +104,13 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
     data: Date
     validade: Date
     status: string
+    motivoPerda: string | null
     total: unknown
     obs: string | null
     vendaId: string | null
     formasPag: string[]
+    descontoRecompraAplicado: boolean
+    valorDescontoRecompra: unknown
     itens: Array<{
       id: string
       produtoId: string | null
@@ -118,9 +128,12 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
       data: row.data,
       validade: row.validade,
       status: row.status as OrcamentoStatus,
+      motivoPerda: (row.motivoPerda ?? undefined) as MotivoPerda | undefined,
       obs: row.obs ?? undefined,
       vendaId: row.vendaId ?? undefined,
       formasPag: row.formasPag ?? [],
+      descontoRecompraAplicado: row.descontoRecompraAplicado,
+      valorDescontoRecompra: row.valorDescontoRecompra !== null && row.valorDescontoRecompra !== undefined ? Number(row.valorDescontoRecompra) : undefined,
       itens: row.itens.map((i) => ({
         id: i.id,
         produtoId: i.produtoId ?? undefined,

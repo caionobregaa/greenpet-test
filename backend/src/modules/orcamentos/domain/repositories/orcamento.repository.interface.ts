@@ -5,6 +5,7 @@ export interface IOrcamentoRepository {
   findMany(params: {
     clienteId?: string
     status?: string
+    motivoPerda?: string
     page: number
     limit: number
   }): Promise<{ orcamentos: Orcamento[]; total: number }>

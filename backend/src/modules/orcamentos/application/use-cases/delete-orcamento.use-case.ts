@@ -8,7 +8,7 @@ export class DeleteOrcamentoUseCase {
   async execute({ id }: { id: string }): Promise<void> {
     const o = await this.repo.findById(id)
     if (!o) throw new NotFoundError('NOT_FOUND', 'Orçamento não encontrado')
-    if (o.status === 'aprovado' && o.vendaId) {
+    if (o.status === 'fechado' && o.vendaId) {
       throw new UnprocessableError('CANNOT_DELETE_CONVERTED', 'Orçamento convertido em venda não pode ser removido')
     }
     await this.repo.delete(id)

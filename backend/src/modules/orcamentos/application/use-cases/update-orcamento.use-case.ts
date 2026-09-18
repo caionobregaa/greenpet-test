@@ -7,6 +7,8 @@ export interface UpdateOrcamentoInput {
   validade?: Date
   obs?: string
   itens?: OrcamentoItemData[]
+  descontoRecompraAplicado?: boolean
+  valorDescontoRecompra?: number
 }
 
 export class UpdateOrcamentoUseCase {
@@ -20,6 +22,8 @@ export class UpdateOrcamentoUseCase {
       validade: input.validade,
       obs: input.obs,
       itens: input.itens,
+      descontoRecompraAplicado: input.descontoRecompraAplicado,
+      valorDescontoRecompra: input.valorDescontoRecompra,
     })
 
     await this.repo.save(orcamento)

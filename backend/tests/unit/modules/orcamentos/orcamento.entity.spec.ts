@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { Orcamento } from '@/modules/orcamentos/domain/entities/orcamento.entity'
+import { Orcamento, MOTIVOS_PERDA, type MotivoPerda } from '@/modules/orcamentos/domain/entities/orcamento.entity'
 
 describe('Orcamento entity', () => {
   const clienteId = crypto.randomUUID()
@@ -14,52 +14,83 @@ describe('Orcamento entity', () => {
   }
 
   describe('create', () => {
-    it('cria orçamento com status pendente por padrão', () => {
+    it('cria orçamento com status aberto por padrão', () => {
       const o = makeOrcamento()
-      expect(o.status).toBe('pendente')
+      expect(o.status).toBe('aberto')
       expect(o.total).toBe(100)
+      expect(o.descontoRecompraAplicado).toBe(false)
+    })
+
+    it('lança VALIDATION_ERROR ao criar direto como perdido sem motivoPerda', () => {
+      let err: unknown
+      try { makeOrcamento({ status: 'perdido' }) } catch (e) { err = e }
+      expect((err as { code?: string })?.code).toBe('VALIDATION_ERROR')
     })
   })
 
   describe('transições de status', () => {
-    it('pendente → aprovado', () => {
+    it('aberto → fechado', () => {
       const o = makeOrcamento()
-      o.aprovar()
-      expect(o.status).toBe('aprovado')
+      o.fechar()
+      expect(o.status).toBe('fechado')
     })
 
-    it('pendente → recusado', () => {
+    it.each(MOTIVOS_PERDA)('aberto → perdido com motivo "%s"', (motivo) => {
       const o = makeOrcamento()
-      o.recusar()
-      expect(o.status).toBe('recusado')
+      o.perder(motivo as MotivoPerda)
+      expect(o.status).toBe('perdido')
+      expect(o.motivoPerda).toBe(motivo)
     })
 
-    it('recusado → pendente (reabrir)', () => {
+    it('perder() sem motivo lança MOTIVO_PERDA_INVALIDO', () => {
       const o = makeOrcamento()
-      o.recusar()
+      let err: unknown
+      try { o.perder(undefined as unknown as MotivoPerda) } catch (e) { err = e }
+      expect((err as { code?: string })?.code).toBe('MOTIVO_PERDA_INVALIDO')
+    })
+
+    it('perder() com motivo inválido lança MOTIVO_PERDA_INVALIDO', () => {
+      const o = makeOrcamento()
+      let err: unknown
+      try { o.perder('Motivo qualquer' as unknown as MotivoPerda) } catch (e) { err = e }
+      expect((err as { code?: string })?.code).toBe('MOTIVO_PERDA_INVALIDO')
+    })
+
+    it('perdido → aberto (reabrir) limpa o motivoPerda', () => {
+      const o = makeOrcamento()
+      o.perder('Preço')
       o.reabrir()
-      expect(o.status).toBe('pendente')
+      expect(o.status).toBe('aberto')
+      expect(o.motivoPerda).toBeUndefined()
     })
 
-    it('aprovado → pendente lança INVALID_STATUS_TRANSITION', () => {
+    it('fechado → aberto lança INVALID_STATUS_TRANSITION', () => {
       const o = makeOrcamento()
-      o.aprovar()
+      o.fechar()
       let err: unknown
       try { o.reabrir() } catch (e) { err = e }
       expect((err as { code?: string })?.code).toBe('INVALID_STATUS_TRANSITION')
     })
 
-    it('aprovado → recusado lança INVALID_STATUS_TRANSITION', () => {
+    it('fechado → perdido lança INVALID_STATUS_TRANSITION', () => {
       const o = makeOrcamento()
-      o.aprovar()
+      o.fechar()
       let err: unknown
-      try { o.recusar() } catch (e) { err = e }
+      try { o.perder('Preço') } catch (e) { err = e }
+      expect((err as { code?: string })?.code).toBe('INVALID_STATUS_TRANSITION')
+    })
+
+    it('perdido → fechado lança INVALID_STATUS_TRANSITION', () => {
+      const o = makeOrcamento()
+      o.perder('Preço')
+      let err: unknown
+      try { o.fechar() } catch (e) { err = e }
       expect((err as { code?: string })?.code).toBe('INVALID_STATUS_TRANSITION')
     })
   })
 
   describe('vencido', () => {
-    it('retorna true quando validade é passada e status é pendente', () => {
+    it('retorna true quando validade é passada e status é aberto', () => {
       const o = makeOrcamento({ validade: new Date(Date.now() - 1000) })
       expect(o.vencido).toBe(true)
     })
@@ -69,10 +100,19 @@ describe('Orcamento entity', () => {
       expect(o.vencido).toBe(false)
     })
 
-    it('retorna false quando status é aprovado (já convertido)', () => {
+    it('retorna false quando status é fechado (já convertido)', () => {
       const o = makeOrcamento({ validade: new Date(Date.now() - 1000) })
-      o.aprovar()
+      o.fechar()
       expect(o.vencido).toBe(false)
+    })
+  })
+
+  describe('desconto de recompra', () => {
+    it('update() registra descontoRecompraAplicado e valorDescontoRecompra', () => {
+      const o = makeOrcamento()
+      o.update({ descontoRecompraAplicado: true, valorDescontoRecompra: 15 })
+      expect(o.descontoRecompraAplicado).toBe(true)
+      expect(o.valorDescontoRecompra).toBe(15)
     })
   })
 })

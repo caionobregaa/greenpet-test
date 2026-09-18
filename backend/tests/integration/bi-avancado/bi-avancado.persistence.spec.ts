@@ -8,6 +8,9 @@ import { PrismaProdutoRepository } from '@/modules/produtos/infrastructure/repos
 import { CreateProdutoUseCase } from '@/modules/produtos/application/use-cases/create-produto.use-case'
 import { PrismaBiAvancadoRepository } from '@/modules/bi-avancado/infrastructure/repositories/prisma-bi-avancado.repository'
 import { GetBiAvancadoUseCase } from '@/modules/bi-avancado/application/use-cases/get-bi-avancado.use-case'
+import { PrismaOrcamentoRepository } from '@/modules/orcamentos/infrastructure/repositories/prisma-orcamento.repository'
+import { CreateOrcamentoUseCase } from '@/modules/orcamentos/application/use-cases/create-orcamento.use-case'
+import { UpdateOrcamentoStatusUseCase } from '@/modules/orcamentos/application/use-cases/update-orcamento-status.use-case'
 
 const DIA_MS = 24 * 60 * 60 * 1000
 
@@ -87,5 +90,106 @@ describe('BI avançado', () => {
     expect(resultado.rankingLtv).toEqual({ clientes: [], total: 0 })
     expect(resultado.taxaRecompra).toEqual({ percentual: 0, clientesComRecompra: 0, totalClientes: 0 })
     expect(resultado.cicloRecompraPorCategoria).toEqual([])
+  })
+
+  it('calcula a taxa de recompra em janelas de 30/60/90 dias', async () => {
+    const clienteRepo = new PrismaClienteRepository(prismaTest)
+    const createClienteUC = new CreateClienteUseCase(clienteRepo)
+    const vendaRepo = new PrismaVendaRepository(prismaTest)
+    const createVendaUC = new CreateVendaUseCase(vendaRepo, clienteRepo)
+
+    const clienteA = await createClienteUC.execute({ nome: 'Recompra Rápida', telefone: '92933333331' })
+    const clienteB = await createClienteUC.execute({ nome: 'Recompra Lenta', telefone: '92933333332' })
+    const clienteC = await createClienteUC.execute({ nome: 'Sem Recompra', telefone: '92933333333' })
+
+    const item = [{ nome: 'Ração', qtd: 1, valorUnitario: 100 }]
+
+    // Cliente A: 1ª compra dia -50, 2ª compra dia -30 (gap de 20 dias) -> conta em 30/60/90
+    await createVendaUC.execute({ clienteId: clienteA.id, data: new Date(Date.now() - 50 * DIA_MS), formaPag: 'Pix', itens: item })
+    await createVendaUC.execute({ clienteId: clienteA.id, data: new Date(Date.now() - 30 * DIA_MS), formaPag: 'Pix', itens: item })
+
+    // Cliente B: 1ª compra dia -50, 2ª compra dia -5 (gap de 45 dias) -> conta só em 60/90
+    await createVendaUC.execute({ clienteId: clienteB.id, data: new Date(Date.now() - 50 * DIA_MS), formaPag: 'Pix', itens: item })
+    await createVendaUC.execute({ clienteId: clienteB.id, data: new Date(Date.now() - 5 * DIA_MS), formaPag: 'Pix', itens: item })
+
+    // Cliente C: só 1 compra -> não conta em nenhuma janela
+    await createVendaUC.execute({ clienteId: clienteC.id, data: new Date(Date.now() - 50 * DIA_MS), formaPag: 'Pix', itens: item })
+
+    const repo = new PrismaBiAvancadoRepository(prismaTest)
+    const useCase = new GetBiAvancadoUseCase(repo)
+    const resultado = await useCase.execute({ inicio: new Date(Date.now() - 90 * DIA_MS), fim: new Date() })
+
+    const janela30 = resultado.taxaRecompraJanela.find((j) => j.janelaDias === 30)
+    const janela60 = resultado.taxaRecompraJanela.find((j) => j.janelaDias === 60)
+    const janela90 = resultado.taxaRecompraJanela.find((j) => j.janelaDias === 90)
+
+    expect(janela30).toMatchObject({ totalClientes: 3, clientesComRecompra: 1 })
+    expect(janela60).toMatchObject({ totalClientes: 3, clientesComRecompra: 2 })
+    expect(janela90).toMatchObject({ totalClientes: 3, clientesComRecompra: 2 })
+  })
+
+  it('calcula a taxa de recompra mensal por cohort de 1ª compra', async () => {
+    const clienteRepo = new PrismaClienteRepository(prismaTest)
+    const createClienteUC = new CreateClienteUseCase(clienteRepo)
+    const vendaRepo = new PrismaVendaRepository(prismaTest)
+    const createVendaUC = new CreateVendaUseCase(vendaRepo, clienteRepo)
+
+    const clienteRecompra = await createClienteUC.execute({ nome: 'Cohort Recompra', telefone: '92944444441' })
+    const clienteSemRecompra = await createClienteUC.execute({ nome: 'Cohort Sem Recompra', telefone: '92944444442' })
+
+    const item = [{ nome: 'Ração', qtd: 1, valorUnitario: 100 }]
+
+    await createVendaUC.execute({ clienteId: clienteRecompra.id, data: new Date(Date.now() - 70 * DIA_MS), formaPag: 'Pix', itens: item })
+    await createVendaUC.execute({ clienteId: clienteRecompra.id, data: new Date(Date.now() - 10 * DIA_MS), formaPag: 'Pix', itens: item })
+
+    await createVendaUC.execute({ clienteId: clienteSemRecompra.id, data: new Date(Date.now() - 40 * DIA_MS), formaPag: 'Pix', itens: item })
+
+    const repo = new PrismaBiAvancadoRepository(prismaTest)
+    const useCase = new GetBiAvancadoUseCase(repo)
+    const resultado = await useCase.execute({ inicio: new Date(Date.now() - 90 * DIA_MS), fim: new Date() })
+
+    const totalClientes = resultado.taxaRecompraMensal.reduce((s, m) => s + m.totalClientes, 0)
+    const totalComRecompra = resultado.taxaRecompraMensal.reduce((s, m) => s + m.clientesComRecompra, 0)
+
+    expect(totalClientes).toBe(2)
+    expect(totalComRecompra).toBe(1)
+  })
+
+  it('calcula taxa de fechamento/não-fechamento de orçamentos e o breakdown de motivo de perda', async () => {
+    const clienteRepo = new PrismaClienteRepository(prismaTest)
+    const createClienteUC = new CreateClienteUseCase(clienteRepo)
+    const cliente = await createClienteUC.execute({ nome: 'Cliente Orçamentos', telefone: '92955555555' })
+
+    const orcamentoRepo = new PrismaOrcamentoRepository(prismaTest)
+    const createOrcamentoUC = new CreateOrcamentoUseCase(orcamentoRepo, clienteRepo)
+    const statusUC = new UpdateOrcamentoStatusUseCase(orcamentoRepo)
+
+    const itens = [{ nome: 'Ração', qtd: 1, valorUnitario: 100 }]
+    const novoOrcamento = () => createOrcamentoUC.execute({ clienteId: cliente.id, validade: new Date(Date.now() + 7 * DIA_MS), itens })
+
+    // 3 fechados
+    for (let i = 0; i < 3; i++) {
+      const o = await novoOrcamento()
+      await statusUC.execute({ id: o.id, acao: 'fechar' })
+    }
+    // 2 perdidos (motivos diferentes)
+    const perdido1 = await novoOrcamento()
+    await statusUC.execute({ id: perdido1.id, acao: 'perder', motivo: 'Preço' })
+    const perdido2 = await novoOrcamento()
+    await statusUC.execute({ id: perdido2.id, acao: 'perder', motivo: 'Cliente desistiu' })
+    // 1 aberto (fora do denominador)
+    await novoOrcamento()
+
+    const repo = new PrismaBiAvancadoRepository(prismaTest)
+    const useCase = new GetBiAvancadoUseCase(repo)
+    const resultado = await useCase.execute({ inicio: new Date(Date.now() - DIA_MS), fim: new Date(Date.now() + DIA_MS) })
+
+    expect(resultado.taxaFechamento.total).toEqual({ fechados: 3, perdidos: 2, taxaFechamento: 60, taxaNaoFechamento: 40 })
+    expect(resultado.taxaFechamento.breakdownMotivoPerda).toEqual(
+      expect.arrayContaining([
+        { motivo: 'Preço', quantidade: 1, percentual: 50 },
+        { motivo: 'Cliente desistiu', quantidade: 1, percentual: 50 },
+      ]),
+    )
   })
 })

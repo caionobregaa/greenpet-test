@@ -29,11 +29,14 @@ function toResponse(o: Orcamento, extra?: { clienteNome?: string | null; animalN
     data: o.data,
     validade: o.validade,
     status: o.status,
+    motivoPerda: o.motivoPerda,
     vencido: o.vencido,
     total: o.total,
     obs: o.obs,
     vendaId: o.vendaId,
     formasPag: o.formasPag,
+    descontoRecompraAplicado: o.descontoRecompraAplicado,
+    valorDescontoRecompra: o.valorDescontoRecompra,
     itens: o.itens,
     cliente: extra?.clienteNome ? { nome: extra.clienteNome } : undefined,
     animal: extra?.animalNome ? { nome: extra.animalNome } : undefined,
@@ -102,7 +105,7 @@ export function registerOrcamentosRoutes(app: FastifyInstance, prisma: PrismaCli
     const { id } = req.params as { id: string }
     const body = UpdateOrcamentoStatusSchema.safeParse(req.body)
     if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
-    const o = await statusUC.execute({ id, acao: body.data.acao })
+    const o = await statusUC.execute({ id, acao: body.data.acao, motivo: body.data.motivo })
     rep.send({ data: toResponse(o) })
   })
 

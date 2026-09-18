@@ -68,7 +68,7 @@ export class PrismaClienteRepository implements IClienteRepository {
   async hasActiveSalesOrQuotes(clienteId: string): Promise<boolean> {
     const [vendas, orcamentos] = await this.prisma.$transaction([
       this.prisma.venda.count({ where: { clienteId } }),
-      this.prisma.orcamento.count({ where: { clienteId, status: { not: 'recusado' } } }),
+      this.prisma.orcamento.count({ where: { clienteId, status: { not: 'perdido' } } }),
     ])
     return vendas > 0 || orcamentos > 0
   }

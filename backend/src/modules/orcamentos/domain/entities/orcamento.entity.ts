@@ -2,7 +2,28 @@ import { AggregateRoot } from '@/shared/domain/aggregate-root.base.js'
 import { Money } from '@/shared/domain/value-objects/money.vo.js'
 import { ValidationError } from '@/shared/errors/validation.error.js'
 
-export type OrcamentoStatus = 'pendente' | 'aprovado' | 'recusado'
+export type OrcamentoStatus = 'aberto' | 'fechado' | 'perdido'
+
+export type MotivoPerda =
+  | 'Preço'
+  | 'Cliente desistiu'
+  | 'Comprou concorrente'
+  | 'Sem estoque'
+  | 'Produto indisponível'
+  | 'Frete/prazo'
+  | 'Parou de responder'
+  | 'Outro'
+
+export const MOTIVOS_PERDA: MotivoPerda[] = [
+  'Preço',
+  'Cliente desistiu',
+  'Comprou concorrente',
+  'Sem estoque',
+  'Produto indisponível',
+  'Frete/prazo',
+  'Parou de responder',
+  'Outro',
+]
 
 export interface OrcamentoItemData {
   id?: string
@@ -29,10 +50,13 @@ interface OrcamentoProps {
   data: Date
   validade: Date
   status: OrcamentoStatus
+  motivoPerda?: MotivoPerda
   total: Money
   obs?: string
   vendaId?: string
   formasPag: string[]
+  descontoRecompraAplicado: boolean
+  valorDescontoRecompra?: number
   itens: OrcamentoItemReadOnly[]
 }
 
@@ -49,11 +73,19 @@ export class Orcamento extends AggregateRoot<OrcamentoProps> {
     data?: Date
     validade: Date
     status?: OrcamentoStatus
+    motivoPerda?: MotivoPerda
     obs?: string
     vendaId?: string
     formasPag?: string[]
+    descontoRecompraAplicado?: boolean
+    valorDescontoRecompra?: number
     itens: OrcamentoItemData[]
   }): Orcamento {
+    const status = data.status ?? 'aberto'
+    if (status === 'perdido' && !data.motivoPerda) {
+      throw new ValidationError('VALIDATION_ERROR', 'motivoPerda é obrigatório para orçamento perdido')
+    }
+
     const itens: OrcamentoItemReadOnly[] = data.itens.map((item) => ({
       id: item.id ?? crypto.randomUUID(),
       produtoId: item.produtoId,
@@ -72,11 +104,14 @@ export class Orcamento extends AggregateRoot<OrcamentoProps> {
         animalId: data.animalId,
         data: data.data ?? new Date(),
         validade: data.validade,
-        status: data.status ?? 'pendente',
+        status,
+        motivoPerda: data.motivoPerda,
         total: Money.create(totalValue),
         obs: data.obs,
         vendaId: data.vendaId,
         formasPag: data.formasPag ?? [],
+        descontoRecompraAplicado: data.descontoRecompraAplicado ?? false,
+        valorDescontoRecompra: data.valorDescontoRecompra,
         itens,
       },
       data.id,
@@ -88,44 +123,52 @@ export class Orcamento extends AggregateRoot<OrcamentoProps> {
   get data(): Date { return this.props.data }
   get validade(): Date { return this.props.validade }
   get status(): OrcamentoStatus { return this.props.status }
+  get motivoPerda(): MotivoPerda | undefined { return this.props.motivoPerda }
   get total(): number { return this.props.total.value }
   get obs(): string | undefined { return this.props.obs }
   get vendaId(): string | undefined { return this.props.vendaId }
   get formasPag(): string[] { return this.props.formasPag }
+  get descontoRecompraAplicado(): boolean { return this.props.descontoRecompraAplicado }
+  get valorDescontoRecompra(): number | undefined { return this.props.valorDescontoRecompra }
   get itens(): OrcamentoItemReadOnly[] { return this.props.itens }
 
   get vencido(): boolean {
-    if (this.props.status !== 'pendente') return false
+    if (this.props.status !== 'aberto') return false
     return this.props.validade < new Date()
   }
 
-  aprovar(): void {
-    if (this.props.status !== 'pendente') {
-      throw new ValidationError('INVALID_STATUS_TRANSITION', `Não é possível aprovar orçamento com status: ${this.props.status}`)
+  fechar(): void {
+    if (this.props.status !== 'aberto') {
+      throw new ValidationError('INVALID_STATUS_TRANSITION', `Não é possível fechar orçamento com status: ${this.props.status}`)
     }
-    this.props.status = 'aprovado'
+    this.props.status = 'fechado'
     this.updatedAt = new Date()
   }
 
-  recusar(): void {
-    if (this.props.status !== 'pendente') {
-      throw new ValidationError('INVALID_STATUS_TRANSITION', `Não é possível recusar orçamento com status: ${this.props.status}`)
+  perder(motivo: MotivoPerda): void {
+    if (this.props.status !== 'aberto') {
+      throw new ValidationError('INVALID_STATUS_TRANSITION', `Não é possível marcar como perdido orçamento com status: ${this.props.status}`)
     }
-    this.props.status = 'recusado'
+    if (!motivo || !MOTIVOS_PERDA.includes(motivo)) {
+      throw new ValidationError('MOTIVO_PERDA_INVALIDO', 'Motivo de perda inválido ou não informado')
+    }
+    this.props.status = 'perdido'
+    this.props.motivoPerda = motivo
     this.updatedAt = new Date()
   }
 
   reabrir(): void {
-    if (this.props.status !== 'recusado') {
+    if (this.props.status !== 'perdido') {
       throw new ValidationError('INVALID_STATUS_TRANSITION', `Não é possível reabrir orçamento com status: ${this.props.status}`)
     }
-    this.props.status = 'pendente'
+    this.props.status = 'aberto'
+    this.props.motivoPerda = undefined
     this.updatedAt = new Date()
   }
 
   vincularVenda(vendaId: string): void {
     this.props.vendaId = vendaId
-    this.props.status = 'aprovado'
+    this.props.status = 'fechado'
     this.updatedAt = new Date()
   }
 
@@ -133,12 +176,16 @@ export class Orcamento extends AggregateRoot<OrcamentoProps> {
     validade?: Date
     obs?: string
     itens?: OrcamentoItemData[]
+    descontoRecompraAplicado?: boolean
+    valorDescontoRecompra?: number
   }): void {
-    if (this.props.status !== 'pendente') {
-      throw new ValidationError('VALIDATION_ERROR', 'Apenas orçamentos pendentes podem ser editados')
+    if (this.props.status !== 'aberto') {
+      throw new ValidationError('VALIDATION_ERROR', 'Apenas orçamentos abertos podem ser editados')
     }
     if (fields.validade !== undefined) this.props.validade = fields.validade
     if (fields.obs !== undefined) this.props.obs = fields.obs
+    if (fields.descontoRecompraAplicado !== undefined) this.props.descontoRecompraAplicado = fields.descontoRecompraAplicado
+    if (fields.valorDescontoRecompra !== undefined) this.props.valorDescontoRecompra = fields.valorDescontoRecompra
     if (fields.itens !== undefined) {
       this.props.itens = fields.itens.map((item) => ({
         id: item.id ?? crypto.randomUUID(),
