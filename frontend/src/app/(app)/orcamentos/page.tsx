@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Plus, Eye, Trash2, Pencil, CreditCard, Banknote, QrCode, Wallet, Loader2, Share2, Check, UserPlus, X as XIcon } from "lucide-react";
+import { Plus, Eye, Trash2, Pencil, CreditCard, Banknote, QrCode, Wallet, Loader2, Share2, Check, UserPlus, X as XIcon, Search } from "lucide-react";
 import { useOrcamentos, useDeleteOrcamento, useCreateOrcamento, useUpdateOrcamento } from "@/lib/hooks/use-orcamentos";
-import { useClientes, useCreateCliente } from "@/lib/hooks/use-clientes";
+import { useCreateCliente } from "@/lib/hooks/use-clientes";
 import { useAnimais } from "@/lib/hooks/use-animais";
 import { apiClientes } from "@/lib/api/clientes";
 import { apiAnimais } from "@/lib/api/animais";
@@ -32,6 +32,7 @@ import {
 import { ItensTable } from "@/components/vendas/itens-table";
 import { formatDate, formatBRL, todayISO, todayPlusDaysISO, formatTelefone } from "@/lib/utils/format";
 import type { Orcamento } from "@/lib/types/orcamento";
+import type { Cliente } from "@/lib/types/cliente";
 
 // ── Payment method toggle ────────────────────────────────────────────────────
 
@@ -71,6 +72,109 @@ function FormasPagSelector({ value, onChange }: { value: string[]; onChange: (v:
   );
 }
 
+// ── Busca de cliente (autocomplete, sem lista flutuante com todo mundo) ──────
+
+function ClienteSearch({
+  selectedId,
+  selectedNome,
+  onSelect,
+  onClear,
+}: {
+  selectedId?: string;
+  selectedNome?: string;
+  onSelect: (c: { id: string; nome: string }) => void;
+  onClear: () => void;
+}) {
+  const [query, setQuery] = useState(selectedNome ?? "");
+  const [results, setResults] = useState<Cliente[]>([]);
+  const [open, setOpen] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    setQuery(selectedNome ?? "");
+  }, [selectedNome]);
+
+  function handleChange(v: string) {
+    setQuery(v);
+    if (selectedId) onClear();
+    clearTimeout(timer.current);
+    if (v.trim().length < 2) { setResults([]); setOpen(false); setSearched(false); return; }
+    timer.current = setTimeout(async () => {
+      try {
+        const { data } = await apiClientes.list({ q: v, limit: 8 });
+        setResults(data);
+        setOpen(true);
+        setSearched(true);
+      } catch {
+        setResults([]);
+      }
+    }, 300);
+  }
+
+  function pick(c: Cliente) {
+    onSelect({ id: c.id, nome: c.nome });
+    setQuery(c.nome);
+    setResults([]); setOpen(false); setSearched(false);
+  }
+
+  function clear() {
+    setQuery("");
+    onClear();
+    setResults([]); setOpen(false); setSearched(false);
+  }
+
+  const showResults = open && results.length > 0;
+  const showEmpty = open && searched && results.length === 0 && query.trim().length >= 2;
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50 pointer-events-none" />
+        <Input
+          value={query}
+          onChange={(e) => handleChange(e.target.value)}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
+          placeholder="Digite as iniciais do nome..."
+          className="pl-8 pr-8"
+        />
+        {selectedId && (
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={clear}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground"
+            title="Limpar cliente selecionado"
+          >
+            <XIcon className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+      {showResults && (
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border/60 rounded-md shadow-md shadow-black/5 overflow-hidden max-h-56 overflow-y-auto">
+          {results.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-muted/60 transition-colors border-b border-border/40 last:border-0"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => pick(c)}
+            >
+              <p className="font-medium text-[13px] text-foreground">{c.nome}</p>
+              <p className="text-[11px] text-muted-foreground">{c.telefone}</p>
+            </button>
+          ))}
+        </div>
+      )}
+      {showEmpty && (
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border/60 rounded-md shadow-md px-3 py-2.5 text-xs text-muted-foreground">
+          Nenhum cliente encontrado com esse nome.
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Dialog: Novo Orçamento ───────────────────────────────────────────────────
 
 
@@ -78,7 +182,7 @@ function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   const create = useCreateOrcamento();
   const createCliente = useCreateCliente();
   const [clienteId, setClienteId] = useState("");
-  const { data: clientesData } = useClientes({ limit: 100 });
+  const [clienteNome, setClienteNome] = useState("");
   const { data: animaisData } = useAnimais({ clienteId: clienteId || undefined, limit: 50 });
 
   // Quick client registration
@@ -104,6 +208,7 @@ function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChan
       const novo = await createCliente.mutateAsync({ nome, telefone: quickTelefone, cidade: "Manaus" });
       setValue("clienteId", novo.id);
       setClienteId(novo.id);
+      setClienteNome(novo.nome);
       setValue("animalId", null);
       setShowQuickCliente(false);
       setQuickNome("");
@@ -127,6 +232,7 @@ function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChan
       toast.success("Orçamento criado com sucesso!");
       reset({ data: todayISO(), validade: todayPlusDaysISO(7), itens: [], formasPag: [] });
       setClienteId("");
+      setClienteNome("");
       setShowQuickCliente(false);
       setQuickNome("");
       setQuickTelefone("");
@@ -194,22 +300,26 @@ function NovoOrcamentoDialog({ open, onOpenChange }: { open: boolean; onOpenChan
                   </div>
                 ) : (
                   <div className="flex gap-2">
-                    <Controller control={control} name="clienteId" render={({ field }) => {
-                      const nomeCliente = clientesData?.data.find(c => c.id === field.value)?.nome;
-                      return (
-                        <Select value={field.value ?? ""} onValueChange={(v) => { field.onChange(v ?? ""); setClienteId(v ?? ""); setValue("animalId", null); }}>
-                          <SelectTrigger className="flex-1">
-                            {nomeCliente
-                              ? <span className="flex flex-1 text-left text-sm truncate">{nomeCliente}</span>
-                              : <SelectValue placeholder="Sem cliente" />}
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">Sem cliente</SelectItem>
-                            {clientesData?.data.map((c) => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                      );
-                    }} />
+                    <div className="flex-1">
+                      <Controller control={control} name="clienteId" render={({ field }) => (
+                        <ClienteSearch
+                          selectedId={field.value || undefined}
+                          selectedNome={clienteNome}
+                          onSelect={(c) => {
+                            field.onChange(c.id);
+                            setClienteId(c.id);
+                            setClienteNome(c.nome);
+                            setValue("animalId", null);
+                          }}
+                          onClear={() => {
+                            field.onChange("");
+                            setClienteId("");
+                            setClienteNome("");
+                            setValue("animalId", null);
+                          }}
+                        />
+                      )} />
+                    </div>
                     <Button
                       type="button" size="sm" variant="outline"
                       className="h-9 w-9 p-0 shrink-0 text-primary border-primary/40 hover:bg-primary/10"
