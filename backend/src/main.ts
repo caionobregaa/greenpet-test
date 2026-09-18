@@ -96,7 +96,7 @@ async function bootstrap(): Promise<void> {
   registerLembretesRoutes(app, prisma)
 
   await app.listen({ port: env.PORT, host: env.HOST })
-  console.log(`🚀 GreenPET API rodando em http://${env.HOST}:${env.PORT}`)
+  console.log(`🚀 BEEZ PET API rodando em http://${env.HOST}:${env.PORT}`)
 }
 
 bootstrap().catch((err) => {

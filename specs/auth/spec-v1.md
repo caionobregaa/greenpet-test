@@ -18,7 +18,7 @@ Ver [rules.md](rules.md).
 **Request:**
 ```json
 {
-  "email": "admin@greenpet.com",
+  "email": "admin@beezpet.com",
   "senha": "senha123"
 }
 ```
@@ -33,7 +33,7 @@ Ver [rules.md](rules.md).
     "user": {
       "id": "uuid",
       "nome": "Admin",
-      "email": "admin@greenpet.com",
+      "email": "admin@beezpet.com",
       "papel": "admin"
     }
   }

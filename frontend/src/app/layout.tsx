@@ -25,7 +25,7 @@ const dmSerifDisplay = DM_Serif_Display({
 });
 
 export const metadata: Metadata = {
-  title: "GreenPET – Sistema de Gestão",
+  title: "BEEZ PET – Sistema de Gestão",
   description: "Sistema de gestão para pet shop",
 };
 

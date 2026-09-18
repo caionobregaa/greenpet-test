@@ -1,4 +1,4 @@
-# AGENTS.md — GreenPET API
+# AGENTS.md — BEEZ PET API
 
 Este arquivo define os papéis dos agentes de IA no processo de Spec-Driven Development (SDD) deste projeto.
 

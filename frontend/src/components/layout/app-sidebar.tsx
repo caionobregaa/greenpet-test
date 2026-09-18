@@ -105,7 +105,7 @@ export function AppSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: A
             className="text-[16px] font-semibold leading-tight whitespace-nowrap tracking-tight"
             style={{ color: "#d4ead4", fontFamily: "var(--font-sora)" }}
           >
-            GreenPET
+            BEEZ PET
           </p>
           <p className="text-[9px] tracking-widest uppercase whitespace-nowrap" style={{ color: "#5a7a5a" }}>
             Gestão Pet Shop

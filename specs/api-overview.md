@@ -1,8 +1,8 @@
-# GreenPET REST API — Visão Geral
+# BEEZ PET REST API — Visão Geral
 
 ## Contexto
 
-API RESTful para o sistema de gestão GreenPET (pet shop). Substitui o mock de dados em `localStorage` do frontend HTML por um backend persistente e multi-usuário.
+API RESTful para o sistema de gestão BEEZ PET (pet shop). Substitui o mock de dados em `localStorage` do frontend HTML por um backend persistente e multi-usuário.
 
 ## Convenções Gerais
 

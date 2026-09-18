@@ -40,7 +40,7 @@ export function ReciboPrint({ venda, clienteDetail, className }: ReciboPrintProp
   return (
     <div className={cn("font-mono text-black bg-white w-[80mm] p-2 text-[11px] leading-snug", className)}>
       <div className="text-center mb-1.5">
-        <p className="text-sm font-bold tracking-wide">GreenPET</p>
+        <p className="text-sm font-bold tracking-wide">BEEZ PET</p>
         <p className="text-[10px]">Recibo de Venda</p>
       </div>
 

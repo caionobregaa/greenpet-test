@@ -25,47 +25,54 @@ async function nextSku(categoria: string): Promise<string> {
   return `${prefix}-${String(rows[0].nextval).padStart(4, '0')}`
 }
 
+/**
+ * Cria o usuário pelo e-mail novo (@beezpet.com) se ele já existir; senão,
+ * renomeia in-place quem ainda estiver com o e-mail antigo (@greenpet.com) do
+ * tempo da marca GreenPET — preserva o mesmo id/histórico do usuário em vez
+ * de duplicar a conta. Se nenhum dos dois existir (instalação nova), cria.
+ */
+async function upsertUserRenamingEmail(
+  emailAntigo: string,
+  emailNovo: string,
+  data: { nome: string; senhaHash: string; papel: string },
+): Promise<void> {
+  const existenteNovo = await prisma.user.findUnique({ where: { email: emailNovo } })
+  if (existenteNovo) return
+
+  const existenteAntigo = await prisma.user.findUnique({ where: { email: emailAntigo } })
+  if (existenteAntigo) {
+    await prisma.user.update({ where: { id: existenteAntigo.id }, data: { email: emailNovo, nome: data.nome } })
+    console.log(`✅ Usuário renomeado: ${emailAntigo} → ${emailNovo}`)
+    return
+  }
+
+  await prisma.user.create({ data: { ...data, email: emailNovo } })
+  console.log(`✅ Usuário criado: ${emailNovo}`)
+}
+
 async function main(): Promise<void> {
   console.log('🌱 Seeding banco de dados...')
 
   const senhaHash = await bcrypt.hash('admin123', 12)
-  await prisma.user.upsert({
-    where: { email: 'admin@greenpet.com' },
-    update: {},
-    create: {
-      nome: 'Administrador',
-      email: 'admin@greenpet.com',
-      senhaHash,
-      papel: 'admin',
-    },
+  await upsertUserRenamingEmail('admin@greenpet.com', 'admin@beezpet.com', {
+    nome: 'Administrador',
+    senhaHash,
+    papel: 'admin',
   })
-  console.log('✅ Usuário admin criado: admin@greenpet.com / admin123')
 
   const senhaCaio = await bcrypt.hash('Caio!225', 12)
-  await prisma.user.upsert({
-    where: { email: 'caionobrega@greenpet.com' },
-    update: {},
-    create: {
-      nome: 'Caio Nóbrega (ADMIN)',
-      email: 'caionobrega@greenpet.com',
-      senhaHash: senhaCaio,
-      papel: 'admin',
-    },
+  await upsertUserRenamingEmail('caionobrega@greenpet.com', 'caionobrega@beezpet.com', {
+    nome: 'Caio Nóbrega (ADMIN)',
+    senhaHash: senhaCaio,
+    papel: 'admin',
   })
-  console.log('✅ Usuário criado: caionobrega@greenpet.com')
 
   const senhaLucy = await bcrypt.hash('124578', 12)
-  await prisma.user.upsert({
-    where: { email: 'lucynobrega@greenpet.com' },
-    update: {},
-    create: {
-      nome: 'Lucy Nóbrega (ADMIN)',
-      email: 'lucynobrega@greenpet.com',
-      senhaHash: senhaLucy,
-      papel: 'admin',
-    },
+  await upsertUserRenamingEmail('lucynobrega@greenpet.com', 'lucynobrega@beezpet.com', {
+    nome: 'Lucy Nóbrega (ADMIN)',
+    senhaHash: senhaLucy,
+    papel: 'admin',
   })
-  console.log('✅ Usuário criado: lucynobrega@greenpet.com')
 
   await seedProdutosPrime(prisma)
   await seedProdutosBasso(prisma)

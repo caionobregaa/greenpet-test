@@ -15,15 +15,15 @@ function fmtDate(iso: string | null | undefined): string {
 }
 
 const GREEN:       [number, number, number] = [45, 122, 45];
-const LOGO_GREEN:  [number, number, number] = [74, 124, 39];   // "Green" part of wordmark
-const LOGO_BROWN:  [number, number, number] = [62,  44, 26];   // "pet" part of wordmark
+const LOGO_GOLD:   [number, number, number] = [212, 155, 41];  // "Beez" part of wordmark (mascote)
+const LOGO_BROWN:  [number, number, number] = [62,  44, 26];   // "Pet" part of wordmark (mascote)
 const DARK:        [number, number, number] = [30,  30,  30];
 const GRAY:        [number, number, number] = [110, 110, 110];
 const LIGHT:       [number, number, number] = [245, 249, 245];
 const WHITE:       [number, number, number] = [255, 255, 255];
 
 const EMPRESA = {
-  nome:     "GreenPet",
+  nome:     "Beez Pet",
   razao:    "L C DO N AMORIM NETA",
   cnpj:     "65.788.498/0001-44",
   endereco: "Avenida Duque de Caxias, 1225",
@@ -50,7 +50,7 @@ function drawFooter(doc: jsPDF, pageNum: number, totalPages: number): void {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(130, 130, 130);
-  doc.text("GreenPET — Sistema de Gestão para Pet Shop", MARGIN, y);
+  doc.text("BEEZ PET — Sistema de Gestão para Pet Shop", MARGIN, y);
   doc.text(`Página ${pageNum}/${totalPages}`, PAGE_W / 2, y, { align: "center" });
   doc.text(`Emitido em ${new Date().toLocaleDateString("pt-BR")}`, PAGE_W - MARGIN, y, { align: "right" });
 }
@@ -69,14 +69,14 @@ export function gerarOrcamentoPDF(
 
   // ── 1. Cabeçalho: Logo wordmark (esquerda) + Dados da empresa ───────
 
-  // Logo wordmark: "Green" (verde) + "pet" (marrom), espelhando a marca
+  // Logo wordmark: "Beez" (dourado) + " Pet" (marrom), espelhando a marca
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
-  doc.setTextColor(...LOGO_GREEN);
-  doc.text("Green", M, y);
-  const greenW = doc.getTextWidth("Green");
+  doc.setTextColor(...LOGO_GOLD);
+  doc.text("Beez", M, y);
+  const beezW = doc.getTextWidth("Beez");
   doc.setTextColor(...LOGO_BROWN);
-  doc.text("pet", M + greenW, y);
+  doc.text(" Pet", M + beezW, y);
   y += 7;
 
   // Dados da empresa abaixo do logo
@@ -351,13 +351,13 @@ export async function compartilharOrcamentoPDF(
 
   const blob = gerarOrcamentoPDF(orcamento, cliente, animal, produtoImages, { returnBlob: true });
   if (!blob) throw new Error("Falha ao gerar PDF do orçamento");
-  const fileName = `orcamento-greenpet-${pedidoNum}.pdf`;
+  const fileName = `orcamento-beezpet-${pedidoNum}.pdf`;
   const file = new File([blob], fileName, { type: "application/pdf" });
 
   const clienteNome = cliente?.nome?.split(" ")[0] ?? "";
   const msg = [
     `Olá${clienteNome ? `, ${clienteNome}` : ""}! 🐾`,
-    `Segue o orçamento da *GreenPet* Nº ${pedidoNum}.`,
+    `Segue o orçamento da *Beez Pet* Nº ${pedidoNum}.`,
     ``,
     `*Total:* ${brl(orcamento.total)}`,
     `*Válido até:* ${fmtDate(orcamento.validade)}`,
@@ -371,7 +371,7 @@ export async function compartilharOrcamentoPDF(
 
   if (canShareFiles) {
     await navigator.share({
-      title: `Orçamento GreenPet Nº ${pedidoNum}`,
+      title: `Orçamento Beez Pet Nº ${pedidoNum}`,
       text: msg,
       files: [file],
     });

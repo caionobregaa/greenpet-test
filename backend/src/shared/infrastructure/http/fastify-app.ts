@@ -21,7 +21,7 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GreenPET API</title>
+  <title>BEEZ PET API</title>
   <style>
     body { font-family: sans-serif; max-width: 600px; margin: 60px auto; padding: 0 20px; color: #333; }
     h1 { color: #2d7a2d; }
@@ -32,12 +32,12 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   </style>
 </head>
 <body>
-  <h1>🐾 GreenPET API</h1>
+  <h1>🐝 BEEZ PET API</h1>
   <p><span class="badge">online</span> &nbsp; Versão 1.0.0</p>
   <p>A API está funcionando. Use um cliente REST (Postman, Insomnia) para interagir.</p>
   <h3>Autenticação</h3>
   <p>Faça login em <code>POST /api/v1/auth/login</code> com:</p>
-  <pre>{ "email": "admin@greenpet.com", "password": "admin123" }</pre>
+  <pre>{ "email": "admin@beezpet.com", "password": "admin123" }</pre>
   <h3>Rotas disponíveis</h3>
   <ul>
     <li><code>POST /api/v1/auth/login</code></li>
@@ -57,7 +57,7 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   })
 
   app.get('/health', { config: { public: true } }, async (_req, reply) => {
-    reply.send({ status: 'ok', app: 'GreenPET API', version: '1.0.0' })
+    reply.send({ status: 'ok', app: 'BEEZ PET API', version: '1.0.0' })
   })
 
   registerAuthHook(app)

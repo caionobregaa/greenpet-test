@@ -69,7 +69,7 @@ export default function LoginPage() {
       <div className="relative h-56 lg:h-auto lg:w-1/2 shrink-0">
         <Image
           src="/joij-login.jpg"
-          alt="GreenPET — um pet feliz"
+          alt="BEEZ PET — um pet feliz"
           fill
           className="object-cover object-[center_25%]"
           priority
@@ -85,7 +85,7 @@ export default function LoginPage() {
             >
               <span className="text-[15px]">🐾</span>
             </div>
-            <span className="text-white/90 text-[15px] lg:text-base font-semibold tracking-tight">GreenPET</span>
+            <span className="text-white/90 text-[15px] lg:text-base font-semibold tracking-tight">BEEZ PET</span>
           </div>
 
           {/* Mobile: tagline simples na base do banner */}
@@ -113,7 +113,7 @@ export default function LoginPage() {
               ))}
             </ul>
             <p className="text-white/30 text-[11px] mt-10 tracking-wider uppercase">
-              GreenPET © {new Date().getFullYear()} · Manaus, AM
+              BEEZ PET © {new Date().getFullYear()} · Manaus, AM
             </p>
           </div>
         </div>
@@ -178,7 +178,7 @@ export default function LoginPage() {
           </form>
 
           <p className="text-center text-[11px] text-muted-foreground/50 mt-8 tracking-wider uppercase">
-            GreenPET © {new Date().getFullYear()} · Manaus, AM
+            BEEZ PET © {new Date().getFullYear()} · Manaus, AM
           </p>
         </div>
       </div>

@@ -28,7 +28,7 @@ import { CATEGORIAS_DESPESA_PADRAO } from "@/lib/types/compra";
 
 // ── Categorias (localStorage persistence) ─────────────────────────────────────
 
-const STORAGE_KEY = "greenpet:categorias_despesa";
+const STORAGE_KEY = "beezpet:categorias_despesa";
 
 function loadCategorias(): string[] {
   if (typeof window === "undefined") return CATEGORIAS_DESPESA_PADRAO;

@@ -1,4 +1,4 @@
-const STORAGE_KEY = "greenpet:distribuidoras";
+const STORAGE_KEY = "beezpet:distribuidoras";
 
 export const DISTRIBUIDORAS_PADRAO = [
   "DUNORTE",

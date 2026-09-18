@@ -4,9 +4,9 @@ import { User } from '@/modules/auth/domain/entities/user.entity'
 describe('User entity', () => {
   describe('create', () => {
     it('cria usuário com dados válidos', () => {
-      const user = User.create({ nome: 'Admin', email: 'admin@greenpet.com', senhaHash: 'hash' })
+      const user = User.create({ nome: 'Admin', email: 'admin@beezpet.com', senhaHash: 'hash' })
       expect(user.nome).toBe('Admin')
-      expect(user.email).toBe('admin@greenpet.com')
+      expect(user.email).toBe('admin@beezpet.com')
       expect(user.loginAttempts).toBe(0)
       expect(user.lockedUntil).toBeUndefined()
     })
@@ -14,7 +14,7 @@ describe('User entity', () => {
 
   describe('recordFailedLogin', () => {
     it('incrementa tentativas a cada chamada', () => {
-      const user = User.create({ nome: 'Admin', email: 'admin@greenpet.com', senhaHash: 'hash' })
+      const user = User.create({ nome: 'Admin', email: 'admin@beezpet.com', senhaHash: 'hash' })
       user.recordFailedLogin()
       user.recordFailedLogin()
       expect(user.loginAttempts).toBe(2)
@@ -22,7 +22,7 @@ describe('User entity', () => {
     })
 
     it('bloqueia conta na 5ª falha e define lockedUntil', () => {
-      const user = User.create({ nome: 'Admin', email: 'admin@greenpet.com', senhaHash: 'hash' })
+      const user = User.create({ nome: 'Admin', email: 'admin@beezpet.com', senhaHash: 'hash' })
       for (let i = 0; i < 5; i++) user.recordFailedLogin()
       expect(user.isLocked).toBe(true)
       expect(user.lockedUntil).toBeDefined()
@@ -30,7 +30,7 @@ describe('User entity', () => {
 
     it('lockedUntil é aproximadamente 15 minutos no futuro', () => {
       const before = Date.now()
-      const user = User.create({ nome: 'Admin', email: 'admin@greenpet.com', senhaHash: 'hash' })
+      const user = User.create({ nome: 'Admin', email: 'admin@beezpet.com', senhaHash: 'hash' })
       for (let i = 0; i < 5; i++) user.recordFailedLogin()
       const lockMs = user.lockedUntil!.getTime()
       expect(lockMs).toBeGreaterThan(before + 14 * 60 * 1000)
@@ -40,7 +40,7 @@ describe('User entity', () => {
 
   describe('resetLoginAttempts', () => {
     it('zera tentativas e remove bloqueio', () => {
-      const user = User.create({ nome: 'Admin', email: 'admin@greenpet.com', senhaHash: 'hash' })
+      const user = User.create({ nome: 'Admin', email: 'admin@beezpet.com', senhaHash: 'hash' })
       for (let i = 0; i < 5; i++) user.recordFailedLogin()
       user.resetLoginAttempts()
       expect(user.loginAttempts).toBe(0)

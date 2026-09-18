@@ -24,7 +24,7 @@ function getPageMeta(pathname: string) {
   for (const [key, meta] of Object.entries(PAGE_TITLES)) {
     if (pathname.startsWith(key + "/")) return meta;
   }
-  return { title: "GreenPET" };
+  return { title: "BEEZ PET" };
 }
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
