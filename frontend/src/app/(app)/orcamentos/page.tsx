@@ -461,7 +461,7 @@ export default function OrcamentosPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1 justify-end flex-wrap">
-                  {o.status === "pendente" && (
+                  {o.status === "aberto" && (
                     <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => setEditOrcamento(o)}>
                       <Pencil className="w-3.5 h-3.5" />
                       Editar
@@ -526,7 +526,7 @@ export default function OrcamentosPage() {
                   <td className="px-4 py-3 text-right font-bold text-primary font-mono">{formatBRL(o.total)}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1 justify-end">
-                      {o.status === "pendente" && (
+                      {o.status === "aberto" && (
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setEditOrcamento(o)}>
                           <Pencil className="w-3.5 h-3.5" />
                         </Button>

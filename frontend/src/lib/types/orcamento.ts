@@ -1,4 +1,4 @@
-export type OrcamentoStatus = "pendente" | "aprovado" | "recusado";
+export type OrcamentoStatus = "aberto" | "fechado" | "perdido";
 
 export interface OrcamentoItem {
   id: string;
@@ -20,10 +20,13 @@ export interface Orcamento {
   animalId: string | null;
   animal?: { nome: string } | null;
   status: OrcamentoStatus;
+  motivoPerda?: string | null;
   total: number;
   obs: string | null;
   vendaId: string | null;
   formasPag: string[];
+  descontoRecompraAplicado?: boolean;
+  valorDescontoRecompra?: number | null;
   createdAt: string;
   updatedAt: string;
   itens: OrcamentoItem[];

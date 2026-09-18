@@ -1,7 +1,7 @@
 import { api } from "./client";
 import type { ApiResponse, ApiMeta } from "@/lib/types/api";
 import type { Orcamento } from "@/lib/types/orcamento";
-import type { CreateOrcamentoInput, UpdateOrcamentoInput, ConverterOrcamentoInput } from "@/lib/schemas/orcamento.schema";
+import type { CreateOrcamentoInput, UpdateOrcamentoInput, ConverterOrcamentoInput, MotivoPerda } from "@/lib/schemas/orcamento.schema";
 import type { Venda } from "@/lib/types/venda";
 
 interface ListParams {
@@ -44,8 +44,8 @@ export const apiOrcamentos = {
     return data.data;
   },
 
-  updateStatus: async (id: string, acao: "aprovar" | "recusar" | "reabrir"): Promise<Orcamento> => {
-    const { data } = await api.patch<ApiResponse<Orcamento>>(`/orcamentos/${id}/status`, { acao });
+  updateStatus: async (id: string, acao: "fechar" | "perder" | "reabrir", motivo?: MotivoPerda): Promise<Orcamento> => {
+    const { data } = await api.patch<ApiResponse<Orcamento>>(`/orcamentos/${id}/status`, { acao, motivo });
     return data.data;
   },
 

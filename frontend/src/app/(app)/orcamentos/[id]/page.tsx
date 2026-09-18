@@ -23,6 +23,7 @@ import { apiClientes } from "@/lib/api/clientes";
 import { apiAnimais } from "@/lib/api/animais";
 import { apiProdutos } from "@/lib/api/produtos";
 import { gerarOrcamentoPDF, compartilharOrcamentoPDF } from "@/lib/utils/orcamento-pdf";
+import { MOTIVOS_PERDA, type MotivoPerda } from "@/lib/schemas/orcamento.schema";
 
 // ── Taxas de cartão ────────────────────────────────────────────────────────────
 const TAXAS = {
@@ -69,6 +70,8 @@ export default function OrcamentoDetailPage({ params }: Props) {
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [converterOpen, setConverterOpen] = useState(false);
+  const [perderOpen, setPerderOpen] = useState(false);
+  const [motivoPerda, setMotivoPerda] = useState<MotivoPerda | "">("");
   const [pagamento, setPagamento] = useState("");
   const [pdfLoading, setPdfLoading] = useState(false);
   const [waLoading, setWaLoading] = useState(false);
@@ -80,13 +83,20 @@ export default function OrcamentoDetailPage({ params }: Props) {
   const valorTaxa = taxa ? (totalBruto * taxa.pct) / 100 : 0;
   const lucroLiquido = totalBruto - valorTaxa;
 
-  async function handleStatus(acao: "aprovar" | "recusar" | "reabrir") {
+  async function handleStatus(acao: "fechar" | "perder" | "reabrir", motivo?: MotivoPerda) {
     try {
-      await updateStatus.mutateAsync({ id, acao });
-      toast.success(`Orçamento ${acao === "aprovar" ? "aprovado" : acao === "recusar" ? "recusado" : "reaberto"}!`);
+      await updateStatus.mutateAsync({ id, acao, motivo });
+      toast.success(`Orçamento ${acao === "fechar" ? "fechado" : acao === "perder" ? "marcado como perdido" : "reaberto"}!`);
     } catch {
       toast.error("Erro ao atualizar status.");
     }
+  }
+
+  async function handlePerder() {
+    if (!motivoPerda) { toast.error("Selecione o motivo da perda."); return; }
+    await handleStatus("perder", motivoPerda);
+    setPerderOpen(false);
+    setMotivoPerda("");
   }
 
   async function handleConverter() {
@@ -193,23 +203,23 @@ export default function OrcamentoDetailPage({ params }: Props) {
 
       {/* Ações de status */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {orcamento.status === "pendente" && (
+        {orcamento.status === "aberto" && (
           <>
-            <Button size="sm" onClick={() => handleStatus("aprovar")} disabled={updateStatus.isPending} className="bg-[#00897b] hover:bg-[#004d40] text-white">
+            <Button size="sm" onClick={() => handleStatus("fechar")} disabled={updateStatus.isPending} className="bg-[#00897b] hover:bg-[#004d40] text-white">
               {updateStatus.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle className="w-4 h-4 mr-2" />}
-              Aprovar
+              Fechar
             </Button>
-            <Button size="sm" variant="outline" onClick={() => handleStatus("recusar")} disabled={updateStatus.isPending} className="text-destructive border-destructive hover:bg-destructive/10">
-              <XCircle className="w-4 h-4 mr-2" />Recusar
+            <Button size="sm" variant="outline" onClick={() => setPerderOpen(true)} disabled={updateStatus.isPending} className="text-destructive border-destructive hover:bg-destructive/10">
+              <XCircle className="w-4 h-4 mr-2" />Marcar como perdido
             </Button>
           </>
         )}
-        {orcamento.status === "recusado" && (
+        {orcamento.status === "perdido" && (
           <Button size="sm" variant="outline" onClick={() => handleStatus("reabrir")} disabled={updateStatus.isPending} className="text-amber-700 border-amber-400 hover:bg-amber-50">
             <RotateCcw className="w-4 h-4 mr-2" />Reabrir
           </Button>
         )}
-        {orcamento.status === "aprovado" && !orcamento.vendaId && (
+        {orcamento.status === "fechado" && !orcamento.vendaId && (
           <Button size="sm" onClick={() => setConverterOpen(true)}>
             <RefreshCw className="w-4 h-4 mr-2" />Converter para Venda
           </Button>
@@ -220,6 +230,9 @@ export default function OrcamentoDetailPage({ params }: Props) {
           </Button>
         )}
       </div>
+      {orcamento.status === "perdido" && orcamento.motivoPerda && (
+        <p className="text-sm text-muted-foreground mb-6 -mt-4">Motivo da perda: <span className="font-medium text-foreground">{orcamento.motivoPerda}</span></p>
+      )}
 
       {/* Info */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -322,6 +335,39 @@ export default function OrcamentoDetailPage({ params }: Props) {
               <Button onClick={handleConverter} disabled={converter.isPending || !pagamento}>
                 {converter.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                 Confirmar Venda
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Marcar como perdido */}
+      <Dialog open={perderOpen} onOpenChange={(o) => { setPerderOpen(o); if (!o) setMotivoPerda(""); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Marcar orçamento como perdido</DialogTitle></DialogHeader>
+          <div className="space-y-5">
+            <div className="space-y-1.5">
+              <Label>Motivo *</Label>
+              <Select value={motivoPerda} onValueChange={(v) => setMotivoPerda(v as MotivoPerda)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o motivo..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {MOTIVOS_PERDA.map((m) => (
+                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setPerderOpen(false)}>Cancelar</Button>
+              <Button
+                onClick={handlePerder}
+                disabled={updateStatus.isPending || !motivoPerda}
+                className="text-destructive-foreground bg-destructive hover:bg-destructive/90"
+              >
+                {updateStatus.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                Confirmar
               </Button>
             </div>
           </div>

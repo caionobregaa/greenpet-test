@@ -133,7 +133,7 @@ function ImportarOrcamento({
   async function load() {
     setLoading(true);
     try {
-      const { data } = await apiOrcamentos.list({ status: "pendente", limit: 50 });
+      const { data } = await apiOrcamentos.list({ status: "aberto", limit: 50 });
       setOrcamentos(data.filter((o) => !!o.clienteId));
     } catch {
       toast.error("Erro ao carregar orçamentos.");
@@ -160,7 +160,7 @@ function ImportarOrcamento({
               <Loader2 className="w-4 h-4 animate-spin" />Carregando...
             </div>
           ) : orcamentos.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">Nenhum orçamento pendente com cliente vinculado.</p>
+            <p className="text-sm text-muted-foreground text-center py-6">Nenhum orçamento aberto com cliente vinculado.</p>
           ) : (
             <table className="w-full text-sm">
               <thead>

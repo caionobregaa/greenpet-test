@@ -25,8 +25,21 @@ export const CreateOrcamentoSchema = z.object({
   itens: z.array(OrcamentoItemSchema).min(1, "Adicione pelo menos um item"),
 });
 
+export const MOTIVOS_PERDA = [
+  "Preço",
+  "Cliente desistiu",
+  "Comprou concorrente",
+  "Sem estoque",
+  "Produto indisponível",
+  "Frete/prazo",
+  "Parou de responder",
+  "Outro",
+] as const;
+export type MotivoPerda = (typeof MOTIVOS_PERDA)[number];
+
 export const UpdateOrcamentoStatusSchema = z.object({
-  acao: z.enum(["aprovar", "recusar", "reabrir"]),
+  acao: z.enum(["fechar", "perder", "reabrir"]),
+  motivo: z.enum(MOTIVOS_PERDA).optional(),
 });
 
 export const ConverterOrcamentoSchema = z.object({
