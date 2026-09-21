@@ -1,10 +1,18 @@
 -- AlterTable: registra o preço pago em cada lote de entrada de estoque (feature "preço de compra")
 ALTER TABLE "estoque_itens" ADD COLUMN IF NOT EXISTS "precoCompra" DECIMAL(10,2);
 
--- AddForeignKey: FK que já era esperada pelo schema (relação Orcamento -> Cliente) mas nunca
--- tinha sido criada no banco. clienteId já é opcional; nenhuma linha órfã encontrada.
-ALTER TABLE "orcamentos" ADD CONSTRAINT "orcamentos_clienteId_fkey"
-  FOREIGN KEY ("clienteId") REFERENCES "clientes"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+-- AddForeignKey: FK que já era esperada pelo schema (relação Orcamento -> Cliente). Em produção
+-- ela já existia (adicionada manualmente antes, sem migração registrada) mas no banco de dev
+-- local não — por isso a versão anterior desta migração (ADD CONSTRAINT sem guarda) quebrou o
+-- deploy em produção com "constraint already exists" (42710) e travou o container em crash-loop.
+-- Idempotente agora: aplica só se ainda não existir.
+DO $$
+BEGIN
+  ALTER TABLE "orcamentos" ADD CONSTRAINT "orcamentos_clienteId_fkey"
+    FOREIGN KEY ("clienteId") REFERENCES "clientes"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- NOTA: o diff automático do Prisma (migrate dev / db push) também propõe, a cada execução,
 -- dar DROP SEQUENCE em "orcamento_numero_seq" e "venda_numero_seq" (usadas pelos campos
