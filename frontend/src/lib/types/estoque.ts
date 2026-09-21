@@ -7,11 +7,13 @@ export interface EstoqueItem {
     categoria: string;
     imagemUrl: string | null;
     valorVenda: number;
+    valorCusto: number;
     marca: string | null;
   };
   quantidade: number;
   validade: string | null;
   lote: string | null;
+  precoCompra: number | null;
   obs: string | null;
   createdAt: string;
   updatedAt: string;

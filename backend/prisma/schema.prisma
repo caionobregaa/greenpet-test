@@ -118,6 +118,10 @@ model Produto {
 
 model Venda {
   id        String      @id @default(uuid())
+  // ATENÇÃO: qualquer `migrate dev`/`migrate diff`/`db push` gerado a partir deste schema vai
+  // propor (erroneamente) DROP SEQUENCE "venda_numero_seq" — falso positivo do Prisma, que não
+  // tem como declarar uma sequence nomeada e por isso "esquece" dela ao montar o estado alvo só
+  // a partir do texto do schema. NUNCA aplique esse trecho da migração gerada; remova-o à mão.
   numero    Int         @default(dbgenerated("nextval('venda_numero_seq'::regclass)"))
   data      DateTime
   clienteId String
@@ -160,6 +164,8 @@ model VendaItem {
 
 model Orcamento {
   id                       String          @id @default(uuid())
+  // Mesmo alerta do campo Venda.numero: nunca aplicar um DROP SEQUENCE gerado automaticamente
+  // para "orcamento_numero_seq" — veja o comentário em Venda.numero.
   numero                   Int             @default(dbgenerated("nextval('orcamento_numero_seq'::regclass)"))
   data                     DateTime
   validade                 DateTime
@@ -200,15 +206,16 @@ model OrcamentoItem {
 // ─────────────── ESTOQUE ───────────────
 
 model EstoqueItem {
-  id         String   @id @default(uuid())
-  produtoId  String
-  produto    Produto  @relation(fields: [produtoId], references: [id])
-  quantidade Int
-  validade   DateTime?
-  lote       String?
-  obs        String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id           String   @id @default(uuid())
+  produtoId    String
+  produto      Produto  @relation(fields: [produtoId], references: [id])
+  quantidade   Int
+  validade     DateTime?
+  lote         String?
+  precoCompra  Decimal? @db.Decimal(10, 2)
+  obs          String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@map("estoque_itens")
 }

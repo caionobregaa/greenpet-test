@@ -5,6 +5,7 @@ export const CreateEstoqueItemSchema = z.object({
   quantidade: z.coerce.number().int().positive(),
   validade: z.string().date().optional().transform((v) => v ? new Date(v) : undefined),
   lote: z.string().optional(),
+  precoCompra: z.coerce.number().min(0).optional(),
   obs: z.string().optional(),
 })
 
@@ -12,6 +13,7 @@ export const UpdateEstoqueItemSchema = z.object({
   quantidade: z.coerce.number().int().positive().optional(),
   validade: z.string().date().optional().nullable().transform((v) => v ? new Date(v) : null),
   lote: z.string().optional(),
+  precoCompra: z.coerce.number().min(0).optional().nullable(),
   obs: z.string().optional(),
 })
 

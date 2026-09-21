@@ -13,6 +13,7 @@ export interface CreateEstoqueItemInput {
   quantidade: number;
   validade?: string | null;
   lote?: string;
+  precoCompra?: number | null;
   obs?: string;
 }
 
@@ -20,6 +21,7 @@ export interface UpdateEstoqueItemInput {
   quantidade?: number;
   validade?: string | null;
   lote?: string;
+  precoCompra?: number | null;
   obs?: string;
 }
 

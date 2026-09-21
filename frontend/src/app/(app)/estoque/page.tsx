@@ -30,6 +30,24 @@ function validadeStatus(validade: string | null): { label: string; color: string
   return { label: formatDate(validade), color: "text-muted-foreground" };
 }
 
+function compraDiffInfo(precoCompra: number, custoRegistrado: number): { label: string; color: string } {
+  const diff = precoCompra - custoRegistrado;
+  if (Math.abs(diff) < 0.005) {
+    return { label: `Igual ao custo cadastrado (${formatBRL(custoRegistrado)})`, color: "text-muted-foreground" };
+  }
+  const pct = custoRegistrado > 0 ? (Math.abs(diff) / custoRegistrado) * 100 : 0;
+  if (diff > 0) {
+    return {
+      label: `${formatBRL(diff)} (${pct.toFixed(1)}%) mais caro que o custo cadastrado (${formatBRL(custoRegistrado)})`,
+      color: "text-destructive",
+    };
+  }
+  return {
+    label: `${formatBRL(Math.abs(diff))} (${pct.toFixed(1)}%) mais barato que o custo cadastrado (${formatBRL(custoRegistrado)})`,
+    color: "text-primary",
+  };
+}
+
 // ── Dialog: Adicionar lote ────────────────────────────────────────────────────
 
 function AdicionarLoteDialog({
@@ -37,16 +55,19 @@ function AdicionarLoteDialog({
   onOpenChange,
   produtoIdInicial,
   nomeProdutoInicial,
+  custoProdutoInicial,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   produtoIdInicial?: string;
   nomeProdutoInicial?: string;
+  custoProdutoInicial?: number;
 }) {
   const create = useCreateEstoqueItem();
 
   const [produtoId, setProdutoId] = useState(produtoIdInicial ?? "");
   const [produtoNome, setProdutoNome] = useState(nomeProdutoInicial ?? "");
+  const [custoRegistrado, setCustoRegistrado] = useState<number | undefined>(custoProdutoInicial);
   const [query, setQuery] = useState(nomeProdutoInicial ?? "");
   const [results, setResults] = useState<Produto[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -56,6 +77,7 @@ function AdicionarLoteDialog({
   const [quantidade, setQuantidade] = useState("1");
   const [validade, setValidade] = useState("");
   const [lote, setLote] = useState("");
+  const [precoCompra, setPrecoCompra] = useState("");
 
   function handleQueryChange(v: string) {
     setQuery(v);
@@ -78,6 +100,7 @@ function AdicionarLoteDialog({
   function selectProduto(p: Produto) {
     setProdutoId(p.id);
     setProdutoNome(p.nome);
+    setCustoRegistrado(p.valorCusto);
     setQuery(p.nome);
     setResults([]);
     setDropdownOpen(false);
@@ -87,6 +110,7 @@ function AdicionarLoteDialog({
   function clearProduto() {
     setProdutoId("");
     setProdutoNome("");
+    setCustoRegistrado(undefined);
     setQuery("");
     setResults([]);
     setDropdownOpen(false);
@@ -98,27 +122,40 @@ function AdicionarLoteDialog({
     if (!produtoId) { toast.error("Selecione um produto da lista."); return; }
     const qtd = parseInt(quantidade);
     if (!qtd || qtd < 1) { toast.error("Informe uma quantidade válida."); return; }
+    const preco = precoCompra.trim() ? parseFloat(precoCompra.replace(",", ".")) : undefined;
+    if (precoCompra.trim() && (preco === undefined || isNaN(preco) || preco < 0)) {
+      toast.error("Informe um preço de compra válido.");
+      return;
+    }
     try {
       await create.mutateAsync({
         produtoId,
         quantidade: qtd,
         validade: validade || null,
         lote: lote || undefined,
+        precoCompra: preco,
       });
       toast.success("Lote adicionado ao estoque!");
       if (!produtoIdInicial) {
         setProdutoId("");
         setProdutoNome("");
+        setCustoRegistrado(undefined);
         setQuery("");
       }
       setQuantidade("1");
       setValidade("");
       setLote("");
+      setPrecoCompra("");
       onOpenChange(false);
     } catch {
       toast.error("Erro ao adicionar lote.");
     }
   }
+
+  const precoCompraNum = precoCompra.trim() ? parseFloat(precoCompra.replace(",", ".")) : null;
+  const diffInfo = precoCompraNum !== null && !isNaN(precoCompraNum) && custoRegistrado != null
+    ? compraDiffInfo(precoCompraNum, custoRegistrado)
+    : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -211,6 +248,26 @@ function AdicionarLoteDialog({
               placeholder="Ex: L2024-001 (opcional)"
             />
           </div>
+          <div className="space-y-1.5">
+            <Label>
+              Preço de Compra (R$)
+              <span className="ml-1 text-muted-foreground font-normal text-xs">(opcional)</span>
+            </Label>
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              value={precoCompra}
+              onChange={(e) => setPrecoCompra(e.target.value)}
+              placeholder={custoRegistrado != null ? `Custo cadastrado: ${formatBRL(custoRegistrado)}` : "0,00"}
+            />
+            <p className="text-xs text-muted-foreground/70">
+              Registre o valor pago nesta compra para consultar depois se ficou mais caro ou mais barato que o custo cadastrado.
+            </p>
+            {diffInfo && (
+              <p className={`text-xs font-medium ${diffInfo.color}`}>{diffInfo.label}</p>
+            )}
+          </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" disabled={create.isPending}>
@@ -239,16 +296,22 @@ function EditarLoteDialog({
   const [quantidade, setQuantidade] = useState(item?.quantidade.toString() ?? "1");
   const [validade, setValidade] = useState(item?.validade?.slice(0, 10) ?? "");
   const [lote, setLote] = useState(item?.lote ?? "");
+  const [precoCompra, setPrecoCompra] = useState(item?.precoCompra != null ? String(item.precoCompra) : "");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!item) return;
     const qtd = parseInt(quantidade);
     if (!qtd || qtd < 1) { toast.error("Informe uma quantidade válida."); return; }
+    const preco = precoCompra.trim() ? parseFloat(precoCompra.replace(",", ".")) : null;
+    if (precoCompra.trim() && (preco === null || isNaN(preco) || preco < 0)) {
+      toast.error("Informe um preço de compra válido.");
+      return;
+    }
     try {
       await update.mutateAsync({
         id: item.id,
-        input: { quantidade: qtd, validade: validade || null, lote: lote || undefined },
+        input: { quantidade: qtd, validade: validade || null, lote: lote || undefined, precoCompra: preco },
       });
       toast.success("Lote atualizado!");
       onOpenChange(false);
@@ -258,6 +321,11 @@ function EditarLoteDialog({
   }
 
   if (!item) return null;
+
+  const precoCompraNum = precoCompra.trim() ? parseFloat(precoCompra.replace(",", ".")) : null;
+  const diffInfo = precoCompraNum !== null && !isNaN(precoCompraNum)
+    ? compraDiffInfo(precoCompraNum, item.produto.valorCusto)
+    : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -293,6 +361,23 @@ function EditarLoteDialog({
               placeholder="Ex: L2024-001 (opcional)"
             />
           </div>
+          <div className="space-y-1.5">
+            <Label>
+              Preço de Compra (R$)
+              <span className="ml-1 text-muted-foreground font-normal text-xs">(opcional)</span>
+            </Label>
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              value={precoCompra}
+              onChange={(e) => setPrecoCompra(e.target.value)}
+              placeholder={`Custo cadastrado: ${formatBRL(item.produto.valorCusto)}`}
+            />
+            {diffInfo && (
+              <p className={`text-xs font-medium ${diffInfo.color}`}>{diffInfo.label}</p>
+            )}
+          </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" disabled={update.isPending}>
@@ -312,7 +397,7 @@ export default function EstoquePage() {
   const [novoOpen, setNovoOpen] = useState(false);
   const [editItem, setEditItem] = useState<EstoqueItem | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [addParaProduto, setAddParaProduto] = useState<{ id: string; nome: string } | undefined>();
+  const [addParaProduto, setAddParaProduto] = useState<{ id: string; nome: string; valorCusto: number } | undefined>();
 
   const { data, isLoading } = useEstoque({ limit: 200 });
   const deleteItem = useDeleteEstoqueItem();
@@ -353,8 +438,8 @@ export default function EstoquePage() {
     }
   }
 
-  function handleAddParaProduto(produtoId: string, produtoNome: string) {
-    setAddParaProduto({ id: produtoId, nome: produtoNome });
+  function handleAddParaProduto(produtoId: string, produtoNome: string, produtoValorCusto: number) {
+    setAddParaProduto({ id: produtoId, nome: produtoNome, valorCusto: produtoValorCusto });
     setNovoOpen(true);
   }
 
@@ -447,7 +532,7 @@ export default function EstoquePage() {
                       variant="outline"
                       size="sm"
                       className="gap-1.5"
-                      onClick={() => handleAddParaProduto(produto.id, produto.nome)}
+                      onClick={() => handleAddParaProduto(produto.id, produto.nome, produto.valorCusto)}
                     >
                       <Plus className="w-3.5 h-3.5" />
                       Adicionar lote
@@ -472,6 +557,11 @@ export default function EstoquePage() {
                             </div>
                             {lote.lote && (
                               <p className="text-xs text-muted-foreground mt-0.5">Lote: {lote.lote}</p>
+                            )}
+                            {lote.precoCompra != null && (
+                              <p className={`text-xs mt-0.5 ${compraDiffInfo(lote.precoCompra, produto.valorCusto).color}`}>
+                                Comprado por {formatBRL(lote.precoCompra)}
+                              </p>
                             )}
                           </div>
                         </div>
@@ -507,6 +597,7 @@ export default function EstoquePage() {
         onOpenChange={(o) => { setNovoOpen(o); if (!o) setAddParaProduto(undefined); }}
         produtoIdInicial={addParaProduto?.id}
         nomeProdutoInicial={addParaProduto?.nome}
+        custoProdutoInicial={addParaProduto?.valorCusto}
       />
       <EditarLoteDialog
         key={editItem?.id ?? "edit"}

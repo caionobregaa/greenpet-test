@@ -19,7 +19,7 @@ export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient
         where,
         include: {
           produto: {
-            select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, marca: true },
+            select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, valorCusto: true, marca: true },
           },
         },
         skip: (q.data.page - 1) * q.data.limit,
@@ -37,6 +37,7 @@ export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient
         quantidade: r.quantidade,
         validade: r.validade,
         lote: r.lote,
+        precoCompra: r.precoCompra,
         obs: r.obs,
         createdAt: r.createdAt,
         updatedAt: r.updatedAt,
@@ -59,10 +60,11 @@ export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient
         quantidade: body.data.quantidade,
         validade: body.data.validade ?? null,
         lote: body.data.lote ?? null,
+        precoCompra: body.data.precoCompra ?? null,
         obs: body.data.obs ?? null,
       },
       include: {
-        produto: { select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, marca: true } },
+        produto: { select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, valorCusto: true, marca: true } },
       },
     })
 
@@ -83,10 +85,11 @@ export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient
         ...(body.data.quantidade !== undefined && { quantidade: body.data.quantidade }),
         ...(body.data.validade !== undefined && { validade: body.data.validade }),
         ...(body.data.lote !== undefined && { lote: body.data.lote }),
+        ...(body.data.precoCompra !== undefined && { precoCompra: body.data.precoCompra }),
         ...(body.data.obs !== undefined && { obs: body.data.obs }),
       },
       include: {
-        produto: { select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, marca: true } },
+        produto: { select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, valorCusto: true, marca: true } },
       },
     })
 
