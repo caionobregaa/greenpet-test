@@ -15,6 +15,13 @@ export function ProdutoInfoDialog({ produto, onOpenChange }: ProdutoInfoDialogPr
   const margem = produto.valorVenda > 0
     ? ((produto.valorVenda - produto.valorCusto) / produto.valorVenda) * 100
     : 0;
+  const margemAbaixoDoMinimo = margem < 20;
+
+  const temComponentesMargemLiquida =
+    produto.margemCartao != null || produto.margemImposto != null || produto.margemOperacao != null;
+  const margemLiquida = temComponentesMargemLiquida
+    ? margem - (produto.margemCartao ?? 0) - (produto.margemImposto ?? 0) - (produto.margemOperacao ?? 0)
+    : null;
 
   return (
     <Dialog open={!!produto} onOpenChange={onOpenChange}>
@@ -62,19 +69,32 @@ export function ProdutoInfoDialog({ produto, onOpenChange }: ProdutoInfoDialogPr
               <InfoRow label="Custo" value={formatBRL(produto.valorCusto)} mono />
               <InfoRow label="Venda" value={formatBRL(produto.valorVenda)} mono />
             </div>
-            <div className="bg-accent rounded-lg px-4 py-3 flex items-center justify-between">
-              <span className="text-xs font-semibold text-accent-foreground uppercase tracking-wide">Margem bruta</span>
-              <span className={`text-lg font-bold font-mono ${margem >= 30 ? "text-primary" : margem >= 15 ? "text-amber-600" : "text-destructive"}`}>
-                {margem.toFixed(1)}%
-              </span>
+            <div className="bg-accent rounded-lg px-4 py-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-accent-foreground uppercase tracking-wide">Margem bruta</span>
+                <span className={`text-lg font-bold font-mono ${margem >= 30 ? "text-primary" : margem >= 20 ? "text-amber-600" : "text-destructive"}`}>
+                  {margem.toFixed(1)}%
+                </span>
+              </div>
+              {margemAbaixoDoMinimo && (
+                <p className="text-xs text-destructive mt-1">
+                  Cuidado com essa margem, está abaixo do padrão mínimo que é 20%
+                </p>
+              )}
             </div>
-            {(produto.margemCartao != null || produto.margemImposto != null || produto.margemOperacao != null || produto.margemLucro != null) && (
+            {(produto.margemCartao != null || produto.margemImposto != null || produto.margemOperacao != null || margemLiquida != null) && (
               <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                 {produto.margemCartao != null && <InfoRow label="Margem Cartão" value={`${produto.margemCartao}%`} mono />}
                 {produto.margemImposto != null && <InfoRow label="Margem Imposto" value={`${produto.margemImposto}%`} mono />}
                 {produto.margemOperacao != null && <InfoRow label="Margem Operação" value={`${produto.margemOperacao}%`} mono />}
-                {produto.margemLucro != null && <InfoRow label="Margem Lucro" value={`${produto.margemLucro}%`} mono />}
+                {margemLiquida != null && <InfoRow label="Margem Líquida" value={`${margemLiquida.toFixed(1)}%`} mono />}
               </div>
+            )}
+            {margemLiquida != null && (
+              <p className="text-[11px] text-muted-foreground/70 leading-relaxed">
+                Margem líquida é uma estimativa base e pode variar: aumenta se a venda não emitir nota
+                fiscal e pode diminuir se for concedido desconto no Pix ao cliente.
+              </p>
             )}
           </div>
 

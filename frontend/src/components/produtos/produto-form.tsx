@@ -195,8 +195,23 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
   const unidadeEmbalagem = useWatch({ control, name: "unidadeEmbalagem" }) ?? "";
   const imagemUrl        = useWatch({ control, name: "imagemUrl" as keyof CreateProdutoInput });
 
-  const margem    = venda > 0 ? ((venda - custo) / venda) * 100 : 0;
-  const margemCor = margem >= 30 ? "text-primary" : margem >= 15 ? "text-amber-500" : "text-destructive";
+  const margem               = venda > 0 ? ((venda - custo) / venda) * 100 : 0;
+  const margemCor            = margem >= 30 ? "text-primary" : margem >= 20 ? "text-amber-500" : "text-destructive";
+  const margemAbaixoDoMinimo = venda > 0 && margem < 20;
+
+  const [margemDesejada, setMargemDesejada] = useState("");
+  const margemDesejadaNum = margemDesejada.trim() ? parseFloat(margemDesejada.replace(",", ".")) : null;
+  const margemDesejadaAbaixoDoMinimo =
+    margemDesejadaNum !== null && !isNaN(margemDesejadaNum) && margemDesejadaNum < 20;
+
+  function handleMargemDesejadaChange(valor: string) {
+    setMargemDesejada(valor);
+    const alvo = parseFloat(valor.replace(",", "."));
+    if (!custo || isNaN(alvo)) return;
+    const margemAplicada = Math.min(Math.max(alvo, 20), 95);
+    const novaVenda = custo / (1 - margemAplicada / 100);
+    setValue("valorVenda", Math.round(novaVenda * 100) / 100, { shouldValidate: true, shouldDirty: true });
+  }
 
   const subcategoriasSugeridas = SUBCATEGORIAS[categoria] ?? [];
 
@@ -452,11 +467,43 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
             {errors.valorVenda && <p className="text-xs text-destructive">{errors.valorVenda.message}</p>}
           </div>
 
+          <div className="col-span-1 sm:col-span-2 space-y-1.5">
+            <Label htmlFor="margemDesejada">
+              Calcular preço pela margem desejada
+              <span className="ml-1 text-muted-foreground font-normal text-xs">(opcional)</span>
+            </Label>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Input
+                id="margemDesejada"
+                type="number"
+                step="0.1"
+                min="20"
+                max="95"
+                value={margemDesejada}
+                onChange={(e) => handleMargemDesejadaChange(e.target.value)}
+                placeholder="Ex: 35"
+                disabled={!custo}
+                className="max-w-[140px]"
+              />
+              <span className="text-xs text-muted-foreground">
+                % sobre o custo — preenche o Preço de Venda automaticamente
+              </span>
+            </div>
+            {!custo && (
+              <p className="text-xs text-muted-foreground/70">Informe o custo primeiro para calcular pela margem.</p>
+            )}
+            {margemDesejadaAbaixoDoMinimo && (
+              <p className="text-xs text-destructive">
+                A margem mínima permitida é 20%. O preço foi calculado usando 20%.
+              </p>
+            )}
+          </div>
+
           {venda > 0 && (
             <div className="col-span-1 sm:col-span-2 rounded-lg border border-border bg-accent/40 px-4 py-3">
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div>
-                  <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Margem de Lucro</p>
+                  <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Margem Bruta</p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     ({formatBRL(venda)} − {formatBRL(custo)}) ÷ {formatBRL(venda)} × 100
                   </p>
@@ -467,10 +514,15 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
               </div>
               <div className="mt-2 h-1.5 rounded-full bg-border overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all ${margem >= 30 ? "bg-primary" : margem >= 15 ? "bg-amber-500" : "bg-destructive"}`}
+                  className={`h-full rounded-full transition-all ${margem >= 30 ? "bg-primary" : margem >= 20 ? "bg-amber-500" : "bg-destructive"}`}
                   style={{ width: `${Math.min(100, Math.max(0, margem))}%` }}
                 />
               </div>
+              {margemAbaixoDoMinimo && (
+                <p className="text-xs text-destructive mt-2">
+                  Cuidado com essa margem, está abaixo do padrão mínimo que é 20%
+                </p>
+              )}
             </div>
           )}
         </div>
