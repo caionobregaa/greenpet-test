@@ -1,5 +1,7 @@
 export type CurvaClasse = "A" | "B" | "C";
 
+export type MelhorMargemOrigem = "compra" | "custoCadastrado";
+
 export interface CurvaVendaItem {
   produtoId: string;
   produtoNome: string;
@@ -9,6 +11,8 @@ export interface CurvaVendaItem {
   percentualReceita: number;
   percentualAcumulado: number;
   curva: CurvaClasse;
+  melhorMargem: number;
+  melhorMargemOrigem: MelhorMargemOrigem;
 }
 
 export interface CurvaVendaMeta {
@@ -23,6 +27,7 @@ export type CurvaVendaSortField =
   | "quantidadeVendida"
   | "receitaTotal"
   | "percentualReceita"
-  | "percentualAcumulado";
+  | "percentualAcumulado"
+  | "melhorMargem";
 
 export type SortOrder = "asc" | "desc";

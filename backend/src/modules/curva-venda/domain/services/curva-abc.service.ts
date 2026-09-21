@@ -53,6 +53,7 @@ export type CurvaVendaSortField =
   | 'receitaTotal'
   | 'percentualReceita'
   | 'percentualAcumulado'
+  | 'melhorMargem'
 
 export type SortOrder = 'asc' | 'desc'
 
@@ -62,6 +63,7 @@ export interface Ordenavel {
   receitaTotal: number
   percentualReceita: number
   percentualAcumulado: number
+  melhorMargem: number
 }
 
 export function ordenarCurvaVenda<T extends Ordenavel>(

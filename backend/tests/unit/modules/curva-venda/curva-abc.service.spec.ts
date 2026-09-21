@@ -78,9 +78,9 @@ describe('curva-abc.service — calcularCurvaAbc', () => {
 
 describe('curva-abc.service — ordenarCurvaVenda', () => {
   const itens: (Ordenavel & { produtoId: string })[] = [
-    { produtoId: 'p1', categoria: 'Ração', quantidadeVendida: 50, receitaTotal: 5000, percentualReceita: 50, percentualAcumulado: 50 },
-    { produtoId: 'p2', categoria: 'Petisco', quantidadeVendida: 10, receitaTotal: 1000, percentualReceita: 10, percentualAcumulado: 90 },
-    { produtoId: 'p3', categoria: 'Acessório', quantidadeVendida: 30, receitaTotal: 3000, percentualReceita: 30, percentualAcumulado: 80 },
+    { produtoId: 'p1', categoria: 'Ração', quantidadeVendida: 50, receitaTotal: 5000, percentualReceita: 50, percentualAcumulado: 50, melhorMargem: 25 },
+    { produtoId: 'p2', categoria: 'Petisco', quantidadeVendida: 10, receitaTotal: 1000, percentualReceita: 10, percentualAcumulado: 90, melhorMargem: 40 },
+    { produtoId: 'p3', categoria: 'Acessório', quantidadeVendida: 30, receitaTotal: 3000, percentualReceita: 30, percentualAcumulado: 80, melhorMargem: 15 },
   ]
 
   it('retorna a lista sem alterações quando sortBy não é informado', () => {
@@ -112,6 +112,14 @@ describe('curva-abc.service — ordenarCurvaVenda', () => {
 
     const desc = ordenarCurvaVenda(itens, 'categoria', 'desc')
     expect(desc.map((r) => r.produtoId)).toEqual(['p1', 'p2', 'p3'])
+  })
+
+  it('ordena por melhorMargem', () => {
+    const desc = ordenarCurvaVenda(itens, 'melhorMargem')
+    expect(desc.map((r) => r.produtoId)).toEqual(['p2', 'p1', 'p3'])
+
+    const asc = ordenarCurvaVenda(itens, 'melhorMargem', 'asc')
+    expect(asc.map((r) => r.produtoId)).toEqual(['p3', 'p1', 'p2'])
   })
 
   it('não muta o array original', () => {

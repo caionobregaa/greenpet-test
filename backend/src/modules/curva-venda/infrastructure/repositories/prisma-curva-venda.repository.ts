@@ -16,6 +16,8 @@ export interface CurvaVendaProduto {
   percentualReceita: number
   percentualAcumulado: number
   curva: Curva
+  melhorMargem: number
+  melhorMargemOrigem: 'compra' | 'custoCadastrado'
 }
 
 export class PrismaCurvaVendaRepository {
@@ -56,9 +58,20 @@ export class PrismaCurvaVendaRepository {
         deletedAt: null,
         ...(params.categoria ? { categoria: params.categoria } : {}),
       },
-      select: { id: true, nome: true, categoria: true },
+      select: { id: true, nome: true, categoria: true, valorCusto: true, valorVenda: true },
     })
     const produtoMap = new Map(produtos.map((p) => [p.id, p]))
+
+    // Melhor margem de compra: menor preço de compra já registrado numa entrada de estoque
+    // (independe do período filtrado na tela). Sem registro, cai para o custo cadastrado.
+    const menoresCompras = await this.prisma.estoqueItem.groupBy({
+      by: ['produtoId'],
+      where: { produtoId: { in: produtoIds }, precoCompra: { not: null } },
+      _min: { precoCompra: true },
+    })
+    const menorCompraMap = new Map(
+      menoresCompras.map((m) => [m.produtoId, Number(m._min.precoCompra)]),
+    )
 
     const itens = grupos
       .filter((g) => g.produtoId && produtoMap.has(g.produtoId))
@@ -72,6 +85,11 @@ export class PrismaCurvaVendaRepository {
 
     const resultado: CurvaVendaProduto[] = curva.map((item) => {
       const produto = produtoMap.get(item.produtoId)!
+      const menorPrecoCompra = menorCompraMap.get(item.produtoId)
+      const custoBase = menorPrecoCompra ?? Number(produto.valorCusto)
+      const valorVenda = Number(produto.valorVenda)
+      const melhorMargem =
+        valorVenda > 0 ? Math.round(((valorVenda - custoBase) / valorVenda) * 100 * 100) / 100 : 0
       return {
         produtoId: item.produtoId,
         produtoNome: produto.nome,
@@ -81,6 +99,8 @@ export class PrismaCurvaVendaRepository {
         percentualReceita: item.percentualReceita,
         percentualAcumulado: item.percentualAcumulado,
         curva: item.curva,
+        melhorMargem,
+        melhorMargemOrigem: menorPrecoCompra != null ? 'compra' : 'custoCadastrado',
       }
     })
 

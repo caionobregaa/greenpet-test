@@ -9,7 +9,7 @@ const QuerySchema = z.object({
   dataInicio: z.string().datetime().optional(),
   dataFim: z.string().datetime().optional(),
   categoria: z.string().optional(),
-  sortBy: z.enum(['categoria', 'quantidadeVendida', 'receitaTotal', 'percentualReceita', 'percentualAcumulado']).optional(),
+  sortBy: z.enum(['categoria', 'quantidadeVendida', 'receitaTotal', 'percentualReceita', 'percentualAcumulado', 'melhorMargem']).optional(),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(200).default(50),

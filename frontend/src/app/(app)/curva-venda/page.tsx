@@ -174,11 +174,15 @@ export default function CurvaVendaPage() {
       </div>
 
       {/* Legenda */}
-      <div className="flex flex-wrap gap-3 mb-4 text-xs text-muted-foreground">
+      <div className="flex flex-wrap gap-3 mb-1 text-xs text-muted-foreground">
         <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-brand-600 inline-block" />A: até 80% da receita acumulada</div>
         <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-600 inline-block" />B: de 80% a 95% da receita acumulada</div>
         <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-muted-foreground/60 inline-block" />C: acima de 95% da receita acumulada</div>
       </div>
+      <p className="text-xs text-muted-foreground/70 mb-4">
+        Melhor Margem: margem bruta usando o menor preço de compra já registrado nas entradas de estoque do produto vs. o preço de venda atual.
+        Itens com <span className="font-medium">*</span> ainda não têm entrada de estoque com preço de compra registrado — o valor é estimado pelo custo cadastrado.
+      </p>
 
       <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
@@ -229,6 +233,14 @@ export default function CurvaVendaPage() {
                   align="right"
                   className="hidden lg:table-cell"
                 />
+                <SortableTh
+                  label="Melhor Margem"
+                  field="melhorMargem"
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSort={handleSort}
+                  align="right"
+                />
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Curva</th>
               </tr>
             </thead>
@@ -236,20 +248,20 @@ export default function CurvaVendaPage() {
               {isLoading ? (
                 Array.from({ length: 8 }).map((_, i) => (
                   <tr key={i} className="border-t border-border">
-                    {Array.from({ length: 7 }).map((_, j) => (
+                    {Array.from({ length: 8 }).map((_, j) => (
                       <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-full" /></td>
                     ))}
                   </tr>
                 ))
               ) : isError ? (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={8}>
                     <EmptyState message="Erro ao carregar a curva de venda" description="Tente novamente em instantes." />
                   </td>
                 </tr>
               ) : data?.data.length === 0 ? (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={8}>
                     <EmptyState message="Nenhum produto encontrado" description="Sem vendas registradas no período/categoria selecionados." />
                   </td>
                 </tr>
@@ -262,6 +274,22 @@ export default function CurvaVendaPage() {
                     <td className="px-4 py-3 text-right font-medium">{formatBRL(item.receitaTotal)}</td>
                     <td className="px-4 py-3 text-right text-muted-foreground hidden lg:table-cell">{formatPercent(item.percentualReceita)}</td>
                     <td className="px-4 py-3 text-right text-muted-foreground hidden lg:table-cell">{formatPercent(item.percentualAcumulado)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <span className={cn(
+                        "font-medium font-mono tabular-nums",
+                        item.melhorMargem >= 30 ? "text-primary" : item.melhorMargem >= 20 ? "text-amber-600" : "text-destructive"
+                      )}>
+                        {formatPercent(item.melhorMargem)}
+                      </span>
+                      {item.melhorMargemOrigem === "custoCadastrado" && (
+                        <span
+                          className="text-muted-foreground/70 ml-1 cursor-help"
+                          title="Sem entrada de estoque com preço de compra registrado ainda — estimado pelo custo cadastrado do produto."
+                        >
+                          *
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3"><CurvaPill curva={item.curva} /></td>
                   </tr>
                 ))
