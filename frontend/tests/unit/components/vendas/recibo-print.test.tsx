@@ -44,20 +44,49 @@ describe("ReciboPrint", () => {
     expect(screen.getByText(/FN Life Adulto Mini\/Pequeno 2,5kg/)).toBeInTheDocument();
   });
 
-  it("mostra o desconto de recompra quando venda.desconto > 0, com a contagem de compras anteriores", () => {
+  it("mostra o desconto total e a nota de recompra quando venda.desconto > 0, com a contagem de compras anteriores", () => {
     const clienteDetail = {
       vendas: Array.from({ length: 8 }, (_, i) => ({ id: `v${i}` })),
     } as unknown as ClienteDetail;
 
     render(<ReciboPrint venda={buildVenda()} clienteDetail={clienteDetail} />);
 
-    expect(screen.getByText(/Desconto recompra \(5%\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Desconto total/)).toBeInTheDocument();
+    expect(screen.getByText(/−R\$\s?5,41/)).toBeInTheDocument();
+    expect(screen.getByText(/Inclui recompra \(5%\)/)).toBeInTheDocument();
     expect(screen.getByText(/7ª\+ compra/)).toBeInTheDocument();
   });
 
-  it("não mostra desconto de recompra quando venda.desconto é 0", () => {
+  it("não mostra desconto nem nota de recompra quando não há desconto nenhum (nem item, nem venda)", () => {
     render(<ReciboPrint venda={buildVenda({ desconto: 0, total: 108.1 })} />);
-    expect(screen.queryByText(/Desconto recompra/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Desconto total/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Inclui recompra/)).not.toBeInTheDocument();
+  });
+
+  it("mostra o desconto total quando só o item tem desconto (sem desconto de venda/recompra)", () => {
+    const venda = buildVenda({
+      desconto: 0,
+      total: 90,
+      itens: [
+        { id: "item-1", produtoId: "p1", nome: "Ração X", qtd: 1, valorUnitario: 100, desconto: 10, total: 90 },
+      ],
+    });
+    render(<ReciboPrint venda={venda} />);
+    expect(screen.getByText(/Desconto total/)).toBeInTheDocument();
+    expect(screen.getByText(/−R\$\s?10,00/)).toBeInTheDocument();
+    expect(screen.queryByText(/Inclui recompra/)).not.toBeInTheDocument();
+  });
+
+  it("Subtotal mostra o valor bruto (sem desconto de item embutido)", () => {
+    const venda = buildVenda({
+      desconto: 0,
+      total: 85,
+      itens: [
+        { id: "item-1", produtoId: "p1", nome: "Ração X", qtd: 2, valorUnitario: 50, desconto: 15, total: 85 },
+      ],
+    });
+    render(<ReciboPrint venda={venda} />);
+    expect(screen.getByText(/Subtotal/).parentElement).toHaveTextContent("R$ 100,00");
   });
 
   it("mostra 'FRETE GRÁTIS' quando subtotal - desconto >= R$80", () => {

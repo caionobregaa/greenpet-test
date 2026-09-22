@@ -25,14 +25,16 @@ function formatEndereco(cliente?: ClienteDetail): string | null {
 }
 
 export function ReciboPrint({ venda, clienteDetail, className }: ReciboPrintProps) {
-  const subtotal = venda.itens.reduce((s, i) => s + i.total, 0);
+  const subtotalBruto = venda.itens.reduce((s, i) => s + i.qtd * i.valorUnitario, 0);
+  const descontoItens = venda.itens.reduce((s, i) => s + (i.desconto ?? 0), 0);
+  const descontoVenda = venda.desconto ?? 0;
+  const descontoTotal = descontoItens + descontoVenda;
   const endereco = formatEndereco(clienteDetail);
-  const descontoRecompra = venda.desconto ?? 0;
-  const clienteElegivelRecompra = descontoRecompra > 0;
+  const clienteElegivelRecompra = descontoVenda > 0;
   const quantidadeComprasAnteriores = clienteDetail
     ? Math.max(0, clienteDetail.vendas.length - 1)
     : undefined;
-  const freteGratis = subtotal - descontoRecompra >= FRETE_GRATIS_PISO;
+  const freteGratis = subtotalBruto - descontoTotal >= FRETE_GRATIS_PISO;
   const numeroVenda = venda.numero
     ? `V${String(venda.numero).padStart(4, "0")}`
     : venda.id.slice(-6).toUpperCase();
@@ -67,18 +69,21 @@ export function ReciboPrint({ venda, clienteDetail, className }: ReciboPrintProp
 
       <div className="flex justify-between">
         <span>Subtotal</span>
-        <span>{formatBRL(subtotal)}</span>
+        <span>{formatBRL(subtotalBruto)}</span>
       </div>
-      {clienteElegivelRecompra && (
+      {descontoTotal > 0 && (
         <div className="flex justify-between gap-2">
-          <span className="truncate">
-            Desconto recompra (5%)
-            {quantidadeComprasAnteriores !== undefined
-              ? ` — ${quantidadeComprasAnteriores}ª+ compra`
-              : ""}
-          </span>
-          <span className="shrink-0">−{formatBRL(descontoRecompra)}</span>
+          <span className="truncate">Desconto total</span>
+          <span className="shrink-0">−{formatBRL(descontoTotal)}</span>
         </div>
+      )}
+      {clienteElegivelRecompra && (
+        <p className="text-[10px] text-neutral-600 truncate">
+          Inclui recompra (5%)
+          {quantidadeComprasAnteriores !== undefined
+            ? ` — ${quantidadeComprasAnteriores}ª+ compra`
+            : ""}
+        </p>
       )}
       {venda.taxaEntrega > 0 && (
         <div className="flex justify-between">
