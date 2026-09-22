@@ -19,7 +19,7 @@ export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient
         where,
         include: {
           produto: {
-            select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, valorCusto: true, marca: true },
+            select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, valorCusto: true, marca: true, codigoBarras: true, semCodigoBarras: true },
           },
         },
         skip: (q.data.page - 1) * q.data.limit,
@@ -64,7 +64,7 @@ export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient
         obs: body.data.obs ?? null,
       },
       include: {
-        produto: { select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, valorCusto: true, marca: true } },
+        produto: { select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, valorCusto: true, marca: true, codigoBarras: true, semCodigoBarras: true } },
       },
     })
 
@@ -89,7 +89,7 @@ export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient
         ...(body.data.obs !== undefined && { obs: body.data.obs }),
       },
       include: {
-        produto: { select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, valorCusto: true, marca: true } },
+        produto: { select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, valorCusto: true, marca: true, codigoBarras: true, semCodigoBarras: true } },
       },
     })
 

@@ -29,6 +29,8 @@ interface ProdutoProps {
   sabor?: string
   marca?: string
   fornecedor?: string
+  codigoBarras?: string
+  semCodigoBarras: boolean
   pesoEmbalagem?: number
   unidadeEmbalagem?: string
   valorCusto: Money
@@ -57,6 +59,8 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     sabor?: string
     marca?: string
     fornecedor?: string
+    codigoBarras?: string | null
+    semCodigoBarras?: boolean
     pesoEmbalagem?: number
     unidadeEmbalagem?: string
     valorCusto?: number
@@ -89,6 +93,8 @@ export class Produto extends AggregateRoot<ProdutoProps> {
         sabor: data.sabor,
         marca: data.marca,
         fornecedor: data.fornecedor,
+        codigoBarras: data.codigoBarras ?? undefined,
+        semCodigoBarras: data.semCodigoBarras ?? false,
         pesoEmbalagem: data.pesoEmbalagem,
         unidadeEmbalagem: data.unidadeEmbalagem,
         valorCusto: Money.create(data.valorCusto ?? 0),
@@ -117,6 +123,8 @@ export class Produto extends AggregateRoot<ProdutoProps> {
   get sabor(): string | undefined { return this.props.sabor }
   get marca(): string | undefined { return this.props.marca }
   get fornecedor(): string | undefined { return this.props.fornecedor }
+  get codigoBarras(): string | undefined { return this.props.codigoBarras }
+  get semCodigoBarras(): boolean { return this.props.semCodigoBarras }
   get pesoEmbalagem(): number | undefined { return this.props.pesoEmbalagem }
   get unidadeEmbalagem(): string | undefined { return this.props.unidadeEmbalagem }
   get valorCusto(): number { return this.props.valorCusto.value }
@@ -154,6 +162,8 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     sabor: string
     marca: string
     fornecedor: string
+    codigoBarras: string | null
+    semCodigoBarras: boolean
     pesoEmbalagem: number
     unidadeEmbalagem: string
     valorCusto: number
@@ -183,6 +193,8 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     if (fields.sabor !== undefined) this.props.sabor = fields.sabor
     if (fields.marca !== undefined) this.props.marca = fields.marca
     if (fields.fornecedor !== undefined) this.props.fornecedor = fields.fornecedor
+    if (fields.codigoBarras !== undefined) this.props.codigoBarras = fields.codigoBarras ?? undefined
+    if (fields.semCodigoBarras !== undefined) this.props.semCodigoBarras = fields.semCodigoBarras
     if (fields.pesoEmbalagem !== undefined) this.props.pesoEmbalagem = fields.pesoEmbalagem
     if (fields.unidadeEmbalagem !== undefined) this.props.unidadeEmbalagem = fields.unidadeEmbalagem
     if (fields.margemCartao !== undefined) this.props.margemCartao = fields.margemCartao

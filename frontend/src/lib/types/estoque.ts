@@ -9,6 +9,8 @@ export interface EstoqueItem {
     valorVenda: number;
     valorCusto: number;
     marca: string | null;
+    codigoBarras: string | null;
+    semCodigoBarras: boolean;
   };
   quantidade: number;
   validade: string | null;

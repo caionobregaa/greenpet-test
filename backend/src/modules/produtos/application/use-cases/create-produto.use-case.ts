@@ -12,6 +12,8 @@ export interface CreateProdutoInput {
   sabor?: string
   marca?: string
   fornecedor?: string
+  codigoBarras?: string | null
+  semCodigoBarras?: boolean
   pesoEmbalagem?: number
   unidadeEmbalagem?: string
   valorCusto?: number

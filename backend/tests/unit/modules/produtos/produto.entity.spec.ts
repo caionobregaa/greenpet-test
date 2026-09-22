@@ -90,6 +90,43 @@ describe('Produto entity', () => {
     })
   })
 
+  describe('codigoBarras / semCodigoBarras', () => {
+    it('semCodigoBarras vem false por padrão quando não informado', () => {
+      const p = Produto.create({ nome: 'Ração', sku: 'RAC-0001', categoria: 'Ração', valorVenda: 10 })
+      expect(p.codigoBarras).toBeUndefined()
+      expect(p.semCodigoBarras).toBe(false)
+    })
+
+    it('aceita codigoBarras e semCodigoBarras na criação', () => {
+      const p = Produto.create({
+        nome: 'Ração', sku: 'RAC-0001', categoria: 'Ração', valorVenda: 10,
+        codigoBarras: '7891234567890',
+      })
+      expect(p.codigoBarras).toBe('7891234567890')
+      expect(p.semCodigoBarras).toBe(false)
+    })
+
+    it('marcar semCodigoBarras via update limpa o codigoBarras existente', () => {
+      const p = Produto.create({
+        nome: 'Ração', sku: 'RAC-0001', categoria: 'Ração', valorVenda: 10,
+        codigoBarras: '7891234567890',
+      })
+      p.update({ codigoBarras: null, semCodigoBarras: true })
+      expect(p.codigoBarras).toBeUndefined()
+      expect(p.semCodigoBarras).toBe(true)
+    })
+
+    it('informar um codigoBarras via update não desmarca semCodigoBarras sozinho (regra fica na UI)', () => {
+      const p = Produto.create({
+        nome: 'Ração', sku: 'RAC-0001', categoria: 'Ração', valorVenda: 10,
+        semCodigoBarras: true,
+      })
+      p.update({ codigoBarras: '7891234567890', semCodigoBarras: false })
+      expect(p.codigoBarras).toBe('7891234567890')
+      expect(p.semCodigoBarras).toBe(false)
+    })
+  })
+
   describe('faseDaVida / porte / sabor', () => {
     it('aceita os três campos na criação', () => {
       const p = Produto.create({

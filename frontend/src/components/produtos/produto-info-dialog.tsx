@@ -58,6 +58,10 @@ export function ProdutoInfoDialog({ produto, onOpenChange }: ProdutoInfoDialogPr
             {produto.sabor && <InfoRow label="Sabor" value={produto.sabor} />}
             {produto.marca && <InfoRow label="Marca" value={produto.marca} />}
             {produto.fornecedor && <InfoRow label="Fornecedor" value={produto.fornecedor} />}
+            {produto.codigoBarras && <InfoRow label="Código de Barras" value={produto.codigoBarras} mono />}
+            {!produto.codigoBarras && produto.semCodigoBarras && (
+              <InfoRow label="Código de Barras" value="Não possui" />
+            )}
             {produto.pesoEmbalagem != null && (
               <InfoRow label="Peso" value={`${produto.pesoEmbalagem} kg`} />
             )}

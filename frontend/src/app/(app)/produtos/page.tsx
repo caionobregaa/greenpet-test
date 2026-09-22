@@ -17,7 +17,7 @@ import type { Produto } from "@/lib/types/produto";
 import { DISTRIBUIDORAS_PADRAO, todasAsDistribuidoras } from "@/lib/utils/distribuidoras";
 
 const CATEGORIAS = ["Ração", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"];
-const ESPECIES   = ["Cão", "Gato", "Cão e Gato", "Ambos"];
+const ESPECIES   = ["Cão", "Gato", "Cão e Gato"];
 
 function FilterSelect({
   label,

@@ -28,6 +28,8 @@ function toResponse(p: Produto, estoque = 0) {
     sabor: p.sabor,
     marca: p.marca,
     fornecedor: p.fornecedor,
+    codigoBarras: p.codigoBarras,
+    semCodigoBarras: p.semCodigoBarras,
     pesoEmbalagem: p.pesoEmbalagem,
     unidadeEmbalagem: p.unidadeEmbalagem ?? null,
     valorCusto: p.valorCusto,

@@ -95,6 +95,8 @@ model Produto {
   sabor          String?
   marca          String?
   fornecedor     String?
+  codigoBarras     String?
+  semCodigoBarras  Boolean       @default(false)
   pesoEmbalagem     Decimal?      @db.Decimal(8, 2)
   unidadeEmbalagem  String?
   valorCusto        Decimal       @default(0) @db.Decimal(10, 2)

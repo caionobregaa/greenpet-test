@@ -4,6 +4,7 @@ import { useState, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2, Pencil, Package, AlertTriangle, Calendar, Search, X, Loader2 } from "lucide-react";
 import { useEstoque, useCreateEstoqueItem, useUpdateEstoqueItem, useDeleteEstoqueItem } from "@/lib/hooks/use-estoque";
+import { useUpdateProduto } from "@/lib/hooks/use-produtos";
 import { apiProdutos } from "@/lib/api/produtos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,18 +57,27 @@ function AdicionarLoteDialog({
   produtoIdInicial,
   nomeProdutoInicial,
   custoProdutoInicial,
+  codigoBarrasProdutoInicial,
+  semCodigoBarrasProdutoInicial,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   produtoIdInicial?: string;
   nomeProdutoInicial?: string;
   custoProdutoInicial?: number;
+  codigoBarrasProdutoInicial?: string | null;
+  semCodigoBarrasProdutoInicial?: boolean;
 }) {
   const create = useCreateEstoqueItem();
+  const updateProduto = useUpdateProduto();
 
   const [produtoId, setProdutoId] = useState(produtoIdInicial ?? "");
   const [produtoNome, setProdutoNome] = useState(nomeProdutoInicial ?? "");
   const [custoRegistrado, setCustoRegistrado] = useState<number | undefined>(custoProdutoInicial);
+  const [codigoBarrasOriginal, setCodigoBarrasOriginal] = useState<string | null>(codigoBarrasProdutoInicial ?? null);
+  const [semCodigoBarrasOriginal, setSemCodigoBarrasOriginal] = useState(semCodigoBarrasProdutoInicial ?? false);
+  const [codigoBarrasInput, setCodigoBarrasInput] = useState("");
+  const [semCodigoBarrasInput, setSemCodigoBarrasInput] = useState(false);
   const [query, setQuery] = useState(nomeProdutoInicial ?? "");
   const [results, setResults] = useState<Produto[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -78,6 +88,18 @@ function AdicionarLoteDialog({
   const [validade, setValidade] = useState("");
   const [lote, setLote] = useState("");
   const [precoCompra, setPrecoCompra] = useState("");
+
+  const produtoPendenteCodigoBarras = !!produtoId && !codigoBarrasOriginal && !semCodigoBarrasOriginal;
+
+  function handleCodigoBarrasInputChange(valor: string) {
+    setCodigoBarrasInput(valor);
+    if (valor.trim()) setSemCodigoBarrasInput(false);
+  }
+
+  function handleSemCodigoBarrasInputChange(marcado: boolean) {
+    setSemCodigoBarrasInput(marcado);
+    if (marcado) setCodigoBarrasInput("");
+  }
 
   function handleQueryChange(v: string) {
     setQuery(v);
@@ -101,6 +123,10 @@ function AdicionarLoteDialog({
     setProdutoId(p.id);
     setProdutoNome(p.nome);
     setCustoRegistrado(p.valorCusto);
+    setCodigoBarrasOriginal(p.codigoBarras);
+    setSemCodigoBarrasOriginal(p.semCodigoBarras);
+    setCodigoBarrasInput("");
+    setSemCodigoBarrasInput(false);
     setQuery(p.nome);
     setResults([]);
     setDropdownOpen(false);
@@ -111,6 +137,10 @@ function AdicionarLoteDialog({
     setProdutoId("");
     setProdutoNome("");
     setCustoRegistrado(undefined);
+    setCodigoBarrasOriginal(null);
+    setSemCodigoBarrasOriginal(false);
+    setCodigoBarrasInput("");
+    setSemCodigoBarrasInput(false);
     setQuery("");
     setResults([]);
     setDropdownOpen(false);
@@ -128,6 +158,15 @@ function AdicionarLoteDialog({
       return;
     }
     try {
+      if (produtoPendenteCodigoBarras && (codigoBarrasInput.trim() || semCodigoBarrasInput)) {
+        await updateProduto.mutateAsync({
+          id: produtoId,
+          input: {
+            codigoBarras: semCodigoBarrasInput ? null : codigoBarrasInput.trim(),
+            semCodigoBarras: semCodigoBarrasInput,
+          },
+        });
+      }
       await create.mutateAsync({
         produtoId,
         quantidade: qtd,
@@ -140,8 +179,12 @@ function AdicionarLoteDialog({
         setProdutoId("");
         setProdutoNome("");
         setCustoRegistrado(undefined);
+        setCodigoBarrasOriginal(null);
+        setSemCodigoBarrasOriginal(false);
         setQuery("");
       }
+      setCodigoBarrasInput("");
+      setSemCodigoBarrasInput(false);
       setQuantidade("1");
       setValidade("");
       setLote("");
@@ -268,10 +311,37 @@ function AdicionarLoteDialog({
               <p className={`text-xs font-medium ${diffInfo.color}`}>{diffInfo.label}</p>
             )}
           </div>
+          {produtoPendenteCodigoBarras && (
+            <div className="space-y-1.5 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
+              <Label htmlFor="codigoBarrasEstoque">Código de Barras do Produto</Label>
+              <p className="text-xs text-muted-foreground/70">
+                Esse produto ainda não tem código de barras registrado.
+              </p>
+              <div className="flex items-center gap-3 flex-wrap">
+                <Input
+                  id="codigoBarrasEstoque"
+                  value={codigoBarrasInput}
+                  onChange={(e) => handleCodigoBarrasInputChange(e.target.value)}
+                  placeholder="Ex: 7891234567890"
+                  disabled={semCodigoBarrasInput}
+                  className="flex-1 min-w-[200px]"
+                />
+                <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={semCodigoBarrasInput}
+                    onChange={(e) => handleSemCodigoBarrasInputChange(e.target.checked)}
+                    className="h-4 w-4 rounded border-input"
+                  />
+                  Sem código de barras
+                </label>
+              </div>
+            </div>
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit" disabled={create.isPending}>
-              {create.isPending ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Salvando...</> : "Adicionar"}
+            <Button type="submit" disabled={create.isPending || updateProduto.isPending}>
+              {create.isPending || updateProduto.isPending ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Salvando...</> : "Adicionar"}
             </Button>
           </div>
         </form>
@@ -292,11 +362,26 @@ function EditarLoteDialog({
   onOpenChange: (o: boolean) => void;
 }) {
   const update = useUpdateEstoqueItem();
+  const updateProduto = useUpdateProduto();
 
   const [quantidade, setQuantidade] = useState(item?.quantidade.toString() ?? "1");
   const [validade, setValidade] = useState(item?.validade?.slice(0, 10) ?? "");
   const [lote, setLote] = useState(item?.lote ?? "");
   const [precoCompra, setPrecoCompra] = useState(item?.precoCompra != null ? String(item.precoCompra) : "");
+  const [codigoBarrasInput, setCodigoBarrasInput] = useState("");
+  const [semCodigoBarrasInput, setSemCodigoBarrasInput] = useState(false);
+
+  const produtoPendenteCodigoBarras = !!item && !item.produto.codigoBarras && !item.produto.semCodigoBarras;
+
+  function handleCodigoBarrasInputChange(valor: string) {
+    setCodigoBarrasInput(valor);
+    if (valor.trim()) setSemCodigoBarrasInput(false);
+  }
+
+  function handleSemCodigoBarrasInputChange(marcado: boolean) {
+    setSemCodigoBarrasInput(marcado);
+    if (marcado) setCodigoBarrasInput("");
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -309,6 +394,15 @@ function EditarLoteDialog({
       return;
     }
     try {
+      if (produtoPendenteCodigoBarras && (codigoBarrasInput.trim() || semCodigoBarrasInput)) {
+        await updateProduto.mutateAsync({
+          id: item.produtoId,
+          input: {
+            codigoBarras: semCodigoBarrasInput ? null : codigoBarrasInput.trim(),
+            semCodigoBarras: semCodigoBarrasInput,
+          },
+        });
+      }
       await update.mutateAsync({
         id: item.id,
         input: { quantidade: qtd, validade: validade || null, lote: lote || undefined, precoCompra: preco },
@@ -378,10 +472,37 @@ function EditarLoteDialog({
               <p className={`text-xs font-medium ${diffInfo.color}`}>{diffInfo.label}</p>
             )}
           </div>
+          {produtoPendenteCodigoBarras && (
+            <div className="space-y-1.5 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
+              <Label htmlFor="codigoBarrasEditar">Código de Barras do Produto</Label>
+              <p className="text-xs text-muted-foreground/70">
+                Esse produto ainda não tem código de barras registrado.
+              </p>
+              <div className="flex items-center gap-3 flex-wrap">
+                <Input
+                  id="codigoBarrasEditar"
+                  value={codigoBarrasInput}
+                  onChange={(e) => handleCodigoBarrasInputChange(e.target.value)}
+                  placeholder="Ex: 7891234567890"
+                  disabled={semCodigoBarrasInput}
+                  className="flex-1 min-w-[200px]"
+                />
+                <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={semCodigoBarrasInput}
+                    onChange={(e) => handleSemCodigoBarrasInputChange(e.target.checked)}
+                    className="h-4 w-4 rounded border-input"
+                  />
+                  Sem código de barras
+                </label>
+              </div>
+            </div>
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit" disabled={update.isPending}>
-              {update.isPending ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Salvando...</> : "Salvar"}
+            <Button type="submit" disabled={update.isPending || updateProduto.isPending}>
+              {update.isPending || updateProduto.isPending ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Salvando...</> : "Salvar"}
             </Button>
           </div>
         </form>
@@ -397,7 +518,7 @@ export default function EstoquePage() {
   const [novoOpen, setNovoOpen] = useState(false);
   const [editItem, setEditItem] = useState<EstoqueItem | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [addParaProduto, setAddParaProduto] = useState<{ id: string; nome: string; valorCusto: number } | undefined>();
+  const [addParaProduto, setAddParaProduto] = useState<{ id: string; nome: string; valorCusto: number; codigoBarras: string | null; semCodigoBarras: boolean } | undefined>();
 
   const { data, isLoading } = useEstoque({ limit: 200 });
   const deleteItem = useDeleteEstoqueItem();
@@ -438,8 +559,14 @@ export default function EstoquePage() {
     }
   }
 
-  function handleAddParaProduto(produtoId: string, produtoNome: string, produtoValorCusto: number) {
-    setAddParaProduto({ id: produtoId, nome: produtoNome, valorCusto: produtoValorCusto });
+  function handleAddParaProduto(produto: EstoqueItem["produto"]) {
+    setAddParaProduto({
+      id: produto.id,
+      nome: produto.nome,
+      valorCusto: produto.valorCusto,
+      codigoBarras: produto.codigoBarras,
+      semCodigoBarras: produto.semCodigoBarras,
+    });
     setNovoOpen(true);
   }
 
@@ -517,6 +644,14 @@ export default function EstoquePage() {
                         {temVencimento && (
                           <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
                         )}
+                        {!produto.codigoBarras && !produto.semCodigoBarras && (
+                          <span
+                            title="Sem código de barras cadastrado"
+                            className="text-[10px] font-semibold uppercase tracking-wide text-amber-600 bg-amber-500/10 border border-amber-500/30 rounded px-1.5 py-0.5"
+                          >
+                            Sem cód. barras
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {produto.categoria}{produto.marca ? ` · ${produto.marca}` : ""} · {formatBRL(Number(produto.valorVenda))}
@@ -532,7 +667,7 @@ export default function EstoquePage() {
                       variant="outline"
                       size="sm"
                       className="gap-1.5"
-                      onClick={() => handleAddParaProduto(produto.id, produto.nome, produto.valorCusto)}
+                      onClick={() => handleAddParaProduto(produto)}
                     >
                       <Plus className="w-3.5 h-3.5" />
                       Adicionar lote
@@ -598,6 +733,8 @@ export default function EstoquePage() {
         produtoIdInicial={addParaProduto?.id}
         nomeProdutoInicial={addParaProduto?.nome}
         custoProdutoInicial={addParaProduto?.valorCusto}
+        codigoBarrasProdutoInicial={addParaProduto?.codigoBarras}
+        semCodigoBarrasProdutoInicial={addParaProduto?.semCodigoBarras}
       />
       <EditarLoteDialog
         key={editItem?.id ?? "edit"}

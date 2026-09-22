@@ -28,7 +28,7 @@ import {
 } from "@/lib/utils/distribuidoras";
 
 const CATEGORIAS = ["Ração", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"];
-const ESPECIES = ["Cão", "Gato", "Cão e Gato", "Ambos"];
+const ESPECIES = ["Cão", "Gato", "Cão e Gato"];
 
 const SUBCATEGORIAS: Record<string, string[]> = {
   "Ração":       ["Seca", "Úmida", "Úmida Sachê", "Úmida Lata", "Natural"],
@@ -183,6 +183,8 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
       sabor:             produto?.sabor ?? "",
       marca:             produto?.marca ?? "",
       fornecedor:        produto?.fornecedor ?? "",
+      codigoBarras:      produto?.codigoBarras ?? "",
+      semCodigoBarras:   produto?.semCodigoBarras ?? false,
       pesoEmbalagem:     produto?.pesoEmbalagem ?? undefined,
       unidadeEmbalagem:  produto?.unidadeEmbalagem ?? "",
       valorCusto:        produto?.valorCusto ?? 0,
@@ -207,6 +209,8 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
   const porte             = useWatch({ control, name: "porte" }) ?? "";
   const sabor             = useWatch({ control, name: "sabor" }) ?? "";
   const pesoEmbalagemWatch = useWatch({ control, name: "pesoEmbalagem" });
+  const semCodigoBarras    = useWatch({ control, name: "semCodigoBarras" }) ?? false;
+  const codigoBarrasWatch  = useWatch({ control, name: "codigoBarras" }) ?? "";
 
   const margem               = venda > 0 ? ((venda - custo) / venda) * 100 : 0;
   const margemCor            = margem >= 30 ? "text-primary" : margem >= 20 ? "text-amber-500" : "text-destructive";
@@ -257,6 +261,16 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
     : unidadeEmbalagem === "mL"          ? "Ex: 250"
     : unidadeEmbalagem === "L"           ? "Ex: 1"
     : "Quantidade";
+
+  function handleCodigoBarrasChange(valor: string) {
+    setValue("codigoBarras", valor);
+    if (valor.trim()) setValue("semCodigoBarras", false);
+  }
+
+  function handleSemCodigoBarrasChange(marcado: boolean) {
+    setValue("semCodigoBarras", marcado);
+    if (marcado) setValue("codigoBarras", "");
+  }
 
   function handleFornecedorChange(valor: string) {
     if (valor && !distribuidoras.includes(valor)) {
@@ -461,6 +475,30 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
             />
           )}
         />
+
+        {/* Código de barras — campo do produto, com opção de marcar que não tem */}
+        <div className="space-y-1.5 col-span-1 sm:col-span-2">
+          <Label htmlFor="codigoBarras">Código de Barras</Label>
+          <div className="flex items-center gap-3 flex-wrap">
+            <Input
+              id="codigoBarras"
+              value={codigoBarrasWatch}
+              onChange={(e) => handleCodigoBarrasChange(e.target.value)}
+              placeholder="Ex: 7891234567890"
+              disabled={semCodigoBarras}
+              className="flex-1 min-w-[200px]"
+            />
+            <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={semCodigoBarras}
+                onChange={(e) => handleSemCodigoBarrasChange(e.target.checked)}
+                className="h-4 w-4 rounded border-input"
+              />
+              Sem código de barras
+            </label>
+          </div>
+        </div>
 
         {/* Quantidade na embalagem: seletor de unidade + campo de valor */}
         <div className="space-y-1.5 col-span-1 sm:col-span-2">

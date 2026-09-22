@@ -10,6 +10,8 @@ export const CreateProdutoSchema = z.object({
   sabor: z.string().optional().or(z.literal("")),
   marca: z.string().optional().or(z.literal("")),
   fornecedor: z.string().optional().or(z.literal("")),
+  codigoBarras: z.string().optional().or(z.literal("")).nullable(),
+  semCodigoBarras: z.boolean().optional(),
   pesoEmbalagem: z.number().min(0).optional(),
   unidadeEmbalagem: z.string().optional().or(z.literal("")),
   valorCusto: z.number().min(0, "Valor de custo inválido"),

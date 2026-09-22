@@ -10,6 +10,8 @@ export interface Produto {
   sabor: string | null;
   marca: string | null;
   fornecedor: string | null;
+  codigoBarras: string | null;
+  semCodigoBarras: boolean;
   pesoEmbalagem: number | null;
   unidadeEmbalagem: string | null;
   valorCusto: number;
