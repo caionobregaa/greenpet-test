@@ -24,6 +24,9 @@ interface ProdutoProps {
   categoria: Categoria
   especie?: string
   subCategoria?: string
+  faseDaVida?: string
+  porte?: string
+  sabor?: string
   marca?: string
   fornecedor?: string
   pesoEmbalagem?: number
@@ -49,6 +52,9 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     categoria: string
     especie?: string
     subCategoria?: string
+    faseDaVida?: string
+    porte?: string
+    sabor?: string
     marca?: string
     fornecedor?: string
     pesoEmbalagem?: number
@@ -78,6 +84,9 @@ export class Produto extends AggregateRoot<ProdutoProps> {
         categoria: data.categoria as Categoria,
         especie: data.especie,
         subCategoria: data.subCategoria,
+        faseDaVida: data.faseDaVida,
+        porte: data.porte,
+        sabor: data.sabor,
         marca: data.marca,
         fornecedor: data.fornecedor,
         pesoEmbalagem: data.pesoEmbalagem,
@@ -103,6 +112,9 @@ export class Produto extends AggregateRoot<ProdutoProps> {
   get categoria(): string { return this.props.categoria }
   get especie(): string | undefined { return this.props.especie }
   get subCategoria(): string | undefined { return this.props.subCategoria }
+  get faseDaVida(): string | undefined { return this.props.faseDaVida }
+  get porte(): string | undefined { return this.props.porte }
+  get sabor(): string | undefined { return this.props.sabor }
   get marca(): string | undefined { return this.props.marca }
   get fornecedor(): string | undefined { return this.props.fornecedor }
   get pesoEmbalagem(): number | undefined { return this.props.pesoEmbalagem }
@@ -137,6 +149,9 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     categoria: string
     especie: string
     subCategoria: string
+    faseDaVida: string
+    porte: string
+    sabor: string
     marca: string
     fornecedor: string
     pesoEmbalagem: number
@@ -163,6 +178,9 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     if (fields.valorVenda !== undefined) this.props.valorVenda = Money.create(fields.valorVenda)
     if (fields.especie !== undefined) this.props.especie = fields.especie
     if (fields.subCategoria !== undefined) this.props.subCategoria = fields.subCategoria
+    if (fields.faseDaVida !== undefined) this.props.faseDaVida = fields.faseDaVida
+    if (fields.porte !== undefined) this.props.porte = fields.porte
+    if (fields.sabor !== undefined) this.props.sabor = fields.sabor
     if (fields.marca !== undefined) this.props.marca = fields.marca
     if (fields.fornecedor !== undefined) this.props.fornecedor = fields.fornecedor
     if (fields.pesoEmbalagem !== undefined) this.props.pesoEmbalagem = fields.pesoEmbalagem

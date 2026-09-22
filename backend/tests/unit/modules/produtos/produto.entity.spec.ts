@@ -90,6 +90,36 @@ describe('Produto entity', () => {
     })
   })
 
+  describe('faseDaVida / porte / sabor', () => {
+    it('aceita os três campos na criação', () => {
+      const p = Produto.create({
+        nome: 'Ração', sku: 'RAC-0001', categoria: 'Ração', valorVenda: 10,
+        faseDaVida: 'Adulto', porte: 'Pequeno', sabor: 'Frango e Arroz',
+      })
+      expect(p.faseDaVida).toBe('Adulto')
+      expect(p.porte).toBe('Pequeno')
+      expect(p.sabor).toBe('Frango e Arroz')
+    })
+
+    it('ficam undefined quando não informados', () => {
+      const p = Produto.create({ nome: 'Ração', sku: 'RAC-0001', categoria: 'Ração', valorVenda: 10 })
+      expect(p.faseDaVida).toBeUndefined()
+      expect(p.porte).toBeUndefined()
+      expect(p.sabor).toBeUndefined()
+    })
+
+    it('update() atualiza um campo sem afetar os outros dois', () => {
+      const p = Produto.create({
+        nome: 'Ração', sku: 'RAC-0001', categoria: 'Ração', valorVenda: 10,
+        faseDaVida: 'Filhote', porte: 'Médio', sabor: 'Carne',
+      })
+      p.update({ porte: 'Grande' })
+      expect(p.porte).toBe('Grande')
+      expect(p.faseDaVida).toBe('Filhote')
+      expect(p.sabor).toBe('Carne')
+    })
+  })
+
   describe('softDelete', () => {
     it('marca deletedAt e isActive fica false', () => {
       const p = Produto.create({ nome: 'Ração', sku: 'RAC-0001', categoria: 'Ração', valorVenda: 10 })

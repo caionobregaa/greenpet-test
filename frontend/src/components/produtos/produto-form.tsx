@@ -19,6 +19,7 @@ import {
 import { Loader2, Plus, Check, X } from "lucide-react";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { formatBRL } from "@/lib/utils/format";
+import { composeNomeRacao } from "@/lib/utils/produtos";
 import type { Produto } from "@/lib/types/produto";
 import {
   DISTRIBUIDORAS_PADRAO,
@@ -40,6 +41,9 @@ const SUBCATEGORIAS: Record<string, string[]> = {
 };
 
 const UNIDADES_EMBALAGEM = ["kg", "g", "Comprimidos", "mL", "L", "unidade"];
+
+const FASES_DA_VIDA = ["Filhote", "Adulto", "Sênior"];
+const PORTES = ["Mini e Pequeno", "Pequeno", "Médio", "Grande", "Gigante"];
 
 interface ProdutoFormProps {
   produto?: Produto;
@@ -136,6 +140,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
   const [estoqueInicial, setEstoqueInicial] = useState<number | "">("");
   const [estoqueValidade, setEstoqueValidade] = useState("");
   const [estoqueLote, setEstoqueLote] = useState("");
+  const [nomeRacao, setNomeRacao] = useState("");
 
   // Load distributors from localStorage + defaults on mount
   const [distribuidoras, setDistribuidoras] = useState<string[]>(() => {
@@ -173,6 +178,9 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
       categoria:         produto?.categoria as CreateProdutoInput["categoria"] ?? undefined,
       especie:           (produto?.especie as CreateProdutoInput["especie"]) ?? undefined,
       subCategoria:      produto?.subCategoria ?? "",
+      faseDaVida:        produto?.faseDaVida ?? "",
+      porte:             produto?.porte ?? "",
+      sabor:             produto?.sabor ?? "",
       marca:             produto?.marca ?? "",
       fornecedor:        produto?.fornecedor ?? "",
       pesoEmbalagem:     produto?.pesoEmbalagem ?? undefined,
@@ -194,6 +202,11 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
   const categoria        = useWatch({ control, name: "categoria" }) ?? "";
   const unidadeEmbalagem = useWatch({ control, name: "unidadeEmbalagem" }) ?? "";
   const imagemUrl        = useWatch({ control, name: "imagemUrl" as keyof CreateProdutoInput });
+  const especie           = useWatch({ control, name: "especie" }) ?? "";
+  const faseDaVida        = useWatch({ control, name: "faseDaVida" }) ?? "";
+  const porte             = useWatch({ control, name: "porte" }) ?? "";
+  const sabor             = useWatch({ control, name: "sabor" }) ?? "";
+  const pesoEmbalagemWatch = useWatch({ control, name: "pesoEmbalagem" });
 
   const margem               = venda > 0 ? ((venda - custo) / venda) * 100 : 0;
   const margemCor            = margem >= 30 ? "text-primary" : margem >= 20 ? "text-amber-500" : "text-destructive";
@@ -212,6 +225,17 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
     const novaVenda = custo / (1 - margemAplicada / 100);
     setValue("valorVenda", Math.round(novaVenda * 100) / 100, { shouldValidate: true, shouldDirty: true });
   }
+
+  const nomeComposto = categoria === "Ração" && nomeRacao.trim()
+    ? composeNomeRacao({ nomeRacao, especie, faseDaVida, porte, sabor, pesoEmbalagem: pesoEmbalagemWatch, unidadeEmbalagem })
+    : null;
+
+  useEffect(() => {
+    if (nomeComposto !== null) {
+      setValue("nome", nomeComposto, { shouldValidate: true, shouldDirty: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nomeComposto]);
 
   const subcategoriasSugeridas = SUBCATEGORIAS[categoria] ?? [];
 
@@ -322,6 +346,74 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
           </div>
         </div>
       </div>
+
+      {/* Composição do Nome — só para Ração */}
+      {categoria === "Ração" && (
+        <div className="space-y-4 pt-2 border-t border-border/60">
+          <span className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">
+            Composição do Nome (Ração)
+          </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+            <div className="space-y-1.5 col-span-1 sm:col-span-2">
+              <Label htmlFor="nomeRacao">Nome da Ração</Label>
+              <Input
+                id="nomeRacao"
+                value={nomeRacao}
+                onChange={(e) => setNomeRacao(e.target.value)}
+                placeholder="Ex: Golden Fórmula"
+              />
+              <p className="text-xs text-muted-foreground/70">
+                Usado para montar o campo Nome acima automaticamente. Deixe em branco para editar o Nome manualmente.
+              </p>
+            </div>
+
+            <Controller
+              control={control}
+              name="faseDaVida"
+              render={({ field }) => (
+                <ComboboxComAdicao
+                  label="Fase da Vida"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  options={FASES_DA_VIDA}
+                  placeholder="Selecione ou adicione..."
+                  addLabel="Nova fase da vida"
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="porte"
+              render={({ field }) => (
+                <ComboboxComAdicao
+                  label="Porte"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  options={PORTES}
+                  placeholder="Selecione ou adicione..."
+                  addLabel="Novo porte"
+                />
+              )}
+            />
+
+            <div className="space-y-1.5">
+              <Label htmlFor="sabor">Sabor</Label>
+              <Input id="sabor" {...register("sabor")} placeholder="Ex: Frango e Arroz" />
+            </div>
+
+            {nomeComposto && (
+              <div className="col-span-1 sm:col-span-2 rounded-lg border border-border bg-accent/40 px-4 py-3">
+                <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Nome Composto</p>
+                <p className="text-sm font-mono mt-1">{nomeComposto}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Preenchido automaticamente no campo Nome acima — você pode editá-lo livremente depois.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Detalhes */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">

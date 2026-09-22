@@ -90,6 +90,9 @@ model Produto {
   categoria      String
   especie        String?
   subCategoria   String?
+  faseDaVida     String?
+  porte          String?
+  sabor          String?
   marca          String?
   fornecedor     String?
   pesoEmbalagem     Decimal?      @db.Decimal(8, 2)

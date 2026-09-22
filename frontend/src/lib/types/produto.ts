@@ -5,6 +5,9 @@ export interface Produto {
   categoria: string;
   especie: string | null;
   subCategoria: string | null;
+  faseDaVida: string | null;
+  porte: string | null;
+  sabor: string | null;
   marca: string | null;
   fornecedor: string | null;
   pesoEmbalagem: number | null;

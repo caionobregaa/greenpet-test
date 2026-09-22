@@ -7,6 +7,9 @@ export interface CreateProdutoInput {
   categoria: string
   especie?: string
   subCategoria?: string
+  faseDaVida?: string
+  porte?: string
+  sabor?: string
   marca?: string
   fornecedor?: string
   pesoEmbalagem?: number

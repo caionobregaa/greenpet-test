@@ -9,3 +9,7 @@
 - Produto inativo (soft delete) não aparece nas buscas de venda/orçamento
 - Atualização de preço não afeta vendas/orçamentos já registrados
 - Estoque não é controlado nesta versão (fora de escopo v1)
+- Para produtos `categoria = "Ração"`, o campo `nome` pode ser composto automaticamente
+  pelo frontend como `[Nome da Ração] [Espécie] [Fase da Vida] PORTE [Porte] SABOR [Sabor] [Peso][Unidade]`
+  (segmentos vazios são omitidos); o campo permanece editável livremente após a
+  composição, e o backend não impõe nem valida essa fórmula (ver spec-v2.md)

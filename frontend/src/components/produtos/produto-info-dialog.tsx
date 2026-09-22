@@ -53,6 +53,9 @@ export function ProdutoInfoDialog({ produto, onOpenChange }: ProdutoInfoDialogPr
             <InfoRow label="Categoria" value={produto.categoria} />
             {produto.especie && <InfoRow label="Espécie" value={produto.especie} />}
             {produto.subCategoria && <InfoRow label="Subcategoria" value={produto.subCategoria} />}
+            {produto.faseDaVida && <InfoRow label="Fase da Vida" value={produto.faseDaVida} />}
+            {produto.porte && <InfoRow label="Porte" value={produto.porte} />}
+            {produto.sabor && <InfoRow label="Sabor" value={produto.sabor} />}
             {produto.marca && <InfoRow label="Marca" value={produto.marca} />}
             {produto.fornecedor && <InfoRow label="Fornecedor" value={produto.fornecedor} />}
             {produto.pesoEmbalagem != null && (
