@@ -74,11 +74,21 @@ async function main(): Promise<void> {
     papel: 'admin',
   })
 
-  await seedProdutosPrime(prisma)
-  await seedProdutosBasso(prisma)
-  await seedProdutosCentralPec(prisma)
-  await seedProdutosMarket(prisma)
-  await seedProdutosZooCenter(prisma)
+  // O seed roda a cada start do container (Dockerfile.backend). O catálogo só
+  // pode ser carregado em instalação nova: como ele casa produtos pelo nome,
+  // rodar sobre um banco em uso recriava produtos renomeados na tela (duplicatas
+  // que "voltavam" após exclusão) e sobrescrevia preços ajustados pelo usuário.
+  // A contagem inclui excluídos (soft delete) de propósito.
+  const produtosExistentes = await prisma.produto.count()
+  if (produtosExistentes > 0) {
+    console.log(`⏭️  Catálogo de produtos ignorado: ${produtosExistentes} produtos já cadastrados.`)
+  } else {
+    await seedProdutosPrime(prisma)
+    await seedProdutosBasso(prisma)
+    await seedProdutosCentralPec(prisma)
+    await seedProdutosMarket(prisma)
+    await seedProdutosZooCenter(prisma)
+  }
   console.log('✅ Seed concluído.')
 }
 

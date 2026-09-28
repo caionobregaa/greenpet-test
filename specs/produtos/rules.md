@@ -15,3 +15,7 @@
   composição, e o backend não impõe nem valida essa fórmula (ver spec-v2.md)
 - Código de barras é um campo do produto (não do lote de estoque); `codigoBarras` e
   `semCodigoBarras` são mutuamente exclusivos — marcar um limpa o outro (ver spec-v3.md)
+- O catálogo inicial de produtos do seed só é carregado em instalação nova (tabela
+  `produtos` vazia, contando inclusive excluídos). Com qualquer produto já cadastrado,
+  o seed não cria nem atualiza produtos — renomear, excluir ou reprecificar um produto
+  nunca é desfeito por um deploy/restart
