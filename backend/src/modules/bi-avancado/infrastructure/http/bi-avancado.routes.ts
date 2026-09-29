@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { PrismaBiAvancadoRepository } from '../repositories/prisma-bi-avancado.repository.js'
 import { GetBiAvancadoUseCase } from '../../application/use-cases/get-bi-avancado.use-case.js'
 import { ValidationError } from '@/shared/errors/validation.error.js'
+import { ultimosMeses } from '@/shared/domain/mes.js'
 
 const QuerySchema = z.object({
   inicio: z.string().date().default(() => {
@@ -29,6 +30,12 @@ export function registerBiAvancadoRoutes(app: FastifyInstance, prisma: PrismaCli
       page: q.data.page,
       limit: q.data.limit,
     })
+    rep.send({ data: resultado })
+  })
+
+  // Últimos 6 meses até o mês atual (specs/bi-avancado/spec-v2.md) — independe do filtro de período.
+  app.get('/api/v1/bi/compras-distribuidora-mensal', async (_req, rep) => {
+    const resultado = await repo.getComprasPorDistribuidoraMensal(ultimosMeses(6, new Date()))
     rep.send({ data: resultado })
   })
 }

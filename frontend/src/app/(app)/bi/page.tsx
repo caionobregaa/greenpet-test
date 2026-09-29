@@ -17,7 +17,8 @@ import { CurvaResumoCard } from "@/components/bi/curva-resumo-card";
 import { RankingLtvCard } from "@/components/bi/ranking-ltv-card";
 import { CicloRecompraCard } from "@/components/bi/ciclo-recompra-card";
 import { MargemCategoriaCard } from "@/components/bi/margem-categoria-card";
-import { useBiAvancado } from "@/lib/hooks/use-bi-avancado";
+import { ComprasDistribuidoraMensalCard } from "@/components/bi/compras-distribuidora-mensal-card";
+import { useBiAvancado, useComprasDistribuidoraMensal } from "@/lib/hooks/use-bi-avancado";
 import { formatBRL, todayISO } from "@/lib/utils/format";
 import type { ComparativoItem } from "@/lib/types/dashboard";
 
@@ -44,6 +45,7 @@ export default function BiPage() {
   const [valoresVisiveis, setValoresVisiveis] = useState(false);
   const { data, isLoading } = useDashboard(inicio, fim);
   const { data: avancado, isLoading: isLoadingAvancado } = useBiAvancado(inicio, fim);
+  const { data: distribuidorasMensal, isLoading: isLoadingDistribuidoras } = useComprasDistribuidoraMensal();
 
   const v = (brl: number) => valoresVisiveis ? formatBRL(brl) : MASK;
   const n = (num: number) => valoresVisiveis ? String(num) : MASK_COUNT;
@@ -166,6 +168,17 @@ export default function BiPage() {
           </>
         )}
       </div>
+
+      {/* Compras por distribuidora mês a mês — janela fixa de 6 meses, independe do período */}
+      {isLoadingDistribuidoras ? (
+        <Skeleton className="h-64 rounded-xl" />
+      ) : (
+        <div className={valoresVisiveis ? "" : "blur-sm select-none pointer-events-none"}>
+          <ComprasDistribuidoraMensalCard
+            dados={distribuidorasMensal ?? { meses: [], distribuidoras: [], totaisPorMes: {} }}
+          />
+        </div>
+      )}
 
       {/* Métricas avançadas: LTV, taxa de recompra, ciclo por categoria, margem por categoria */}
       <div className="pt-2 border-t border-border/60">

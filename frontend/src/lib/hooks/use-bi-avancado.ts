@@ -17,3 +17,12 @@ export function useBiAvancado(inicio?: string, fim?: string, page = 1, limit = 1
     staleTime: 30_000,
   });
 }
+
+/** Últimos 6 meses por distribuidora — não depende do período do BI. */
+export function useComprasDistribuidoraMensal() {
+  return useQuery({
+    queryKey: ["bi-avancado", "compras-distribuidora-mensal"],
+    queryFn: () => apiBiAvancado.comprasDistribuidoraMensal(),
+    staleTime: 30_000,
+  });
+}

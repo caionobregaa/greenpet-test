@@ -29,3 +29,15 @@ export interface BiAvancado {
   cicloRecompraPorCategoria: CicloRecompraCategoria[];
   margemPorCategoria: MargemCategoria[];
 }
+
+export interface DistribuidoraMensal {
+  fornecedor: string;
+  total: number;
+  porMes: Record<string, number>;
+}
+
+export interface ComprasDistribuidoraMensal {
+  meses: string[];
+  distribuidoras: DistribuidoraMensal[];
+  totaisPorMes: Record<string, number>;
+}
