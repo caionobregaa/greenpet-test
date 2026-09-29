@@ -20,5 +20,5 @@ export const UpdateEstoqueItemSchema = z.object({
 export const ListEstoqueQuerySchema = z.object({
   produtoId: z.string().uuid().optional(),
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(200).default(100),
+  limit: z.coerce.number().int().min(1).max(1000).default(100),
 })

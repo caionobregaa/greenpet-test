@@ -5,6 +5,8 @@ export interface EstoqueItem {
     id: string;
     nome: string;
     categoria: string;
+    especie: string | null;
+    fornecedor: string | null;
     imagemUrl: string | null;
     valorVenda: number;
     valorCusto: number;

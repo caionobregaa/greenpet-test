@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2, Pencil, Package, AlertTriangle, Calendar, Search, X, Loader2 } from "lucide-react";
 import { useEstoque, useCreateEstoqueItem, useUpdateEstoqueItem, useDeleteEstoqueItem } from "@/lib/hooks/use-estoque";
@@ -14,7 +14,10 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { SearchInput } from "@/components/shared/search-input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatBRL, formatDate } from "@/lib/utils/format";
-import { produtoCorrespondeBusca } from "@/lib/utils/produtos";
+import { CATEGORIAS_PRODUTO, ESPECIES_PRODUTO } from "@/lib/utils/produtos";
+import { agruparEstoque } from "@/lib/utils/estoque";
+import { DISTRIBUIDORAS_PADRAO, todasAsDistribuidoras } from "@/lib/utils/distribuidoras";
+import { FilterSelect } from "@/components/shared/filter-select";
 import type { EstoqueItem } from "@/lib/types/estoque";
 import type { Produto } from "@/lib/types/produto";
 import { differenceInDays, parseISO, isValid } from "date-fns";
@@ -516,32 +519,33 @@ function EditarLoteDialog({
 
 export default function EstoquePage() {
   const [search, setSearch] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [especie, setEspecie] = useState("");
+  const [fornecedor, setFornecedor] = useState("");
+  const [fornecedoresLista, setFornecedoresLista] = useState<string[]>(DISTRIBUIDORAS_PADRAO);
   const [novoOpen, setNovoOpen] = useState(false);
   const [editItem, setEditItem] = useState<EstoqueItem | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [addParaProduto, setAddParaProduto] = useState<{ id: string; nome: string; valorCusto: number; codigoBarras: string | null; semCodigoBarras: boolean } | undefined>();
 
-  const { data, isLoading } = useEstoque({ limit: 200 });
+  // Distribuidoras customizadas ficam no localStorage — carregar após a hidratação.
+  useEffect(() => {
+    setFornecedoresLista(todasAsDistribuidoras());
+  }, []);
+
+  // Carrega o estoque inteiro: a busca e os filtros rodam na tela, a cada tecla.
+  const { data, isLoading } = useEstoque({ limit: 1000 });
   const deleteItem = useDeleteEstoqueItem();
 
-  // Group items by product
-  const grouped = useMemo(() => {
-    if (!data?.data) return [];
-    const filtered = search
-      ? data.data.filter((i) => produtoCorrespondeBusca(i.produto, search))
-      : data.data;
+  const hasFilters = !!(search || categoria || especie || fornecedor);
+  function resetFilters() {
+    setSearch(""); setCategoria(""); setEspecie(""); setFornecedor("");
+  }
 
-    const map = new Map<string, { produto: EstoqueItem["produto"]; lotes: EstoqueItem[] }>();
-    for (const item of filtered) {
-      const existing = map.get(item.produtoId);
-      if (existing) {
-        existing.lotes.push(item);
-      } else {
-        map.set(item.produtoId, { produto: item.produto, lotes: [item] });
-      }
-    }
-    return Array.from(map.values());
-  }, [data, search]);
+  const grouped = useMemo(
+    () => agruparEstoque(data?.data ?? [], { busca: search, categoria, especie, fornecedor }),
+    [data, search, categoria, especie, fornecedor],
+  );
 
   const totalItens = data?.data.reduce((s, i) => s + i.quantidade, 0) ?? 0;
 
@@ -583,13 +587,22 @@ export default function EstoquePage() {
         </Button>
       </div>
 
-      <div className="mb-4">
+      <div className="flex flex-wrap items-center gap-2 mb-4">
         <SearchInput
           value={search}
           onChange={setSearch}
           placeholder="Buscar por nome, marca ou SKU..."
-          className="max-w-sm"
+          className="max-w-xs"
         />
+        <FilterSelect label="Distribuidora" value={fornecedor} onChange={setFornecedor} options={fornecedoresLista} />
+        <FilterSelect label="Categoria" value={categoria} onChange={setCategoria} options={CATEGORIAS_PRODUTO} />
+        <FilterSelect label="Espécie" value={especie} onChange={setEspecie} options={ESPECIES_PRODUTO} />
+        {hasFilters && (
+          <Button variant="ghost" size="sm" onClick={resetFilters} className="text-muted-foreground gap-1">
+            <X className="w-3.5 h-3.5" />
+            Limpar filtros
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -604,10 +617,16 @@ export default function EstoquePage() {
       ) : grouped.length === 0 ? (
         <div className="bg-card rounded-xl border border-border p-12 text-center">
           <Package className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
-          <p className="text-muted-foreground font-medium">Nenhum item no estoque</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Adicione produtos ao estoque usando o botão acima ou registre uma Despesa de Produtos Pets.
-          </p>
+          {hasFilters ? (
+            <p className="text-muted-foreground font-medium">Nenhum item encontrado com esses filtros</p>
+          ) : (
+            <>
+              <p className="text-muted-foreground font-medium">Nenhum item no estoque</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Adicione produtos ao estoque usando o botão acima ou registre uma Despesa de Produtos Pets.
+              </p>
+            </>
+          )}
         </div>
       ) : (
         <div className="space-y-4">

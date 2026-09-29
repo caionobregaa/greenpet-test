@@ -15,42 +15,8 @@ import { ProdutoInfoDialog } from "@/components/produtos/produto-info-dialog";
 import { formatBRL } from "@/lib/utils/format";
 import type { Produto } from "@/lib/types/produto";
 import { DISTRIBUIDORAS_PADRAO, todasAsDistribuidoras } from "@/lib/utils/distribuidoras";
-
-const CATEGORIAS = ["Ração", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"];
-const ESPECIES   = ["Cão", "Gato", "Cão e Gato"];
-
-function FilterSelect({
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: string[];
-}) {
-  return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-9 pl-3 pr-8 rounded-md border border-input bg-background text-sm text-foreground appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-      >
-        <option value="">{label}</option>
-        {options.map((o) => <option key={o} value={o}>{o}</option>)}
-      </select>
-      {value && (
-        <button
-          onClick={() => onChange("")}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
-      )}
-    </div>
-  );
-}
+import { CATEGORIAS_PRODUTO, ESPECIES_PRODUTO } from "@/lib/utils/produtos";
+import { FilterSelect } from "@/components/shared/filter-select";
 
 export default function ProdutosPage() {
   const [search, setSearch]         = useState("");
@@ -128,13 +94,13 @@ export default function ProdutosPage() {
           label="Categoria"
           value={categoria}
           onChange={(v) => { setCategoria(v); setPage(1); }}
-          options={CATEGORIAS}
+          options={CATEGORIAS_PRODUTO}
         />
         <FilterSelect
           label="Espécie"
           value={especie}
           onChange={(v) => { setEspecie(v); setPage(1); }}
-          options={ESPECIES}
+          options={ESPECIES_PRODUTO}
         />
         {hasFilters && (
           <Button variant="ghost" size="sm" onClick={resetFilters} className="text-muted-foreground gap-1">

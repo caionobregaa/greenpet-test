@@ -8,6 +8,11 @@ import {
   ListEstoqueQuerySchema,
 } from './estoque.schema.js'
 
+const PRODUTO_SELECT = {
+  id: true, nome: true, categoria: true, especie: true, fornecedor: true, imagemUrl: true,
+  valorVenda: true, valorCusto: true, marca: true, sku: true, codigoBarras: true, semCodigoBarras: true,
+} as const
+
 export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient): void {
   app.get('/api/v1/estoque', async (req, rep) => {
     const q = ListEstoqueQuerySchema.safeParse(req.query)
@@ -18,13 +23,12 @@ export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient
       prisma.estoqueItem.findMany({
         where,
         include: {
-          produto: {
-            select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, valorCusto: true, marca: true, sku: true, codigoBarras: true, semCodigoBarras: true },
-          },
+          produto: { select: PRODUTO_SELECT },
         },
         skip: (q.data.page - 1) * q.data.limit,
         take: q.data.limit,
-        orderBy: [{ validade: 'asc' }, { createdAt: 'desc' }],
+        // Ordem alfabética do produto (specs/estoque/spec-v1.md), depois validade mais próxima.
+        orderBy: [{ produto: { nome: 'asc' } }, { validade: 'asc' }, { createdAt: 'desc' }],
       }),
       prisma.estoqueItem.count({ where }),
     ])
@@ -64,7 +68,7 @@ export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient
         obs: body.data.obs ?? null,
       },
       include: {
-        produto: { select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, valorCusto: true, marca: true, sku: true, codigoBarras: true, semCodigoBarras: true } },
+        produto: { select: PRODUTO_SELECT },
       },
     })
 
@@ -89,7 +93,7 @@ export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient
         ...(body.data.obs !== undefined && { obs: body.data.obs }),
       },
       include: {
-        produto: { select: { id: true, nome: true, categoria: true, imagemUrl: true, valorVenda: true, valorCusto: true, marca: true, sku: true, codigoBarras: true, semCodigoBarras: true } },
+        produto: { select: PRODUTO_SELECT },
       },
     })
 

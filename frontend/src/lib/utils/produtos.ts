@@ -1,3 +1,6 @@
+export const CATEGORIAS_PRODUTO = ["Ração", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"];
+export const ESPECIES_PRODUTO = ["Cão", "Gato", "Cão e Gato"];
+
 function normalizarBusca(texto: string): string {
   return texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 }
