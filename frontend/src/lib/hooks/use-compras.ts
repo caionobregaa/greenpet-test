@@ -6,6 +6,7 @@ import type { CompraAcao } from "@/lib/types/compra";
 interface ListParams {
   status?: string;
   fornecedor?: string;
+  mes?: string;
   page?: number;
   limit?: number;
 }

@@ -25,6 +25,8 @@ import { ItensTable } from "@/components/vendas/itens-table";
 import { formatDate, formatBRL, todayISO } from "@/lib/utils/format";
 import { Loader2 } from "lucide-react";
 import { CATEGORIAS_DESPESA_PADRAO } from "@/lib/types/compra";
+import { mesAtual } from "@/lib/utils/mes";
+import { MesNavigator } from "@/components/compras/mes-navigator";
 
 // ── Categorias (localStorage persistence) ─────────────────────────────────────
 
@@ -563,6 +565,7 @@ function ImportarEstoqueDialog({
 // ── Página principal ──────────────────────────────────────────────────────────
 
 export default function DespesasPage() {
+  const [mes, setMes] = useState(mesAtual);
   const [page, setPage] = useState(1);
   const [newOpen, setNewOpen] = useState(false);
   const [gerenciarOpen, setGerenciarOpen] = useState(false);
@@ -571,7 +574,12 @@ export default function DespesasPage() {
   const [importarCompra, setImportarCompra] = useState<Compra | null>(null);
   const [categorias, setCategorias] = useState<string[]>(loadCategorias);
 
-  const { data, isLoading } = useCompras({ page, limit: 20 });
+  const { data, isLoading } = useCompras({ mes, page, limit: 20 });
+
+  function handleMesChange(novo: string) {
+    setMes(novo);
+    setPage(1);
+  }
   const deleteCompra = useDeleteCompra();
 
   function handleCreated(compra: Compra) {
@@ -605,6 +613,23 @@ export default function DespesasPage() {
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <MesNavigator mes={mes} onChange={handleMesChange} />
+        <div className="bg-card rounded-xl border border-border shadow-sm px-5 py-3 text-right">
+          <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Total do mês</p>
+          {isLoading ? (
+            <Skeleton className="h-7 w-32 mt-1 ml-auto" />
+          ) : (
+            <>
+              <p className="text-xl font-bold text-primary tabular-nums" data-testid="total-mes">{formatBRL(data?.meta.totalValor ?? 0)}</p>
+              <p className="text-xs text-muted-foreground">
+                {data?.meta.total ?? 0} {data?.meta.total === 1 ? "despesa" : "despesas"} · canceladas não somam
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+
       <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -624,7 +649,7 @@ export default function DespesasPage() {
                   {Array.from({ length: 6 }).map((_, j) => <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-full" /></td>)}
                 </tr>
               )) : data?.data.length === 0 ? (
-                <tr><td colSpan={6}><EmptyState message="Nenhuma despesa registrada" /></td></tr>
+                <tr><td colSpan={6}><EmptyState message="Nenhuma despesa neste mês" /></td></tr>
               ) : data?.data.map((c) => (
                 <tr key={c.id} className="border-t border-border hover:bg-accent/30 transition-colors">
                   <td className="px-4 py-3 text-muted-foreground">{formatDate(c.dataPedido)}</td>

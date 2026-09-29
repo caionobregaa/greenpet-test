@@ -8,13 +8,15 @@ export class ListComprasUseCase {
     status?: string
     categoria?: string
     fornecedor?: string
+    mes?: string
     page?: number
     limit?: number
-  }): Promise<{ compras: Compra[]; total: number }> {
+  }): Promise<{ compras: Compra[]; total: number; totalValor: number }> {
     return this.repo.findMany({
       status: params.status,
       categoria: params.categoria,
       fornecedor: params.fornecedor,
+      mes: params.mes,
       page: params.page ?? 1,
       limit: params.limit ?? 20,
     })

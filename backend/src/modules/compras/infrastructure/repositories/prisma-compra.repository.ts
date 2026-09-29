@@ -1,6 +1,7 @@
 import type { PrismaClient } from '@prisma/client'
 import type { ICompraRepository } from '../../domain/repositories/compra.repository.interface.js'
 import { Compra, type CompraStatus } from '../../domain/entities/compra.entity.js'
+import { intervaloDoMes } from '@/shared/domain/mes.js'
 
 export class PrismaCompraRepository implements ICompraRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -10,13 +11,17 @@ export class PrismaCompraRepository implements ICompraRepository {
     return row ? this.toDomain(row) : null
   }
 
-  async findMany(params: { status?: string; categoria?: string; fornecedor?: string; page: number; limit: number }) {
+  async findMany(params: { status?: string; categoria?: string; fornecedor?: string; mes?: string; page: number; limit: number }) {
+    const periodo = params.mes ? intervaloDoMes(params.mes) : undefined
     const where = {
       ...(params.status ? { status: params.status } : {}),
       ...(params.categoria ? { categoria: params.categoria } : {}),
       ...(params.fornecedor ? { fornecedor: { contains: params.fornecedor, mode: 'insensitive' as const } } : {}),
+      ...(periodo ? { dataPedido: { gte: periodo.inicio, lt: periodo.fim } } : {}),
     }
-    const [rows, total] = await this.prisma.$transaction([
+    // Soma do filtro inteiro (não só da página); cancelados ficam fora, como no dashboard.
+    const whereTotalValor = { ...where, AND: [{ status: { not: 'cancelado' } }] }
+    const [rows, total, soma] = await this.prisma.$transaction([
       this.prisma.compra.findMany({
         where,
         include: { itens: true },
@@ -25,8 +30,9 @@ export class PrismaCompraRepository implements ICompraRepository {
         orderBy: { dataPedido: 'desc' },
       }),
       this.prisma.compra.count({ where }),
+      this.prisma.compra.aggregate({ where: whereTotalValor, _sum: { total: true } }),
     ])
-    return { compras: rows.map((r) => this.toDomain(r)), total }
+    return { compras: rows.map((r) => this.toDomain(r)), total, totalValor: Number(soma._sum.total ?? 0) }
   }
 
   async save(compra: Compra): Promise<void> {
@@ -110,6 +116,8 @@ export class PrismaCompraRepository implements ICompraRepository {
       formaPag: row.formaPag ?? undefined,
       status: row.status as CompraStatus,
       obs: row.obs ?? undefined,
+      // Despesas sem itens (aluguel, luz...) só têm o total gravado; com itens, a entidade recalcula.
+      totalManual: Number(row.total),
       itens: row.itens.map((i) => ({
         id: i.id,
         produtoId: i.produtoId ?? undefined,

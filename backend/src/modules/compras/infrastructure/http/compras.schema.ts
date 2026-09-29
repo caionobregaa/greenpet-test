@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { MES_REGEX } from '@/shared/domain/mes.js'
 
 const FORMAS_PAG = ['Pix', 'Dinheiro', 'Cartão Crédito', 'Cartão Débito', 'Boleto'] as const
 
@@ -40,6 +41,7 @@ export const ListComprasQuerySchema = z.object({
   status: z.enum(['pendente', 'confirmado', 'recebido', 'cancelado']).optional(),
   categoria: z.string().optional(),
   fornecedor: z.string().optional(),
+  mes: z.string().regex(MES_REGEX, 'mes deve estar no formato YYYY-MM').optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 })

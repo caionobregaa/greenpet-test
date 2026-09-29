@@ -27,5 +27,13 @@ export interface Compra {
   itens: CompraItem[];
 }
 
+/** Meta da listagem: `totalValor` soma o filtro inteiro (sem canceladas), não só a página. */
+export interface ComprasMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalValor: number;
+}
+
 // Categorias padrão do sistema
 export const CATEGORIAS_DESPESA_PADRAO = ["Produtos Pets", "Contas Pessoais", "Marketing"];

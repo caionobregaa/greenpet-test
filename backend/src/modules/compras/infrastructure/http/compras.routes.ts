@@ -67,7 +67,7 @@ export function registerComprasRoutes(app: FastifyInstance, prisma: PrismaClient
     const q = ListComprasQuerySchema.safeParse(req.query)
     if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.errors[0].message)
     const result = await listUC.execute(q.data)
-    rep.send({ data: result.compras.map(toResponse), meta: { page: q.data.page, limit: q.data.limit, total: result.total } })
+    rep.send({ data: result.compras.map(toResponse), meta: { page: q.data.page, limit: q.data.limit, total: result.total, totalValor: result.totalValor } })
   })
 
   app.post('/api/v1/compras', async (req, rep) => {

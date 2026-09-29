@@ -1,18 +1,19 @@
 import { api } from "./client";
-import type { ApiResponse, ApiMeta } from "@/lib/types/api";
-import type { Compra, CompraAcao } from "@/lib/types/compra";
+import type { ApiResponse } from "@/lib/types/api";
+import type { Compra, CompraAcao, ComprasMeta } from "@/lib/types/compra";
 import type { CreateCompraInput, UpdateCompraInput } from "@/lib/schemas/compra.schema";
 
 interface ListParams {
   status?: string;
   fornecedor?: string;
+  mes?: string;
   page?: number;
   limit?: number;
 }
 
 export const apiCompras = {
-  list: async (params?: ListParams): Promise<{ data: Compra[]; meta: ApiMeta }> => {
-    const { data } = await api.get<{ data: Compra[]; meta: ApiMeta }>("/compras", { params });
+  list: async (params?: ListParams): Promise<{ data: Compra[]; meta: ComprasMeta }> => {
+    const { data } = await api.get<{ data: Compra[]; meta: ComprasMeta }>("/compras", { params });
     return data;
   },
 
