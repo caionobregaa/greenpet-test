@@ -344,9 +344,9 @@ async function seedProdutosZooCenter(prisma: PrismaClient): Promise<void> {
       margemOperacao: p.margemOperacao ?? 0,
       margemLucro:    p.margemLucro ?? 0,
     }
-    const existing = await prisma.produto.findUnique({ where: { nome: p.nome } })
+    const existing = await prisma.produto.findFirst({ where: { nome: p.nome, deletedAt: null } })
     if (existing) {
-      await prisma.produto.update({ where: { nome: p.nome }, data })
+      await prisma.produto.update({ where: { id: existing.id }, data })
       atualizados++
     } else {
       await prisma.produto.create({ data: { nome: p.nome, sku: await nextSku(p.categoria), ...data } })
@@ -377,9 +377,9 @@ async function seedProdutosMarket(prisma: PrismaClient): Promise<void> {
       margemOperacao: p.margemOperacao ?? 0,
       margemLucro:    p.margemLucro ?? 0,
     }
-    const existing = await prisma.produto.findUnique({ where: { nome: p.nome } })
+    const existing = await prisma.produto.findFirst({ where: { nome: p.nome, deletedAt: null } })
     if (existing) {
-      await prisma.produto.update({ where: { nome: p.nome }, data })
+      await prisma.produto.update({ where: { id: existing.id }, data })
       atualizados++
     } else {
       await prisma.produto.create({ data: { nome: p.nome, sku: await nextSku(p.categoria), ...data } })
@@ -410,9 +410,9 @@ async function seedProdutosCentralPec(prisma: PrismaClient): Promise<void> {
       margemOperacao: p.margemOperacao ?? 0,
       margemLucro:    p.margemLucro ?? 0,
     }
-    const existing = await prisma.produto.findUnique({ where: { nome: p.nome } })
+    const existing = await prisma.produto.findFirst({ where: { nome: p.nome, deletedAt: null } })
     if (existing) {
-      await prisma.produto.update({ where: { nome: p.nome }, data })
+      await prisma.produto.update({ where: { id: existing.id }, data })
       atualizados++
     } else {
       await prisma.produto.create({ data: { nome: p.nome, sku: await nextSku(p.categoria), ...data } })
@@ -443,9 +443,9 @@ async function seedProdutosBasso(prisma: PrismaClient): Promise<void> {
       margemOperacao: p.margemOperacao ?? 0,
       margemLucro:    p.margemLucro ?? 0,
     }
-    const existing = await prisma.produto.findUnique({ where: { nome: p.nome } })
+    const existing = await prisma.produto.findFirst({ where: { nome: p.nome, deletedAt: null } })
     if (existing) {
-      await prisma.produto.update({ where: { nome: p.nome }, data })
+      await prisma.produto.update({ where: { id: existing.id }, data })
       atualizados++
     } else {
       await prisma.produto.create({ data: { nome: p.nome, sku: await nextSku(p.categoria), ...data } })
@@ -476,9 +476,9 @@ async function seedProdutosPrime(prisma: PrismaClient): Promise<void> {
       margemOperacao: p.margemOperacao ?? 0,
       margemLucro:    p.margemLucro ?? 0,
     }
-    const existing = await prisma.produto.findUnique({ where: { nome: p.nome } })
+    const existing = await prisma.produto.findFirst({ where: { nome: p.nome, deletedAt: null } })
     if (existing) {
-      await prisma.produto.update({ where: { nome: p.nome }, data })
+      await prisma.produto.update({ where: { id: existing.id }, data })
       atualizados++
     } else {
       await prisma.produto.create({ data: { nome: p.nome, sku: await nextSku(p.categoria), ...data } })

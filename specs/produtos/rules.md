@@ -1,6 +1,8 @@
 # Regras de Negócio — Produtos
 
-- Nome do produto é obrigatório e único no catálogo
+- Nome do produto é obrigatório e único entre os produtos ativos (`deletedAt IS NULL`).
+  O nome de um produto excluído (soft delete) fica livre para ser reutilizado por outro
+  produto, no cadastro ou na edição — garantido no banco por índice único parcial
 - `valorVenda` deve ser maior que zero
 - `valorCusto` deve ser maior ou igual a zero
 - Margem de lucro é calculada pelo servidor: `(valorVenda - valorCusto) / valorVenda * 100`

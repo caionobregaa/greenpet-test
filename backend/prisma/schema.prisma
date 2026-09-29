@@ -85,7 +85,11 @@ model Animal {
 
 model Produto {
   id             String        @id @default(uuid())
-  nome           String        @unique
+  // Único só entre ativos: índice parcial "produtos_nome_ativo_key" (WHERE "deletedAt" IS NULL),
+  // criado na migration unique_produto_nome_ativo. O Prisma não declara índice parcial, então
+  // `migrate dev`/`migrate diff` vão propor DROP INDEX "produtos_nome_ativo_key" — falso
+  // positivo; NUNCA aplique esse trecho da migração gerada, remova-o à mão.
+  nome           String
   sku            String        @unique
   categoria      String
   especie        String?
