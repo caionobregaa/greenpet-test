@@ -145,7 +145,7 @@ const ProdutoSearch = memo(function ProdutoSearch({
           value={query}
           onChange={(e) => handleChange(e.target.value)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder="Buscar produto..."
+          placeholder="Buscar produto por nome ou SKU..."
           className="pl-8"
         />
       </div>

@@ -1,3 +1,23 @@
+function normalizarBusca(texto: string): string {
+  return texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
+/**
+ * Mesma regra da busca do backend (specs/produtos/spec-v4.md), para filtros locais:
+ * toda palavra de `busca` precisa aparecer, em qualquer ordem e posição, em nome, marca,
+ * SKU (hífen opcional) ou código de barras — sem diferenciar acento nem maiúscula.
+ */
+export function produtoCorrespondeBusca(
+  produto: { nome: string; marca?: string | null; sku?: string | null; codigoBarras?: string | null },
+  busca: string,
+): boolean {
+  const termos = normalizarBusca(busca).split(/\s+/).filter(Boolean);
+  if (termos.length === 0) return true;
+  const textos = normalizarBusca([produto.nome, produto.marca ?? "", produto.codigoBarras ?? ""].join(" "));
+  const sku = normalizarBusca(produto.sku ?? "").replace(/-/g, "");
+  return termos.every((t) => textos.includes(t) || sku.includes(t.replace(/-/g, "")));
+}
+
 export function composeNomeRacao(parts: {
   nomeRacao: string;
   especie?: string;

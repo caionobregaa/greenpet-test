@@ -2,6 +2,7 @@ import { Prisma, type PrismaClient } from '@prisma/client'
 import type { IProdutoRepository } from '../../domain/repositories/produto.repository.interface.js'
 import { Produto, SKU_PREFIXES } from '../../domain/entities/produto.entity.js'
 import { ValidationError } from '@/shared/errors/validation.error.js'
+import { parseTermosBusca } from './produto-busca.js'
 
 export class PrismaProdutoRepository implements IProdutoRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -39,19 +40,25 @@ export class PrismaProdutoRepository implements IProdutoRepository {
     const skip = (params.page - 1) * params.limit
     const take = params.limit
 
-    if (params.q) {
-      // accent-insensitive + partial match anywhere in nome, marca, subCategoria
-      const qParam = `%${params.q}%`
+    const termos = parseTermosBusca(params.q)
+    if (termos.length > 0) {
+      // Cada palavra precisa aparecer (sem acento/caixa, em qualquer posição) em algum
+      // campo pesquisável — palavras em qualquer ordem. No SKU o hífen é opcional.
       const conditions: Prisma.Sql[] = [Prisma.sql`"deletedAt" IS NULL`]
       if (params.categoria)  conditions.push(Prisma.sql`categoria  = ${params.categoria}`)
       if (params.especie)    conditions.push(Prisma.sql`especie    = ${params.especie}`)
       if (params.fornecedor) conditions.push(Prisma.sql`fornecedor = ${params.fornecedor}`)
       if (params.marca)      conditions.push(Prisma.sql`marca      = ${params.marca}`)
-      conditions.push(Prisma.sql`(
-        unaccent(lower(nome))                         LIKE unaccent(lower(${qParam}))
-        OR unaccent(lower(COALESCE(marca, '')))        LIKE unaccent(lower(${qParam}))
-        OR unaccent(lower(COALESCE("subCategoria", ''))) LIKE unaccent(lower(${qParam}))
-      )`)
+      for (const termo of termos) {
+        const qParam = `%${termo}%`
+        conditions.push(Prisma.sql`(
+          unaccent(lower(nome))                           LIKE unaccent(lower(${qParam}))
+          OR unaccent(lower(COALESCE(marca, '')))          LIKE unaccent(lower(${qParam}))
+          OR unaccent(lower(COALESCE("subCategoria", ''))) LIKE unaccent(lower(${qParam}))
+          OR replace(lower(sku), '-', '')                  LIKE replace(lower(${qParam}), '-', '')
+          OR COALESCE("codigoBarras", '')                  LIKE ${qParam}
+        )`)
+      }
       const where = Prisma.join(conditions, ' AND ')
       type ProdutoRow = Record<string, unknown>
       const rows = await this.prisma.$queryRaw<ProdutoRow[]>(

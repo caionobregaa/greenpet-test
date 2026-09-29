@@ -14,6 +14,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { SearchInput } from "@/components/shared/search-input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatBRL, formatDate } from "@/lib/utils/format";
+import { produtoCorrespondeBusca } from "@/lib/utils/produtos";
 import type { EstoqueItem } from "@/lib/types/estoque";
 import type { Produto } from "@/lib/types/produto";
 import { differenceInDays, parseISO, isValid } from "date-fns";
@@ -221,7 +222,7 @@ function AdicionarLoteDialog({
                     value={query}
                     onChange={(e) => handleQueryChange(e.target.value)}
                     onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
-                    placeholder="Digite o nome do produto..."
+                    placeholder="Digite o nome ou SKU do produto..."
                     className="pl-9 pr-8"
                     autoFocus
                   />
@@ -527,10 +528,7 @@ export default function EstoquePage() {
   const grouped = useMemo(() => {
     if (!data?.data) return [];
     const filtered = search
-      ? data.data.filter((i) =>
-          i.produto.nome.toLowerCase().includes(search.toLowerCase()) ||
-          (i.produto.marca ?? "").toLowerCase().includes(search.toLowerCase())
-        )
+      ? data.data.filter((i) => produtoCorrespondeBusca(i.produto, search))
       : data.data;
 
     const map = new Map<string, { produto: EstoqueItem["produto"]; lotes: EstoqueItem[] }>();
@@ -589,7 +587,7 @@ export default function EstoquePage() {
         <SearchInput
           value={search}
           onChange={setSearch}
-          placeholder="Buscar produto no estoque..."
+          placeholder="Buscar por nome, marca ou SKU..."
           className="max-w-sm"
         />
       </div>

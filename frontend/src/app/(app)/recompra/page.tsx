@@ -181,7 +181,7 @@ function NovaRecompraManualDialog({
             ) : (
               <>
                 <Input
-                  placeholder="Buscar produto..."
+                  placeholder="Buscar produto por nome ou SKU..."
                   value={produtoSearch}
                   onChange={(e) => setProdutoSearch(e.target.value)}
                 />

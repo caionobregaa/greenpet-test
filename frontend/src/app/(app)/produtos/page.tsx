@@ -115,7 +115,7 @@ export default function ProdutosPage() {
         <SearchInput
           value={search}
           onChange={(v) => { setSearch(v); setPage(1); }}
-          placeholder="Buscar por nome, marca..."
+          placeholder="Buscar por nome, marca ou SKU..."
           className="max-w-xs"
         />
         <FilterSelect
