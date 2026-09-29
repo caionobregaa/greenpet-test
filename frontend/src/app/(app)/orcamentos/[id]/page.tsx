@@ -16,8 +16,9 @@ import { StatusPill } from "@/components/shared/status-pill";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { formatDate, formatBRL } from "@/lib/utils/format";
+import { formatDate, formatBRL, todayLocalISO } from "@/lib/utils/format";
 import { Loader2 } from "lucide-react";
 import { apiClientes } from "@/lib/api/clientes";
 import { apiAnimais } from "@/lib/api/animais";
@@ -73,6 +74,7 @@ export default function OrcamentoDetailPage({ params }: Props) {
   const [perderOpen, setPerderOpen] = useState(false);
   const [motivoPerda, setMotivoPerda] = useState<MotivoPerda | "">("");
   const [pagamento, setPagamento] = useState("");
+  const [dataPagamento, setDataPagamento] = useState(todayLocalISO);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [waLoading, setWaLoading] = useState(false);
 
@@ -103,9 +105,11 @@ export default function OrcamentoDetailPage({ params }: Props) {
     if (!pagamento) { toast.error("Selecione a forma de pagamento."); return; }
     const opcao = OPCOES_PAG.find((o) => o.value === pagamento);
     if (!opcao) return;
+    if (!dataPagamento) { toast.error("Informe a data do pagamento."); return; }
+    if (dataPagamento > todayLocalISO()) { toast.error("A data do pagamento não pode ser no futuro."); return; }
     const taxaPct = opcao.taxaKey ? TAXAS[opcao.taxaKey].pct : 0;
     try {
-      const result = await converter.mutateAsync({ id, input: { formaPag: opcao.backend, taxaCartao: taxaPct } });
+      const result = await converter.mutateAsync({ id, input: { formaPag: opcao.backend, taxaCartao: taxaPct, data: dataPagamento } });
       toast.success("Orçamento convertido em venda!");
       router.push(`/vendas/${result.vendaId}`);
     } catch (err: unknown) {
@@ -283,7 +287,7 @@ export default function OrcamentoDetailPage({ params }: Props) {
       </div>
 
       {/* Converter Dialog */}
-      <Dialog open={converterOpen} onOpenChange={(o) => { setConverterOpen(o); if (!o) setPagamento(""); }}>
+      <Dialog open={converterOpen} onOpenChange={(o) => { setConverterOpen(o); if (!o) { setPagamento(""); setDataPagamento(todayLocalISO()); } }}>
         <DialogContent className="sm:max-w-5xl sm:p-8 max-h-[90dvh] overflow-y-auto">
           <DialogHeader><DialogTitle>Fechar Venda</DialogTitle></DialogHeader>
           <div className="space-y-5">
@@ -301,6 +305,20 @@ export default function OrcamentoDetailPage({ params }: Props) {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="dataPagamento">Data do pagamento *</Label>
+              <Input
+                id="dataPagamento"
+                type="date"
+                value={dataPagamento}
+                max={todayLocalISO()}
+                onChange={(e) => setDataPagamento(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground/70">
+                Dia em que o cliente pagou. A venda entra nos relatórios nesta data; o orçamento mantém a data do pedido ({formatDate(orcamento.data)}).
+              </p>
             </div>
 
             {pagamento && (

@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ItensTable } from "@/components/vendas/itens-table";
-import { todayISO, formatBRL, formatTelefone } from "@/lib/utils/format";
+import { todayISO, todayLocalISO, formatBRL, formatDate, formatTelefone } from "@/lib/utils/format";
 import { cn } from "@/lib/utils";
 
 // ── Payment options ──────────────────────────────────────────────────────────
@@ -212,6 +212,7 @@ export default function NovaVendaPage() {
 
   // Selected orcamento for converter flow
   const [orcamentoSelecionado, setOrcamentoSelecionado] = useState<Orcamento | null>(null);
+  const [dataPagamento, setDataPagamento] = useState(todayLocalISO);
   const [formaPagKey, setFormaPagKey] = useState("");
 
   const [clienteQ, setClienteQ] = useState("");
@@ -407,11 +408,13 @@ export default function NovaVendaPage() {
     const opcao = OPCOES_PAG.find((o) => o.value === formaPagKey);
     if (!opcao) { toast.error("Selecione a forma de pagamento."); return; }
     if (!orcamentoSelecionado) return;
+    if (!dataPagamento) { toast.error("Informe a data do pagamento."); return; }
+    if (dataPagamento > todayLocalISO()) { toast.error("A data do pagamento não pode ser no futuro."); return; }
     const taxaPctVal = opcao.taxaKey ? TAXAS[opcao.taxaKey].pct : 0;
     try {
       const result = await converterOrcamento.mutateAsync({
         id: orcamentoSelecionado.id,
-        input: { formaPag: opcao.backend, taxaCartao: taxaPctVal, taxaEntrega: entrega },
+        input: { formaPag: opcao.backend, taxaCartao: taxaPctVal, taxaEntrega: entrega, data: dataPagamento },
       });
       toast.success("Venda registrada com sucesso!");
       router.push(`/vendas/${result.vendaId}`);
@@ -484,6 +487,23 @@ export default function NovaVendaPage() {
             if (opcao) setValue("formaPag", opcao.backend);
           }} />
           {errors.formaPag && <p className="text-xs text-destructive mt-1">{errors.formaPag.message}</p>}
+
+          {/* Data do pagamento — só no fluxo de orçamento importado; a venda direta usa o campo Data abaixo */}
+          {orcamentoSelecionado && (
+            <div className="mt-4 space-y-1.5 max-w-xs">
+              <Label htmlFor="dataPagamento">Data do pagamento *</Label>
+              <Input
+                id="dataPagamento"
+                type="date"
+                value={dataPagamento}
+                max={todayLocalISO()}
+                onChange={(e) => setDataPagamento(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground/70">
+                Dia em que o cliente pagou. O orçamento mantém a data do pedido ({formatDate(orcamentoSelecionado.data)}).
+              </p>
+            </div>
+          )}
 
           {/* Taxa de entrega */}
           <div className="mt-4 flex items-center gap-3">

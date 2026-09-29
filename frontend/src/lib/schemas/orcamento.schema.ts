@@ -47,6 +47,7 @@ export const ConverterOrcamentoSchema = z.object({
   taxaCartao: z.number().min(0).max(100).optional(),
   taxaEntrega: z.number().min(0).optional(),
   desconto: z.number().min(0).optional(),
+  data: z.string().optional(),
 });
 
 export type OrcamentoItemInput = z.infer<typeof OrcamentoItemSchema>;

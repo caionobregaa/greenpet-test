@@ -44,6 +44,8 @@ export const ConverterOrcamentoSchema = z.object({
   taxaCartao: z.number().min(0).max(100).optional().default(0),
   taxaEntrega: z.number().min(0).optional().default(0),
   desconto: z.number().min(0).optional().default(0),
+  // Data do pagamento → data da venda (spec-v2). Meio-dia UTC, como em vendas.schema.ts.
+  data: z.string().date().optional().transform((v) => v ? new Date(v + 'T12:00:00.000Z') : undefined),
 })
 
 export const ListOrcamentosQuerySchema = z.object({

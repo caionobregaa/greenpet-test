@@ -35,6 +35,30 @@ describe('ConverterOrcamentoUseCase', () => {
     expect(atualizado!.vendaId).toBe(venda.id)
   })
 
+  it('cria a venda com a data do pagamento informada, sem alterar a data do orçamento', async () => {
+    const dataPedido = new Date('2026-09-20T12:00:00.000Z')
+    const o = makeOrcamento({ data: dataPedido })
+    await orcamentoRepo.save(o)
+
+    const dataPagamento = new Date('2026-09-25T12:00:00.000Z')
+    const venda = await useCase.execute({ id: o.id, formaPag: 'Pix', data: dataPagamento })
+
+    expect(venda.data).toEqual(dataPagamento)
+    expect((await vendaRepo.findById(venda.id))!.data).toEqual(dataPagamento)
+    expect((await orcamentoRepo.findById(o.id))!.data).toEqual(dataPedido)
+  })
+
+  it('sem data informada, cria a venda com a data do dia', async () => {
+    const o = makeOrcamento()
+    await orcamentoRepo.save(o)
+
+    const antes = Date.now()
+    const venda = await useCase.execute({ id: o.id, formaPag: 'Pix' })
+
+    expect(venda.data.getTime()).toBeGreaterThanOrEqual(antes)
+    expect(venda.data.getTime()).toBeLessThanOrEqual(Date.now())
+  })
+
   it('lança ALREADY_CONVERTED quando o orçamento já está fechado com vendaId', async () => {
     const o = makeOrcamento()
     o.vincularVenda(crypto.randomUUID())

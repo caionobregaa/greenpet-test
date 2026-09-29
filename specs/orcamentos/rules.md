@@ -9,6 +9,8 @@
 - Marcar como `perdido` exige um `motivoPerda` válido dentre: `Preço`, `Cliente desistiu`, `Comprou concorrente`, `Sem estoque`, `Produto indisponível`, `Frete/prazo`, `Parou de responder`, `Outro`
 - Reabrir um orçamento `perdido` limpa o `motivoPerda`
 - Converter em venda cria uma nova Venda e marca o orçamento como `fechado` e preenche `vendaId`
+- A venda criada pela conversão recebe a data do pagamento informada (padrão: hoje); a data do
+  orçamento (dia do pedido) não muda (ver spec-v2.md)
 - Orçamento já convertido (`vendaId` preenchido) não pode ser convertido novamente
 - Exclusão só permitida para orçamentos `aberto` ou `perdido`; orçamentos `fechado` são imutáveis
 - Itens são snapshot (nome + valor) — alteração de produto não afeta orçamentos existentes

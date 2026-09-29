@@ -67,6 +67,13 @@ export function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+// Hoje no fuso do navegador. todayISO() usa UTC e, à noite no Brasil, já devolve amanhã —
+// use esta para datas que o usuário escolhe (ex. data do pagamento).
+export function todayLocalISO(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export function todayPlusDaysISO(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() + days);
