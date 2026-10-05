@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import Link from "next/link";
@@ -13,6 +13,9 @@ import { PaginationBar } from "@/components/shared/pagination-bar";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ClienteDialog } from "@/components/clientes/cliente-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ClientesSumidosTab } from "@/components/clientes/clientes-sumidos-tab";
+import { useClientesSumidos } from "@/lib/hooks/use-recompra";
 import type { Cliente } from "@/lib/types/cliente";
 
 export default function ClientesPage() {
@@ -21,6 +24,14 @@ export default function ClientesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | undefined>();
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [aba, setAba] = useState<string>("todos");
+
+  // `?aba=sumidos` (link do card do Dashboard) abre direto na categoria Sumidos.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("aba") === "sumidos") setAba("sumidos");
+  }, []);
+
+  const { data: sumidos } = useClientesSumidos();
 
   const { data, isLoading } = useClientes({ q: search || undefined, page, limit: 20 });
   const deleteCliente = useDeleteCliente();
@@ -62,89 +73,102 @@ export default function ClientesPage() {
         </Button>
       </div>
 
-      <div className="mb-4">
-        <SearchInput
-          value={search}
-          onChange={(v) => { setSearch(v); setPage(1); }}
-          placeholder="Buscar por nome, telefone ou e-mail..."
-          className="max-w-sm"
-        />
-      </div>
+      <Tabs value={aba} onValueChange={(v) => setAba(String(v))}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="todos">Todos</TabsTrigger>
+          <TabsTrigger value="sumidos">Sumidos ({sumidos?.length ?? 0})</TabsTrigger>
+        </TabsList>
 
-      <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-muted/50">
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Nome</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Telefone</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden md:table-cell">E-mail</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden lg:table-cell">Cidade</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden xl:table-cell">Animais</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden xl:table-cell">Vendas</th>
-                <th className="px-4 py-3 w-28"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="border-t border-border">
-                    {Array.from({ length: 7 }).map((_, j) => (
-                      <td key={j} className="px-4 py-3">
-                        <Skeleton className="h-4 w-full rounded" />
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              ) : data?.data.length === 0 ? (
-                <tr>
-                  <td colSpan={7}>
-                    <EmptyState message="Nenhum cliente encontrado" />
-                  </td>
-                </tr>
-              ) : (
-                data?.data.map((c) => (
-                  <tr key={c.id} className="border-t border-border hover:bg-accent/30 transition-colors">
-                    <td className="px-4 py-3 font-medium">{c.nome}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{c.telefone}</td>
-                    <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{c.email ?? "—"}</td>
-                    <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{c.cidade}</td>
-                    <td className="px-4 py-3 text-muted-foreground hidden xl:table-cell">
-                      {c.numeroDeAnimais > 0 ? `${c.numeroDeAnimais} ${c.numeroDeAnimais === 1 ? "animal" : "animais"}` : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground hidden xl:table-cell">
-                      {c.numeroDeVendas > 0 ? `${c.numeroDeVendas} ${c.numeroDeVendas === 1 ? "venda" : "vendas"}` : "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1 justify-end">
-                        <Link href={`/clientes/${c.id}`} className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-8 w-8 p-0")}>
-                          <Eye className="w-3.5 h-3.5" />
-                        </Link>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleEdit(c)}>
-                          <Pencil className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                          onClick={() => setDeleteId(c.id)}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        {data?.meta && (
-          <div className="px-4 pb-4">
-            <PaginationBar meta={data.meta} onPageChange={setPage} />
+        <TabsContent value="todos">
+          <div className="mb-4">
+            <SearchInput
+              value={search}
+              onChange={(v) => { setSearch(v); setPage(1); }}
+              placeholder="Buscar por nome, telefone ou e-mail..."
+              className="max-w-sm"
+            />
           </div>
-        )}
-      </div>
+
+          <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-muted/50">
+                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Nome</th>
+                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Telefone</th>
+                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden md:table-cell">E-mail</th>
+                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden lg:table-cell">Cidade</th>
+                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden xl:table-cell">Animais</th>
+                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide hidden xl:table-cell">Vendas</th>
+                    <th className="px-4 py-3 w-28"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {isLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i} className="border-t border-border">
+                        {Array.from({ length: 7 }).map((_, j) => (
+                          <td key={j} className="px-4 py-3">
+                            <Skeleton className="h-4 w-full rounded" />
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  ) : data?.data.length === 0 ? (
+                    <tr>
+                      <td colSpan={7}>
+                        <EmptyState message="Nenhum cliente encontrado" />
+                      </td>
+                    </tr>
+                  ) : (
+                    data?.data.map((c) => (
+                      <tr key={c.id} className="border-t border-border hover:bg-accent/30 transition-colors">
+                        <td className="px-4 py-3 font-medium">{c.nome}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{c.telefone}</td>
+                        <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{c.email ?? "—"}</td>
+                        <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{c.cidade}</td>
+                        <td className="px-4 py-3 text-muted-foreground hidden xl:table-cell">
+                          {c.numeroDeAnimais > 0 ? `${c.numeroDeAnimais} ${c.numeroDeAnimais === 1 ? "animal" : "animais"}` : "—"}
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground hidden xl:table-cell">
+                          {c.numeroDeVendas > 0 ? `${c.numeroDeVendas} ${c.numeroDeVendas === 1 ? "venda" : "vendas"}` : "—"}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1 justify-end">
+                            <Link href={`/clientes/${c.id}`} className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-8 w-8 p-0")}>
+                              <Eye className="w-3.5 h-3.5" />
+                            </Link>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleEdit(c)}>
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                              onClick={() => setDeleteId(c.id)}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+            {data?.meta && (
+              <div className="px-4 pb-4">
+                <PaginationBar meta={data.meta} onPageChange={setPage} />
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="sumidos">
+          <ClientesSumidosTab />
+        </TabsContent>
+      </Tabs>
 
       <ClienteDialog
         open={dialogOpen}

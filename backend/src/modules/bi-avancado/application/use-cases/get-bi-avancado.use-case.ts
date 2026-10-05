@@ -9,6 +9,7 @@ import type {
   TaxaFechamentoMes,
   MotivoPerdaBreakdown,
 } from '../../infrastructure/repositories/prisma-bi-avancado.repository.js'
+import type { MotivosClientesSumidos } from '../../domain/services/motivos-sumido.service.js'
 
 const JANELAS_RECOMPRA_DIAS = [30, 60, 90] as const
 
@@ -24,6 +25,7 @@ export interface BiAvancado {
     total: { fechados: number; perdidos: number; taxaFechamento: number; taxaNaoFechamento: number }
     breakdownMotivoPerda: MotivoPerdaBreakdown[]
   }
+  motivosClientesSumidos: MotivosClientesSumidos
 }
 
 export class GetBiAvancadoUseCase {
@@ -39,6 +41,7 @@ export class GetBiAvancadoUseCase {
       taxaRecompraJanela,
       taxaFechamentoPorMes,
       breakdownMotivoPerda,
+      motivosClientesSumidos,
     ] = await Promise.all([
       this.repo.findRankingLtv({ page: params.page ?? 1, limit: params.limit ?? 20 }),
       this.repo.getTaxaRecompra(),
@@ -48,6 +51,7 @@ export class GetBiAvancadoUseCase {
       Promise.all(JANELAS_RECOMPRA_DIAS.map((dias) => this.repo.getTaxaRecompraJanela(params.inicio, params.fim, dias))),
       this.repo.getTaxaFechamentoMensal(params.inicio, params.fim),
       this.repo.getMotivoPerdaBreakdown(params.inicio, params.fim),
+      this.repo.getMotivosClientesSumidos(params.inicio, params.fim),
     ])
 
     const totalFechados = taxaFechamentoPorMes.reduce((s, m) => s + m.fechados, 0)
@@ -71,6 +75,7 @@ export class GetBiAvancadoUseCase {
         },
         breakdownMotivoPerda,
       },
+      motivosClientesSumidos,
     }
   }
 }

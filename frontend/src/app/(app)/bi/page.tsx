@@ -17,6 +17,7 @@ import { CurvaResumoCard } from "@/components/bi/curva-resumo-card";
 import { RankingLtvCard } from "@/components/bi/ranking-ltv-card";
 import { CicloRecompraCard } from "@/components/bi/ciclo-recompra-card";
 import { MargemCategoriaCard } from "@/components/bi/margem-categoria-card";
+import { MotivosSumidosCard } from "@/components/bi/motivos-sumidos-card";
 import { ComprasDistribuidoraMensalCard } from "@/components/bi/compras-distribuidora-mensal-card";
 import { useBiAvancado, useComprasDistribuidoraMensal } from "@/lib/hooks/use-bi-avancado";
 import { formatBRL, todayISO } from "@/lib/utils/format";
@@ -212,6 +213,12 @@ export default function BiPage() {
               <CicloRecompraCard ciclos={avancado?.cicloRecompraPorCategoria ?? []} />
             </div>
             <MargemCategoriaCard categorias={avancado?.margemPorCategoria ?? []} />
+            <div className="mt-4">
+              <MotivosSumidosCard
+                totalRegistros={avancado?.motivosClientesSumidos?.totalRegistros ?? 0}
+                motivos={avancado?.motivosClientesSumidos?.motivos ?? []}
+              />
+            </div>
           </div>
         )}
       </div>

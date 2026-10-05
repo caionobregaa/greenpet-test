@@ -4,6 +4,8 @@ import { PrismaRecompraRepository } from '../repositories/prisma-recompra.reposi
 import { ListRecompraAlertasUseCase } from '../../application/use-cases/list-recompra-alertas.use-case.js'
 import { z } from 'zod'
 import { ValidationError } from '@/shared/errors/validation.error.js'
+import { UnprocessableError } from '@/shared/errors/unprocessable.error.js'
+import { isSumido, validarMotivosSumido } from '../../domain/services/recompra-alert.service.js'
 
 const QuerySchema = z.object({
   clienteId: z.string().uuid().optional(),
@@ -26,6 +28,19 @@ const ManualSchema = z.object({
   ultimaCompra: z.string().datetime().optional().nullable(),
   previsaoData: z.string().datetime().optional().nullable(),
   diasRecompra: z.number().int().min(1).optional().nullable(),
+})
+
+// Chave de um ciclo de recompra (specs/recompra/spec-v2.md).
+const CicloSchema = z.object({
+  clienteId: z.string().uuid(),
+  produtoId: z.string().uuid(),
+  animalId: z.string().optional().default(''),
+  ultimaCompra: z.string().datetime().transform((v) => new Date(v)),
+})
+
+const MotivosSchema = CicloSchema.extend({
+  motivos: z.array(z.string()),
+  outroTexto: z.string().trim().nullish().transform((v) => v || null),
 })
 
 export function registerRecompraRoutes(app: FastifyInstance, prisma: PrismaClient): void {
@@ -52,6 +67,57 @@ export function registerRecompraRoutes(app: FastifyInstance, prisma: PrismaClien
       update: { reason, createdAt: new Date() },
     })
     rep.status(204).send()
+  })
+
+  app.post('/api/v1/recompra/contato', async (req, rep) => {
+    const body = CicloSchema.safeParse(req.body)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    const { email } = req.user as { email: string }
+    await repo.marcarMensagemEnviada(body.data, email)
+    rep.status(204).send()
+  })
+
+  app.delete('/api/v1/recompra/contato', async (req, rep) => {
+    const body = CicloSchema.safeParse(req.body)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    await repo.desmarcarMensagemEnviada(body.data)
+    rep.status(204).send()
+  })
+
+  app.get('/api/v1/recompra/sumidos', async (_req, rep) => {
+    const { alertas } = await repo.findAlertas({ urgencia: 'vencido', page: 1, limit: 10_000 })
+    const sumidos = alertas
+      .filter((a) => isSumido(a.diasRestantes))
+      .map((a) => ({ ...a, diasAtraso: Math.abs(a.diasRestantes) }))
+      .sort((a, b) => b.diasAtraso - a.diasAtraso)
+    rep.send({ data: sumidos })
+  })
+
+  app.put('/api/v1/recompra/sumidos/motivos', async (req, rep) => {
+    const body = MotivosSchema.safeParse(req.body)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    const { motivos, outroTexto, ...ciclo } = body.data
+    const erro = validarMotivosSumido(motivos, outroTexto)
+    if (erro) throw new ValidationError('VALIDATION_ERROR', erro)
+
+    // O ciclo informado precisa ser o ciclo atual de um cliente sumido.
+    const { alertas } = await repo.findAlertas({ clienteId: ciclo.clienteId, urgencia: 'vencido', page: 1, limit: 10_000 })
+    const alerta = alertas.find((a) =>
+      a.produtoId === ciclo.produtoId &&
+      (a.animalId ?? '') === ciclo.animalId &&
+      a.ultimaCompra.getTime() === ciclo.ultimaCompra.getTime(),
+    )
+    if (!alerta || !isSumido(alerta.diasRestantes)) {
+      throw new UnprocessableError('NOT_SUMIDO', 'Este cliente não está sumido neste ciclo de recompra')
+    }
+
+    const { email } = req.user as { email: string }
+    const registro = await repo.registrarMotivosSumido(ciclo, {
+      motivos,
+      outroTexto: motivos.includes('Outro') ? outroTexto : null,
+      registradoPor: email,
+    })
+    rep.send({ data: registro })
   })
 
   app.post('/api/v1/recompra/manual', async (req, rep) => {

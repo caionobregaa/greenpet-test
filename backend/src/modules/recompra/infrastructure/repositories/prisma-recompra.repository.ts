@@ -15,7 +15,27 @@ export interface RecompraAlerta {
   ultimaCompra: Date
   diasRestantes: number
   urgencia: UrgencyLevel
+  clienteTelefone: string
+  /** Mensagem de lembrete enviada neste ciclo (specs/recompra/spec-v2.md). */
+  mensagemEnviadaEm: Date | null
+  mensagemEnviadaPor: string | null
+  /** Motivos registrados para o cliente sumido neste ciclo. */
+  motivosSumido: { motivos: string[]; outroTexto: string | null; registradoEm: Date } | null
 }
+
+/** Identifica um ciclo de recompra: o alerta + a venda que o originou. */
+export interface CicloRecompra {
+  clienteId: string
+  produtoId: string
+  animalId: string
+  ultimaCompra: Date
+}
+
+function chaveCiclo(c: CicloRecompra): string {
+  return `${c.clienteId}:${c.produtoId}:${c.animalId}:${c.ultimaCompra.getTime()}`
+}
+
+type AlertaBase = Omit<RecompraAlerta, 'mensagemEnviadaEm' | 'mensagemEnviadaPor' | 'motivosSumido'>
 
 export class PrismaRecompraRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -67,7 +87,7 @@ export class PrismaRecompraRepository {
       include: {
         venda: {
           include: {
-            cliente: { select: { id: true, nome: true } },
+            cliente: { select: { id: true, nome: true, telefone: true } },
             animal: { select: { id: true, nome: true } },
           },
         },
@@ -91,7 +111,7 @@ export class PrismaRecompraRepository {
     const animalNameMap = new Map(animalRows.map((a) => [a.id, a.nome]))
 
     // Group by (clienteId, produtoId, animalId) — keep only most recent sale per combination
-    const seen = new Map<string, RecompraAlerta>()
+    const seen = new Map<string, AlertaBase>()
     for (const item of vendaItens) {
       if (!item.produtoId) continue
 
@@ -120,6 +140,7 @@ export class PrismaRecompraRepository {
       seen.set(key, {
         clienteId: item.venda.clienteId,
         clienteNome: item.venda.cliente.nome,
+        clienteTelefone: item.venda.cliente.telefone,
         animalId,
         animalNome: animalId ? (animalNameMap.get(animalId) ?? '') : '',
         produtoId: item.produtoId,
@@ -155,13 +176,14 @@ export class PrismaRecompraRepository {
       const manualAnimalIds = [...new Set(manuais.map((m) => m.animalId).filter(Boolean))]
 
       const [clientes, produtos, animais] = await Promise.all([
-        this.prisma.cliente.findMany({ where: { id: { in: clienteIds } }, select: { id: true, nome: true } }),
+        this.prisma.cliente.findMany({ where: { id: { in: clienteIds } }, select: { id: true, nome: true, telefone: true } }),
         this.prisma.produto.findMany({ where: { id: { in: produtoIds } }, select: { id: true, nome: true } }),
         manualAnimalIds.length > 0
           ? this.prisma.animal.findMany({ where: { id: { in: manualAnimalIds } }, select: { id: true, nome: true } })
           : Promise.resolve([]),
       ])
       const clienteMap = new Map(clientes.map((c) => [c.id, c.nome]))
+      const telefoneMap = new Map(clientes.map((c) => [c.id, c.telefone]))
       const produtoMap = new Map(produtos.map((p) => [p.id, p.nome]))
       const animalMapManual = new Map(animais.map((a) => [a.id, a.nome]))
 
@@ -203,6 +225,7 @@ export class PrismaRecompraRepository {
           isManual: true,
           clienteId: m.clienteId,
           clienteNome: clienteMap.get(m.clienteId) ?? '',
+          clienteTelefone: telefoneMap.get(m.clienteId) ?? '',
           animalId: m.animalId || undefined,
           animalNome: m.animalId ? (animalMapManual.get(m.animalId) ?? '') : '',
           produtoId: m.produtoId,
@@ -237,6 +260,55 @@ export class PrismaRecompraRepository {
     const total = alertas.length
     const paginated = alertas.slice((params.page - 1) * params.limit, params.page * params.limit)
 
-    return { alertas: paginated, total }
+    return { alertas: await this.enriquecerComCiclo(paginated), total }
+  }
+
+  /** Junta a mensagem enviada e os motivos de sumido do ciclo atual de cada alerta. */
+  private async enriquecerComCiclo(alertas: AlertaBase[]): Promise<RecompraAlerta[]> {
+    if (alertas.length === 0) return []
+    const clienteIds = [...new Set(alertas.map((a) => a.clienteId))]
+    const [contatos, motivos] = await Promise.all([
+      this.prisma.recompraContato.findMany({ where: { clienteId: { in: clienteIds } } }),
+      this.prisma.clienteSumidoMotivo.findMany({ where: { clienteId: { in: clienteIds } } }),
+    ])
+    const contatoMap = new Map(contatos.map((c) => [chaveCiclo(c), c]))
+    const motivoMap = new Map(motivos.map((m) => [chaveCiclo(m), m]))
+
+    return alertas.map((a) => {
+      const chave = chaveCiclo({ ...a, animalId: a.animalId ?? '' })
+      const contato = contatoMap.get(chave)
+      const motivo = motivoMap.get(chave)
+      return {
+        ...a,
+        mensagemEnviadaEm: contato?.enviadoEm ?? null,
+        mensagemEnviadaPor: contato?.enviadoPor ?? null,
+        motivosSumido: motivo
+          ? { motivos: motivo.motivos, outroTexto: motivo.outroTexto, registradoEm: motivo.registradoEm }
+          : null,
+      }
+    })
+  }
+
+  async marcarMensagemEnviada(ciclo: CicloRecompra, enviadoPor: string): Promise<void> {
+    await this.prisma.recompraContato.upsert({
+      where: { clienteId_produtoId_animalId_ultimaCompra: ciclo },
+      create: { ...ciclo, enviadoPor },
+      update: {},
+    })
+  }
+
+  async desmarcarMensagemEnviada(ciclo: CicloRecompra): Promise<void> {
+    await this.prisma.recompraContato.deleteMany({ where: ciclo })
+  }
+
+  async registrarMotivosSumido(
+    ciclo: CicloRecompra,
+    dados: { motivos: string[]; outroTexto: string | null; registradoPor: string },
+  ) {
+    return this.prisma.clienteSumidoMotivo.upsert({
+      where: { clienteId_produtoId_animalId_ultimaCompra: ciclo },
+      create: { ...ciclo, ...dados },
+      update: { motivos: dados.motivos, outroTexto: dados.outroTexto, registradoPor: dados.registradoPor },
+    })
   }
 }

@@ -3,6 +3,7 @@ import autoTable from "jspdf-autotable";
 import type { Orcamento } from "@/lib/types/orcamento";
 import type { Cliente } from "@/lib/types/cliente";
 import type { Animal } from "@/lib/types/animal";
+import { whatsappUrl } from "@/lib/utils/whatsapp";
 
 function brl(value: number): string {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -386,10 +387,6 @@ export async function compartilharOrcamentoPDF(
   link.click();
   URL.revokeObjectURL(url);
 
-  const phone = cliente?.telefone ? `55${cliente.telefone.replace(/\D/g, "")}` : "";
   const fullMsg = `${msg}\n\n📎 O PDF foi baixado automaticamente — por favor anexe ao enviar!`;
-  const waUrl = phone.length > 4
-    ? `https://wa.me/${phone}?text=${encodeURIComponent(fullMsg)}`
-    : `https://wa.me/?text=${encodeURIComponent(fullMsg)}`;
-  window.open(waUrl, "_blank", "noopener,noreferrer");
+  window.open(whatsappUrl(cliente?.telefone, fullMsg), "_blank", "noopener,noreferrer");
 }

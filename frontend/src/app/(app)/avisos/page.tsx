@@ -9,17 +9,15 @@ import {
   BellRing,
   AlertTriangle,
 } from "lucide-react";
-import { useRecompra, useDismissRecompra } from "@/lib/hooks/use-recompra";
+import { useRecompra } from "@/lib/hooks/use-recompra";
 import { useLembretes, useCreateLembrete, useDeleteLembrete } from "@/lib/hooks/use-lembretes";
 import { useVendasSemCusto } from "@/lib/hooks/use-vendas";
 import Link from "next/link";
-import { DismissRecompraDialog } from "@/components/shared/dismiss-recompra-dialog";
+import { LembreteMensagens } from "@/components/avisos/lembrete-mensagens";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UrgencyPill } from "@/components/shared/urgency-pill";
-import { formatDate, formatDiasRestantes } from "@/lib/utils/format";
-import type { RecompraAlerta } from "@/lib/types/recompra";
+import { formatDate } from "@/lib/utils/format";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // ── Página ────────────────────────────────────────────────────────────────────
@@ -27,13 +25,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function AvisosPage() {
   const { data: recompraData, isLoading } = useRecompra({ limit: 100 });
   const { data: semCustoData, isLoading: isLoadingSemCusto } = useVendasSemCusto();
-  const dismiss = useDismissRecompra();
 
-  const [pendingAlerta, setPendingAlerta] = useState<RecompraAlerta | null>(null);
-
-  const alertasUrgentes = (recompraData?.data ?? []).filter(
-    (a) => a.diasRestantes <= 10
-  );
+  const alertasAviso = (recompraData?.data ?? []).filter((a) => a.diasRestantes <= 10);
+  const pendentes = alertasAviso.filter((a) => !a.mensagemEnviadaEm).length;
 
   // ── Lembretes (backend) ──
   const { data: tarefas = [], isLoading: isLoadingTarefas } = useLembretes();
@@ -65,167 +59,24 @@ export default function AvisosPage() {
     }
   }
 
-  async function confirmarDismiss() {
-    if (!pendingAlerta) return;
-    try {
-      await dismiss.mutateAsync({
-        produtoId: pendingAlerta.produtoId,
-        clienteId: pendingAlerta.clienteId,
-        animalId: pendingAlerta.animalId,
-        reason: "ok",
-      });
-      toast.success("Alerta marcado como resolvido!");
-    } catch {
-      toast.error("Erro ao atualizar o alerta.");
-    } finally {
-      setPendingAlerta(null);
-    }
-  }
-
   return (
     <div className="space-y-8">
-      {/* ── Recompra urgentes ──────────────────────────────────────────────── */}
+      {/* ── Lembrete de mensagens (recompra) ───────────────────────────────── */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-1">
           <BellRing className="w-5 h-5 text-amber-500" />
-          <h2 className="text-base font-semibold">Alertas de Recompra</h2>
-          {!isLoading && alertasUrgentes.length > 0 && (
+          <h2 className="text-base font-semibold">Lembrete de mensagens — Recompra</h2>
+          {!isLoading && pendentes > 0 && (
             <span className="bg-red-500 text-white text-[11px] font-bold rounded-full px-2 py-0.5">
-              {alertasUrgentes.length}
+              {pendentes}
             </span>
           )}
         </div>
-
-        {/* Mobile cards */}
-        <div className="md:hidden bg-card rounded-xl border border-border overflow-hidden shadow-sm divide-y divide-border">
-          {isLoading ? (
-            Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="p-4 space-y-2">
-                <Skeleton className="h-4 w-2/3" />
-                <Skeleton className="h-3 w-1/3" />
-              </div>
-            ))
-          ) : alertasUrgentes.length === 0 ? (
-            <div className="p-8 text-center">
-              <BellRing className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
-              <p className="text-sm text-muted-foreground">
-                Nenhum alerta urgente. Tudo no prazo!
-              </p>
-            </div>
-          ) : (
-            alertasUrgentes.map((a) => (
-              <div key={`${a.produtoId}-${a.clienteId}-${a.animalId}`} className="p-4 flex items-center gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{a.produtoNome}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {a.clienteNome} · {a.animalNome}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <UrgencyPill urgencia={a.urgencia} />
-                    <span className="text-xs text-muted-foreground">
-                      {formatDiasRestantes(a.diasRestantes)}
-                    </span>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  title="Marcar como resolvido"
-                  className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 shrink-0"
-                  onClick={() => setPendingAlerta(a)}
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                </Button>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Desktop table */}
-        <div className="hidden md:block bg-card rounded-xl border border-border overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-muted/50">
-                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-                    Cliente
-                  </th>
-                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-                    Animal
-                  </th>
-                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-                    Produto
-                  </th>
-                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-                    Previsão
-                  </th>
-                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-                    Situação
-                  </th>
-                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-                    Urgência
-                  </th>
-                  <th className="px-4 py-3 w-16 text-center font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-                    OK
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                  Array.from({ length: 3 }).map((_, i) => (
-                    <tr key={i} className="border-t border-border">
-                      {Array.from({ length: 7 }).map((_, j) => (
-                        <td key={j} className="px-4 py-3">
-                          <Skeleton className="h-4 w-full" />
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                ) : alertasUrgentes.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-10 text-center">
-                      <BellRing className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
-                      <p className="text-sm text-muted-foreground">
-                        Nenhum alerta urgente. Tudo no prazo!
-                      </p>
-                    </td>
-                  </tr>
-                ) : (
-                  alertasUrgentes.map((a) => (
-                    <tr
-                      key={`${a.produtoId}-${a.clienteId}-${a.animalId}`}
-                      className="border-t border-border hover:bg-accent/30 transition-colors"
-                    >
-                      <td className="px-4 py-3 font-medium">{a.clienteNome}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{a.animalNome}</td>
-                      <td className="px-4 py-3">{a.produtoNome}</td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {formatDate(a.previsaoRecompra)}
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium">
-                        {formatDiasRestantes(a.diasRestantes)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <UrgencyPill urgencia={a.urgencia} />
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          title="Marcar como resolvido"
-                          className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                          onClick={() => setPendingAlerta(a)}
-                        >
-                          <CheckCircle2 className="w-4 h-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          Clientes com recompra em até 10 dias ou atrasada. Marcar a mensagem não remove o cliente de
+          Atrasados/Sumidos — ele só sai quando comprar de novo.
+        </p>
+        <LembreteMensagens alertas={alertasAviso} isLoading={isLoading} />
       </section>
 
       {/* ── Produtos sem custo ─────────────────────────────────────────────── */}
@@ -385,14 +236,6 @@ export default function AvisosPage() {
           )}
         </div>
       </section>
-
-      <DismissRecompraDialog
-        alerta={pendingAlerta}
-        reason="ok"
-        loading={dismiss.isPending}
-        onClose={() => setPendingAlerta(null)}
-        onConfirm={confirmarDismiss}
-      />
 
       <ConfirmDialog
         open={!!pendingTarefaId}

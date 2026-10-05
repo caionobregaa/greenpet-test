@@ -20,6 +20,8 @@ export async function truncateAll(): Promise<void> {
     prismaTest.animal.deleteMany(),
     prismaTest.estoqueItem.deleteMany(),
     prismaTest.recompraManual.deleteMany(),
+    prismaTest.recompraContato.deleteMany(),
+    prismaTest.clienteSumidoMotivo.deleteMany(),
     prismaTest.recompraDismissal.deleteMany(),
     prismaTest.produto.deleteMany(),
     prismaTest.cliente.deleteMany(),

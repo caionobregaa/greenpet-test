@@ -274,6 +274,39 @@ model RecompraDismissal {
   @@map("recompra_dismissals")
 }
 
+// Ciclo de recompra = (clienteId, produtoId, animalId, ultimaCompra). Nova venda do
+// produto muda ultimaCompra e começa um ciclo novo (specs/recompra/spec-v2.md).
+
+model RecompraContato {
+  id           String   @id @default(uuid())
+  clienteId    String
+  produtoId    String
+  animalId     String   @default("")
+  ultimaCompra DateTime
+  enviadoEm    DateTime @default(now())
+  enviadoPor   String   // email do usuário autenticado
+
+  @@unique([clienteId, produtoId, animalId, ultimaCompra])
+  @@map("recompra_contatos")
+}
+
+model ClienteSumidoMotivo {
+  id            String   @id @default(uuid())
+  clienteId     String
+  produtoId     String
+  animalId      String   @default("")
+  ultimaCompra  DateTime
+  motivos       String[]
+  outroTexto    String?
+  registradoEm  DateTime @default(now())
+  registradoPor String   // email do usuário autenticado
+  updatedAt     DateTime @updatedAt
+
+  @@unique([clienteId, produtoId, animalId, ultimaCompra])
+  @@index([registradoEm])
+  @@map("cliente_sumido_motivos")
+}
+
 model RecompraManual {
   id           String    @id @default(uuid())
   clienteId    String

@@ -8,12 +8,14 @@ import {
   TrendingDown,
   PackageX,
   ArrowRight,
+  BellRing,
+  CheckCheck,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { useDashboardOperacional } from "@/lib/hooks/use-dashboard-operacional";
 import { UrgencyPill } from "@/components/shared/urgency-pill";
-import { formatBRL, formatDate } from "@/lib/utils/format";
+import { formatBRL, formatDate, formatDiasRestantes } from "@/lib/utils/format";
 import type { ComparativoItem } from "@/lib/types/dashboard-operacional";
 
 function formatVariacao(item: ComparativoItem | undefined): string {
@@ -99,12 +101,36 @@ export default function DashboardPage() {
       {/* Alertas operacionais */}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {Array.from({ length: 5 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-56 rounded-xl" />
           ))}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <SectionCard
+            title="Alertas de Recompra"
+            icon={BellRing}
+            count={data?.alertasRecompra.total ?? 0}
+            tone="red"
+            emptyLabel="Nenhuma recompra para os próximos 10 dias"
+            href="/avisos"
+          >
+            {data?.alertasRecompra.itens.slice(0, 5).map((a, i) => (
+              <div key={i} className="flex items-center justify-between gap-2 text-sm">
+                <div className="min-w-0">
+                  <p className="font-medium truncate flex items-center gap-1">
+                    {a.clienteNome}
+                    {a.mensagemEnviadaEm && (
+                      <CheckCheck className="w-3.5 h-3.5 text-green-600 shrink-0" aria-label="Mensagem enviada" />
+                    )}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">{a.produtoNome}</p>
+                </div>
+                <span className="text-xs font-semibold text-muted-foreground shrink-0">{formatDiasRestantes(a.diasRestantes)}</span>
+              </div>
+            ))}
+          </SectionCard>
+
           <SectionCard
             title="Recompras da Semana"
             icon={CalendarClock}
@@ -149,6 +175,7 @@ export default function DashboardPage() {
             count={data?.clientesSumidos.total ?? 0}
             tone="amber"
             emptyLabel="Nenhum cliente sumido (mais de 30 dias sem recomprar)"
+            href="/clientes?aba=sumidos"
           >
             {data?.clientesSumidos.itens.slice(0, 5).map((c, i) => (
               <div key={i} className="flex items-center justify-between gap-2 text-sm">

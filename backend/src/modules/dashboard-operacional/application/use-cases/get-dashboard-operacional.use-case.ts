@@ -1,4 +1,5 @@
 import type { PrismaRecompraRepository, RecompraAlerta } from '@/modules/recompra/infrastructure/repositories/prisma-recompra.repository.js'
+import { isAlertaAviso, isSumido } from '@/modules/recompra/domain/services/recompra-alert.service.js'
 import type { GetDashboardOverviewUseCase } from '@/modules/dashboard/application/use-cases/get-dashboard-overview.use-case.js'
 import type { ComparativoItem } from '@/modules/dashboard/application/use-cases/get-dashboard-overview.use-case.js'
 import type {
@@ -15,6 +16,8 @@ export interface ClienteSumido {
 }
 
 export interface DashboardOperacional {
+  /** Alertas de aviso (≤10 dias, inclui vencidos) — o mesmo conjunto da aba Avisos. */
+  alertasRecompra: { total: number; itens: RecompraAlerta[] }
   recompraSemana: { total: number; itens: RecompraAlerta[] }
   recompraAtrasada: { total: number; itens: RecompraAlerta[] }
   clientesSumidos: { total: number; itens: ClienteSumido[] }
@@ -22,10 +25,6 @@ export interface DashboardOperacional {
   vendasMargemNegativa: VendaMargemNegativa[]
   estoqueBaixo: ProdutoEstoqueBaixo[]
 }
-
-// Cliente "sumido": alerta vencido (já deveria ter recomprado) há mais desse
-// tanto de dias. Confirmado com o usuário — corte de 30 dias.
-const DIAS_ATRASO_SUMIDO = 30
 
 function startOfDay(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0)
@@ -56,10 +55,11 @@ export class GetDashboardOperacionalUseCase {
     ])
 
     const alertas = alertasResult.alertas
+    const alertasRecompraItens = alertas.filter((a) => isAlertaAviso(a.diasRestantes))
     const recompraSemanaItens = alertas.filter((a) => a.urgencia === 'proximo' || a.urgencia === 'urgente')
     const recompraAtrasadaItens = alertas.filter((a) => a.urgencia === 'vencido')
     const clientesSumidosItens: ClienteSumido[] = recompraAtrasadaItens
-      .filter((a) => Math.abs(a.diasRestantes) > DIAS_ATRASO_SUMIDO)
+      .filter((a) => isSumido(a.diasRestantes))
       .map((a) => ({
         clienteId: a.clienteId,
         nome: a.clienteNome,
@@ -68,6 +68,7 @@ export class GetDashboardOperacionalUseCase {
       }))
 
     return {
+      alertasRecompra: { total: alertasRecompraItens.length, itens: alertasRecompraItens },
       recompraSemana: { total: recompraSemanaItens.length, itens: recompraSemanaItens },
       recompraAtrasada: { total: recompraAtrasadaItens.length, itens: recompraAtrasadaItens },
       clientesSumidos: { total: clientesSumidosItens.length, itens: clientesSumidosItens },

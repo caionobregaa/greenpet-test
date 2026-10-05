@@ -23,7 +23,14 @@ export interface MargemCategoria {
   margemRealizada: number | null;
 }
 
+export interface MotivoSumidoContagem {
+  motivo: string;
+  quantidade: number;
+  percentual: number;
+}
+
 export interface BiAvancado {
+  motivosClientesSumidos: { totalRegistros: number; motivos: MotivoSumidoContagem[] };
   rankingLtv: { clientes: ClienteLtv[]; total: number };
   taxaRecompra: TaxaRecompra;
   cicloRecompraPorCategoria: CicloRecompraCategoria[];

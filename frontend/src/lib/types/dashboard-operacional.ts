@@ -9,6 +9,7 @@ export interface RecompraAlertaResumo {
   ultimaCompra: string;
   diasRestantes: number;
   urgencia: Urgencia;
+  mensagemEnviadaEm: string | null;
 }
 
 export interface ClienteSumido {
@@ -43,6 +44,7 @@ export interface ComparativoItem {
 }
 
 export interface DashboardOperacional {
+  alertasRecompra: { total: number; itens: RecompraAlertaResumo[] };
   recompraSemana: { total: number; itens: RecompraAlertaResumo[] };
   recompraAtrasada: { total: number; itens: RecompraAlertaResumo[] };
   clientesSumidos: { total: number; itens: ClienteSumido[] };

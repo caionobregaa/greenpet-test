@@ -1,6 +1,6 @@
 import { api } from "./client";
 import type { ApiMeta } from "@/lib/types/api";
-import type { RecompraAlerta, Urgencia } from "@/lib/types/recompra";
+import type { RecompraAlerta, Urgencia, CicloRecompra, ClienteSumidoAlerta } from "@/lib/types/recompra";
 
 interface ListParams {
   clienteId?: string;
@@ -40,5 +40,22 @@ export const apiRecompra = {
 
   deleteManual: async (id: string): Promise<void> => {
     await api.delete(`/recompra/manual/${id}`);
+  },
+
+  marcarMensagem: async (ciclo: CicloRecompra): Promise<void> => {
+    await api.post("/recompra/contato", ciclo);
+  },
+
+  desmarcarMensagem: async (ciclo: CicloRecompra): Promise<void> => {
+    await api.delete("/recompra/contato", { data: ciclo });
+  },
+
+  sumidos: async (): Promise<ClienteSumidoAlerta[]> => {
+    const { data } = await api.get<{ data: ClienteSumidoAlerta[] }>("/recompra/sumidos");
+    return data.data;
+  },
+
+  registrarMotivos: async (params: CicloRecompra & { motivos: string[]; outroTexto: string | null }): Promise<void> => {
+    await api.put("/recompra/sumidos/motivos", params);
   },
 };

@@ -29,7 +29,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import type { Urgencia, RecompraAlerta } from "@/lib/types/recompra";
+import { previsaoRecompra, type Urgencia, type RecompraAlerta } from "@/lib/types/recompra";
 import { Loader2, CheckCircle2, XCircle, Plus, Trash2 } from "lucide-react";
 
 // ── Diálogo de Recompra Manual ─────────────────────────────────────────────
@@ -410,7 +410,7 @@ export default function RecompraPage() {
                     <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{a.animalNome}</td>
                     <td className="px-4 py-3">{a.produtoNome}</td>
                     <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{formatDate(a.ultimaCompra)}</td>
-                    <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{formatDate(a.previsaoRecompra)}</td>
+                    <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{formatDate(previsaoRecompra(a))}</td>
                     <td className="px-4 py-3 text-sm font-medium">{formatDiasRestantes(a.diasRestantes)}</td>
                     <td className="px-4 py-3"><UrgencyPill urgencia={a.urgencia} /></td>
                     <td className="px-4 py-3">
