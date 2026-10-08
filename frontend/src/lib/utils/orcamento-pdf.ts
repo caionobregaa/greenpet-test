@@ -4,6 +4,7 @@ import type { Orcamento } from "@/lib/types/orcamento";
 import type { Cliente } from "@/lib/types/cliente";
 import type { Animal } from "@/lib/types/animal";
 import { whatsappUrl } from "@/lib/utils/whatsapp";
+import { resumoValoresOrcamento, valorBrutoItem } from "@/lib/utils/orcamento-valores";
 
 function brl(value: number): string {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -166,8 +167,9 @@ export function gerarOrcamentoPDF(
 
   const tableBody = orcamento.itens.map((item) =>
     hasImages
-      ? ["", item.nome, "un.", brl(item.valorUnitario), String(item.qtd), brl(item.total)]
-      : [item.nome, "un.", brl(item.valorUnitario), String(item.qtd), brl(item.total)],
+      // Valor cheio do item: o desconto aparece separado, abaixo da tabela (specs/orcamentos/spec-v3.md)
+      ? ["", item.nome, "un.", brl(item.valorUnitario), String(item.qtd), brl(valorBrutoItem(item))]
+      : [item.nome, "un.", brl(item.valorUnitario), String(item.qtd), brl(valorBrutoItem(item))],
   );
 
   const colStylesWithImg = {
@@ -232,17 +234,34 @@ export function gerarOrcamentoPDF(
 
   y = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
 
-  // ── 7. Linha de total ────────────────────────────────────────────────
-  // Se não cabe na página atual, adiciona nova página
-  if (y + 10 > SAFE_BOTTOM) { doc.addPage(); y = M; }
+  // ── 7. Totais: valor total, desconto e total com desconto ────────────
+  const valores = resumoValoresOrcamento(orcamento);
+  const temDesconto = valores.desconto > 0;
+  // Se o bloco não cabe na página atual, adiciona nova página
+  if (y + (temDesconto ? 26 : 10) > SAFE_BOTTOM) { doc.addPage(); y = M; }
+
+  if (temDesconto) {
+    y += 1.5;
+    doc.setFontSize(9.5);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...DARK);
+    doc.text("Valor total", M + 4, y + 5.5);
+    doc.text(brl(valores.subtotal), W - M - 4, y + 5.5, { align: "right" });
+    y += 7;
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...WINE);
+    doc.text("Desconto", M + 4, y + 5.5);
+    doc.text(`- ${brl(valores.desconto)}`, W - M - 4, y + 5.5, { align: "right" });
+    y += 8.5;
+  }
 
   doc.setFillColor(...WINE);
   doc.rect(M, y, W - M * 2, 10, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(...BUTTER);
-  doc.text("Total", M + 4, y + 6.8);
-  doc.text(brl(orcamento.total), W - M - 4, y + 6.8, { align: "right" });
+  doc.text(temDesconto ? "Total com desconto" : "Total", M + 4, y + 6.8);
+  doc.text(brl(valores.total), W - M - 4, y + 6.8, { align: "right" });
   y += 16;
 
   // ── 8. Pagamento ─────────────────────────────────────────────────────
@@ -352,11 +371,19 @@ export async function compartilharOrcamentoPDF(
   const file = new File([blob], fileName, { type: "application/pdf" });
 
   const clienteNome = cliente?.nome?.split(" ")[0] ?? "";
+  const valores = resumoValoresOrcamento(orcamento);
+  const linhasValor = valores.desconto > 0
+    ? [
+        `*Valor total:* ${brl(valores.subtotal)}`,
+        `*Desconto:* − ${brl(valores.desconto)}`,
+        `*Total com desconto:* ${brl(valores.total)}`,
+      ]
+    : [`*Total:* ${brl(valores.total)}`];
   const msg = [
     `Olá${clienteNome ? `, ${clienteNome}` : ""}! 🐾`,
     `Segue o orçamento da *Beez Pet* Nº ${pedidoNum}.`,
     ``,
-    `*Total:* ${brl(orcamento.total)}`,
+    ...linhasValor,
     `*Válido até:* ${fmtDate(orcamento.validade)}`,
   ].join("\n");
 
