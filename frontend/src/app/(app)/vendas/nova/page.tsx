@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Search, X, FileText, CreditCard, Banknote, QrCode, Wallet, ChevronDown, PawPrint, UserPlus, Check } from "lucide-react";
+import { ArrowLeft, Loader2, Search, X, FileText, ChevronDown, PawPrint, UserPlus, Check } from "lucide-react";
 import { CreateVendaSchema, type CreateVendaInput } from "@/lib/schemas/venda.schema";
 import { useCreateVenda } from "@/lib/hooks/use-vendas";
 import { useConverterOrcamento } from "@/lib/hooks/use-orcamentos";
@@ -23,101 +23,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { ItensTable } from "@/components/vendas/itens-table";
 import { todayISO, todayLocalISO, formatBRL, formatDate, formatTelefone } from "@/lib/utils/format";
 import { cn } from "@/lib/utils";
+import { OPCOES_PAGAMENTO } from "@/lib/utils/formas-pagamento";
+import { FormaPagSelect } from "@/components/vendas/forma-pag-select";
 
 // ── Payment options ──────────────────────────────────────────────────────────
 
 // Regra oficial de precificação (ago/2026): desconto de recompra é sempre 5%
 // sobre o subtotal dos itens, independente da forma de pagamento.
 const DESCONTO_RECOMPRA_PCT = 0.05;
-
-const TAXAS = {
-  "link-1x":        { label: "Link de Pagamento 1x",          pct: 4.20 },
-  "link-2x":        { label: "Link de Pagamento 2x+",         pct: 6.09 },
-  "maquininha-1x":  { label: "Infinite TAP 1x",               pct: 3.15 },
-  "maquininha-2x":  { label: "Infinite TAP 2x+",              pct: 5.39 },
-  "debito":         { label: "Cartão Débito",                  pct: 1.37 },
-} as const;
-
-type TaxaKey = keyof typeof TAXAS;
-type FormaPagBackend = "Pix" | "Dinheiro" | "Cartão Crédito" | "Cartão Débito" | "Boleto";
-
-interface OpcaoPag {
-  value: string;
-  label: string;
-  backend: FormaPagBackend;
-  taxaKey?: TaxaKey;
-  Icon: React.ElementType;
-}
-
-const OPCOES_PAG: OpcaoPag[] = [
-  { value: "pix",           label: "PIX",                                         backend: "Pix",           Icon: QrCode    },
-  { value: "dinheiro",      label: "Dinheiro",                                    backend: "Dinheiro",      Icon: Banknote  },
-  { value: "link-1x",       label: "Crédito — Link de Pagamento 1x (4,2%)",       backend: "Cartão Crédito", taxaKey: "link-1x",       Icon: CreditCard },
-  { value: "link-2x",       label: "Crédito — Link de Pagamento 2x+ (6,09%)",     backend: "Cartão Crédito", taxaKey: "link-2x",       Icon: CreditCard },
-  { value: "maquininha-1x", label: "Crédito — Infinite TAP 1x (3,15%)",           backend: "Cartão Crédito", taxaKey: "maquininha-1x", Icon: CreditCard },
-  { value: "maquininha-2x", label: "Crédito — Infinite TAP 2x+ (5,39%)",          backend: "Cartão Crédito", taxaKey: "maquininha-2x", Icon: CreditCard },
-  { value: "cartao-debito", label: "Débito (1,37%)",                               backend: "Cartão Débito",  taxaKey: "debito",        Icon: Wallet     },
-];
-
-// ── FormaPag selector ────────────────────────────────────────────────────────
-
-function FormaPagDetalhada({
-  value,
-  onValueChange,
-}: {
-  value: string;
-  onValueChange: (v: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const selected = OPCOES_PAG.find((o) => o.value === value);
-
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((p) => !p)}
-        className={cn(
-          "w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md border text-sm transition-colors",
-          "bg-background border-input hover:border-primary/50",
-          !selected && "text-muted-foreground"
-        )}
-      >
-        <span className="flex items-center gap-2">
-          {selected ? (
-            <>
-              <selected.Icon className="w-4 h-4 text-muted-foreground" />
-              {selected.label}
-            </>
-          ) : (
-            "Selecione a forma de pagamento..."
-          )}
-        </span>
-        <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", open && "rotate-180")} />
-      </button>
-      {open && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-md overflow-hidden">
-          {OPCOES_PAG.map((o) => (
-            <button
-              key={o.value}
-              type="button"
-              className={cn(
-                "w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-accent transition-colors text-left border-b border-border/40 last:border-0",
-                value === o.value && "bg-accent"
-              )}
-              onClick={() => { onValueChange(o.value); setOpen(false); }}
-            >
-              <o.Icon className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span>{o.label}</span>
-              {o.taxaKey && (
-                <span className="ml-auto text-xs text-destructive font-medium">−{TAXAS[o.taxaKey].pct}%</span>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ── Importar de Orçamento ────────────────────────────────────────────────────
 
@@ -257,8 +170,8 @@ export default function NovaVendaPage() {
     0
   );
 
-  const selectedOpcao = OPCOES_PAG.find((o) => o.value === formaPagKey);
-  const taxaPct = selectedOpcao?.taxaKey ? TAXAS[selectedOpcao.taxaKey].pct : 0;
+  const selectedOpcao = OPCOES_PAGAMENTO.find((o) => o.value === formaPagKey);
+  const taxaPct = selectedOpcao?.taxa ?? 0;
   const entrega = cobrarEntrega ? (valorEntrega || 0) : 0;
   const descontoRecompra = !orcamentoSelecionado && clienteRecompra
     ? Math.round(formTotal * DESCONTO_RECOMPRA_PCT * 100) / 100
@@ -405,12 +318,12 @@ export default function NovaVendaPage() {
 
   // Converter flow: bypass form validation
   async function handleConfirmarOrcamento() {
-    const opcao = OPCOES_PAG.find((o) => o.value === formaPagKey);
+    const opcao = OPCOES_PAGAMENTO.find((o) => o.value === formaPagKey);
     if (!opcao) { toast.error("Selecione a forma de pagamento."); return; }
     if (!orcamentoSelecionado) return;
     if (!dataPagamento) { toast.error("Informe a data do pagamento."); return; }
     if (dataPagamento > todayLocalISO()) { toast.error("A data do pagamento não pode ser no futuro."); return; }
-    const taxaPctVal = opcao.taxaKey ? TAXAS[opcao.taxaKey].pct : 0;
+    const taxaPctVal = opcao.taxa;
     try {
       const result = await converterOrcamento.mutateAsync({
         id: orcamentoSelecionado.id,
@@ -426,9 +339,9 @@ export default function NovaVendaPage() {
 
   // Normal venda creation flow
   async function onSubmit(data: CreateVendaInput) {
-    const opcao = OPCOES_PAG.find((o) => o.value === formaPagKey);
+    const opcao = OPCOES_PAGAMENTO.find((o) => o.value === formaPagKey);
     if (!opcao) { toast.error("Selecione a forma de pagamento."); return; }
-    const taxaPctVal = opcao.taxaKey ? TAXAS[opcao.taxaKey].pct : 0;
+    const taxaPctVal = opcao.taxa;
     try {
       const venda = await createVenda.mutateAsync({
         ...data,
@@ -481,9 +394,9 @@ export default function NovaVendaPage() {
         {/* Payment method — always shown */}
         <div className="bg-card rounded-lg border border-border/50 p-6 shadow-sm shadow-black/5">
           <h2 className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground mb-4">Forma de Pagamento *</h2>
-          <FormaPagDetalhada value={formaPagKey} onValueChange={(v) => {
+          <FormaPagSelect opcoes={OPCOES_PAGAMENTO} value={formaPagKey} onValueChange={(v) => {
             setFormaPagKey(v);
-            const opcao = OPCOES_PAG.find((o) => o.value === v);
+            const opcao = OPCOES_PAGAMENTO.find((o) => o.value === v);
             if (opcao) setValue("formaPag", opcao.backend);
           }} />
           {errors.formaPag && <p className="text-xs text-destructive mt-1">{errors.formaPag.message}</p>}

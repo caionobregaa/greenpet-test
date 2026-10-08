@@ -25,36 +25,7 @@ import { apiAnimais } from "@/lib/api/animais";
 import { apiProdutos } from "@/lib/api/produtos";
 import { gerarOrcamentoPDF, compartilharOrcamentoPDF } from "@/lib/utils/orcamento-pdf";
 import { MOTIVOS_PERDA, type MotivoPerda } from "@/lib/schemas/orcamento.schema";
-
-// ── Taxas de cartão ────────────────────────────────────────────────────────────
-const TAXAS = {
-  "link-1x":       { label: "Link de Pagamento — 1x",       pct: 4.2  },
-  "link-2x":       { label: "Link de Pagamento — 2x+",      pct: 6.09 },
-  "maquininha-1x": { label: "Maquininha / INFINITETAP — 1x", pct: 3.15 },
-  "maquininha-2x": { label: "Maquininha / INFINITETAP — 2x+", pct: 5.39 },
-} as const;
-
-type TaxaKey = keyof typeof TAXAS;
-
-type FormaPagBackend = "Pix" | "Dinheiro" | "Cartão Crédito" | "Cartão Débito" | "Boleto";
-
-interface OpcaoPagamento {
-  value: string;
-  label: string;
-  backend: FormaPagBackend;
-  taxaKey?: TaxaKey;
-}
-
-const OPCOES_PAG: OpcaoPagamento[] = [
-  { value: "pix",          label: "PIX",                         backend: "Pix" },
-  { value: "dinheiro",     label: "Dinheiro",                    backend: "Dinheiro" },
-  { value: "link-1x",      label: "Cartão — Link 1x (4,2%)",    backend: "Cartão Crédito", taxaKey: "link-1x" },
-  { value: "link-2x",      label: "Cartão — Link 2x+ (6,09%)",  backend: "Cartão Crédito", taxaKey: "link-2x" },
-  { value: "maquininha-1x", label: "Cartão — Maquininha 1x (3,15%)",  backend: "Cartão Crédito", taxaKey: "maquininha-1x" },
-  { value: "maquininha-2x", label: "Cartão — Maquininha 2x+ (5,39%)", backend: "Cartão Crédito", taxaKey: "maquininha-2x" },
-  { value: "cartao-debito", label: "Cartão Débito",               backend: "Cartão Débito" },
-  { value: "boleto",        label: "Boleto",                       backend: "Boleto" },
-];
+import { OPCOES_PAGAMENTO_ORCAMENTO } from "@/lib/utils/formas-pagamento";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -78,11 +49,11 @@ export default function OrcamentoDetailPage({ params }: Props) {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [waLoading, setWaLoading] = useState(false);
 
-  const opcaoSelecionada = OPCOES_PAG.find((o) => o.value === pagamento);
-  const taxaKey = opcaoSelecionada?.taxaKey;
-  const taxa = taxaKey ? TAXAS[taxaKey] : null;
+  // Taxas do banco (specs/vendas/spec-v2.md): iguais para link e maquininha.
+  const opcaoSelecionada = OPCOES_PAGAMENTO_ORCAMENTO.find((o) => o.value === pagamento);
+  const taxa = opcaoSelecionada && opcaoSelecionada.taxa > 0 ? opcaoSelecionada : null;
   const totalBruto = orcamento?.total ?? 0;
-  const valorTaxa = taxa ? (totalBruto * taxa.pct) / 100 : 0;
+  const valorTaxa = taxa ? (totalBruto * taxa.taxa) / 100 : 0;
   const lucroLiquido = totalBruto - valorTaxa;
 
   async function handleStatus(acao: "fechar" | "perder" | "reabrir", motivo?: MotivoPerda) {
@@ -103,11 +74,11 @@ export default function OrcamentoDetailPage({ params }: Props) {
 
   async function handleConverter() {
     if (!pagamento) { toast.error("Selecione a forma de pagamento."); return; }
-    const opcao = OPCOES_PAG.find((o) => o.value === pagamento);
+    const opcao = OPCOES_PAGAMENTO_ORCAMENTO.find((o) => o.value === pagamento);
     if (!opcao) return;
     if (!dataPagamento) { toast.error("Informe a data do pagamento."); return; }
     if (dataPagamento > todayLocalISO()) { toast.error("A data do pagamento não pode ser no futuro."); return; }
-    const taxaPct = opcao.taxaKey ? TAXAS[opcao.taxaKey].pct : 0;
+    const taxaPct = opcao.taxa;
     try {
       const result = await converter.mutateAsync({ id, input: { formaPag: opcao.backend, taxaCartao: taxaPct, data: dataPagamento } });
       toast.success("Orçamento convertido em venda!");
@@ -300,7 +271,7 @@ export default function OrcamentoDetailPage({ params }: Props) {
                   <SelectValue placeholder="Selecione..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {OPCOES_PAG.map((o) => (
+                  {OPCOES_PAGAMENTO_ORCAMENTO.map((o) => (
                     <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
                   ))}
                 </SelectContent>
@@ -331,7 +302,7 @@ export default function OrcamentoDetailPage({ params }: Props) {
                 {taxa ? (
                   <>
                     <div className="flex justify-between items-center text-destructive">
-                      <span className="text-sm">Taxa {taxa.label} ({taxa.pct}%)</span>
+                      <span className="text-sm">Taxa {taxa.label}</span>
                       <span className="font-mono font-semibold">− {formatBRL(valorTaxa)}</span>
                     </div>
                     <div className="border-t border-border pt-3 flex justify-between items-center">
