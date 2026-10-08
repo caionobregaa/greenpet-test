@@ -22,7 +22,7 @@ interface VendasPorFormaPagamentoChartProps {
   formasPagamento: VendaPorFormaPagamento[];
 }
 
-const COLORS = ["#2f6b4f", "#3f8a68", "#5aa382", "#82c0a5", "#b7ddc9"];
+const COLORS = ["#a8335f", "#c4557c", "#dc7f9a", "#efa9b8", "#ffc9d0"];
 
 export function VendasPorFormaPagamentoChart({ formasPagamento }: VendasPorFormaPagamentoChartProps) {
   const data = [...formasPagamento]
@@ -54,7 +54,7 @@ export function VendasPorFormaPagamentoChart({ formasPagamento }: VendasPorForma
               type="number"
               domain={[0, ticks[ticks.length - 1]]}
               ticks={ticks}
-              tick={{ fontSize: 10, fill: "#6b6460" }}
+              tick={{ fontSize: 10, fill: "#7a6370" }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `R$${v}`}
@@ -62,7 +62,7 @@ export function VendasPorFormaPagamentoChart({ formasPagamento }: VendasPorForma
             <YAxis
               type="category"
               dataKey="nome"
-              tick={{ fontSize: 11, fill: "#6b6460" }}
+              tick={{ fontSize: 11, fill: "#7a6370" }}
               axisLine={false}
               tickLine={false}
               width={100}
@@ -72,8 +72,8 @@ export function VendasPorFormaPagamentoChart({ formasPagamento }: VendasPorForma
                 `${formatBRL(Number(value ?? 0))} (${entry.payload.vendas} vendas)`,
                 "Total",
               ]}
-              labelStyle={{ color: "#1c1917", fontWeight: 600 }}
-              contentStyle={{ borderColor: "#dbd5cc", borderRadius: 6, fontSize: 12, background: "#fefcf8" }}
+              labelStyle={{ color: "#641d3f", fontWeight: 600 }}
+              contentStyle={{ borderColor: "#eedfdf", borderRadius: 6, fontSize: 12, background: "#fffefd" }}
             />
             <Bar dataKey="total" radius={[0, 4, 4, 0]} maxBarSize={24}>
               {data.map((_, i) => (

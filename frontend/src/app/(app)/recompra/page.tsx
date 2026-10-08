@@ -364,8 +364,8 @@ export default function RecompraPage() {
       <div className="flex flex-wrap gap-3 mb-4 text-xs text-muted-foreground">
         <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-600 inline-block" />Vencido: passou a data prevista</div>
         <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-600 inline-block" />Urgente: faltam ≤ 3 dias</div>
-        <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-teal-600 inline-block" />Próximo: faltam ≤ 7 dias</div>
-        <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-brand-600 inline-block" />OK: no prazo</div>
+        <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-blush-400 inline-block" />Próximo: faltam ≤ 7 dias</div>
+        <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block" />OK: no prazo</div>
       </div>
 
       <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">

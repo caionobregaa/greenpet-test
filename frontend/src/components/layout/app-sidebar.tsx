@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
@@ -93,25 +94,26 @@ export function AppSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: A
       )}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-sidebar-border">
-        <div
-          className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 shadow-lg"
-          style={{ background: "linear-gradient(135deg, #5cbf7a 0%, #1a9688 100%)" }}
-        >
-          <span className="text-[15px]">🐾</span>
-        </div>
-        <div className={cn("overflow-hidden", collapsed && "md:hidden")}>
-          <p
-            className="text-[16px] font-semibold leading-tight whitespace-nowrap tracking-tight"
-            style={{ color: "#d4ead4", fontFamily: "var(--font-sora)" }}
-          >
-            BEEZ PET
-          </p>
-          <p className="text-[9px] tracking-widest uppercase whitespace-nowrap" style={{ color: "#5a7a5a" }}>
+      <Link
+        href="/dashboard"
+        onClick={onMobileClose}
+        className={cn("flex items-center gap-2.5 px-4 py-4 border-b border-sidebar-border", collapsed && "md:justify-center md:px-0")}
+      >
+        <Image
+          src="/brand/mascote.png"
+          alt="beezpet"
+          width={320}
+          height={320}
+          priority
+          className="h-10 w-10 shrink-0 rounded-full ring-2 ring-butter-200/30"
+        />
+        <div className={cn("min-w-0", collapsed && "md:hidden")}>
+          <Image src="/brand/wordmark-amarelo.png" alt="" width={720} height={190} priority className="h-[22px] w-auto" />
+          <p className="mt-1 text-[9px] tracking-[0.22em] uppercase whitespace-nowrap text-blush-200/70">
             Gestão Pet Shop
           </p>
         </div>
-      </div>
+      </Link>
 
       {/* Nav */}
       <nav className="flex-1 px-2 py-3 overflow-y-auto space-y-0.5">
@@ -137,10 +139,7 @@ export function AppSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: A
       <div className="hidden md:block px-2 py-2 border-t border-sidebar-border">
         <button
           onClick={onToggle}
-          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-xs transition-colors"
-          style={{ color: "#3a5a3a" }}
-          onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#152219")}
-          onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
+          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-xs transition-colors text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground"
         >
           {collapsed ? (
             <ChevronRight className="w-4 h-4 shrink-0" />
@@ -176,19 +175,19 @@ function NavLink({
       title={collapsed ? label : undefined}
       onClick={onMobileClose}
       className={cn(
-        "flex items-center gap-2.5 px-2.5 py-2 md:py-[7px] rounded-md text-[13px] font-medium transition-all duration-150 whitespace-nowrap overflow-hidden",
+        "flex items-center gap-2.5 px-2.5 py-2 md:py-[7px] rounded-lg text-[13px] font-medium transition-all duration-150 whitespace-nowrap overflow-hidden",
         indent && !collapsed && "pl-8",
-        highlight && !active
-          ? "bg-sidebar-primary/20 text-sidebar-primary border border-sidebar-primary/25 hover:bg-sidebar-primary/30"
+        highlight
+          ? "mb-2 bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-[0_6px_16px_-8px_rgba(0,0,0,0.5)] hover:-translate-y-px hover:bg-butter-100"
           : active
-          ? "bg-sidebar-accent text-sidebar-primary border-l-2 border-sidebar-primary ml-0"
-          : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          ? "bg-sidebar-accent text-sidebar-primary shadow-[inset_3px_0_0_0_var(--sidebar-primary)]"
+          : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
       )}
     >
       <Icon
         className={cn(
           "w-[17px] h-[17px] shrink-0",
-          active ? "text-sidebar-primary" : highlight && !active ? "text-sidebar-primary" : "opacity-70"
+          highlight ? "text-sidebar-primary-foreground" : active ? "text-sidebar-primary" : "opacity-70"
         )}
       />
       <span className={cn("truncate", collapsed && "md:hidden")}>{label}</span>

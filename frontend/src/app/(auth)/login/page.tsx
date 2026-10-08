@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, PawPrint } from "lucide-react";
 import Image from "next/image";
 import { LoginSchema, type LoginInput } from "@/lib/schemas/auth.schema";
 import { apiAuth } from "@/lib/api/auth";
@@ -13,13 +13,20 @@ import { getAccessToken, setTokens } from "@/lib/utils/auth-storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 const FEATURES = [
-  "Cadastro completo de clientes e seus pets",
-  "Registro de vendas e orçamentos",
-  "Controle de estoque e alertas de recompra",
-  "Dashboard com relatórios e indicadores",
-  "Gestão de pedidos de compra",
+  "Clientes e seus pets",
+  "Vendas e orçamentos",
+  "Estoque e recompra",
+  "Relatórios e BI",
+];
+
+// "Manchas" do mascote espalhadas pelo painel vinho (posição, tamanho, rotação).
+const MANCHAS = [
+  { top: "8%",  left: "78%", w: 120, h: 84,  rot: -18 },
+  { top: "34%", left: "-4%", w: 170, h: 118, rot: 24 },
+  { top: "62%", left: "86%", w: 96,  h: 66,  rot: 12 },
 ];
 
 export default function LoginPage() {
@@ -63,87 +70,104 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
 
-      {/* ── Painel da imagem: banner no mobile, coluna no desktop ── */}
-      <div className="relative h-56 lg:h-auto lg:w-1/2 shrink-0">
-        <Image
-          src="/joij-login.jpg"
-          alt="BEEZ PET — um pet feliz"
-          fill
-          className="object-cover object-[center_25%]"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/15" />
+      {/* ── Painel da marca: banner no mobile, coluna no desktop ── */}
+      <section className="bz-grain relative overflow-hidden bg-[#641d3f] text-[#fffefd] lg:w-[54%] shrink-0">
+        {MANCHAS.map((m, i) => (
+          <span
+            key={i}
+            aria-hidden
+            className="absolute rounded-[50%] bg-[#ffc9d0]/[0.07]"
+            style={{ top: m.top, left: m.left, width: m.w, height: m.h, transform: `rotate(${m.rot}deg)` }}
+          />
+        ))}
 
-        <div className="relative z-10 flex flex-col justify-between h-full p-6 lg:p-10">
-          {/* Logo — sempre visível */}
-          <div className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 lg:w-9 lg:h-9 rounded-md flex items-center justify-center shrink-0 shadow-lg"
-              style={{ background: "linear-gradient(135deg, #5cbf7a 0%, #1a9688 100%)" }}
-            >
-              <span className="text-[15px]">🐾</span>
-            </div>
-            <span className="text-white/90 text-[15px] lg:text-base font-semibold tracking-tight">BEEZ PET</span>
-          </div>
+        <div className="relative z-10 flex flex-col h-full px-6 pt-6 pb-4 lg:px-14 lg:pt-12 lg:pb-10">
+          <Image
+            src="/brand/wordmark-amarelo.png"
+            alt="beezpet"
+            width={720}
+            height={190}
+            priority
+            className="bz-rise h-9 lg:h-12 w-auto self-start"
+          />
 
-          {/* Mobile: tagline simples na base do banner */}
-          <p className="lg:hidden text-white/80 text-sm font-light tracking-wide">
-            Sistema de Gestão para Pet Shops
-          </p>
-
-          {/* Desktop: título completo + lista de funcionalidades */}
-          <div className="hidden lg:block">
+          <div className="hidden lg:block mt-12 max-w-[30rem]">
             <h1
-              className="text-[38px] text-white leading-[1.15] mb-4"
-              style={{ fontFamily: "var(--font-dm-serif)", fontStyle: "italic" }}
+              className="bz-rise text-[44px] leading-[1.05] text-[#ffed8e]"
+              style={{ animationDelay: "120ms", fontStyle: "italic", fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 72' }}
             >
-              Gestão inteligente<br />para o seu Pet Shop
+              Cada patinha,<br />bem cuidada.
             </h1>
-            <p className="text-white/60 text-sm font-light mb-8 tracking-wide">
-              Tudo que você precisa em um só lugar.
+            <p className="bz-rise mt-4 text-[15px] leading-relaxed text-[#fbe6ec]/80" style={{ animationDelay: "220ms" }}>
+              O sistema da beezpet para cuidar dos clientes, dos pets e do negócio, tudo num lugar só.
             </p>
-            <ul className="space-y-2.5">
+            <ul className="bz-rise mt-6 flex flex-wrap gap-2" style={{ animationDelay: "320ms" }}>
               {FEATURES.map((feat) => (
-                <li key={feat} className="flex items-center gap-3">
-                  <CheckCircle2 className="w-4 h-4 text-brand-400 shrink-0" />
-                  <span className="text-white/80 text-[13px]">{feat}</span>
+                <li
+                  key={feat}
+                  className="flex items-center gap-2 rounded-full border border-[#ffc9d0]/25 bg-[#ffc9d0]/[0.08] px-3 py-1.5 text-[12.5px] text-[#ffe3e7]"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#ffed8e]" />
+                  {feat}
                 </li>
               ))}
             </ul>
-            <p className="text-white/30 text-[11px] mt-10 tracking-wider uppercase">
-              BEEZ PET © {new Date().getFullYear()} · Manaus, AM
-            </p>
           </div>
+
+          <div className="bz-rise mt-4 lg:mt-auto flex justify-center lg:justify-start" style={{ animationDelay: "380ms" }}>
+            <Image
+              src="/brand/mascote-caixas.webp"
+              alt="Mascote da beezpet ao lado de caixas de entrega"
+              width={900}
+              height={602}
+              priority
+              className="bz-float w-[230px] sm:w-[280px] lg:w-[min(100%,520px)] h-auto select-none [mask-image:radial-gradient(ellipse_at_center,black_74%,transparent_96%)]"
+            />
+          </div>
+
+          <p className="hidden lg:block mt-6 text-[10.5px] tracking-[0.2em] uppercase text-[#ffc9d0]/45">
+            beezpet © {new Date().getFullYear()} · Manaus, AM
+          </p>
         </div>
-      </div>
+      </section>
 
-      {/* ── Painel do formulário ── */}
-      <div className="flex-1 flex flex-col items-center justify-center bg-background p-6 lg:p-10">
-        <div className="w-full max-w-[340px]">
-          <div className="mb-9">
+      {/* ── Formulário ── */}
+      <section className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12">
+        <div className="w-full max-w-[360px]">
+          <div className="bz-rise mb-9 flex flex-col items-start" style={{ animationDelay: "150ms" }}>
+            <Image
+              src="/brand/mascote.png"
+              alt=""
+              width={320}
+              height={320}
+              className="h-14 w-14 mb-6 rounded-full shadow-[0_8px_24px_-8px_rgba(100,29,63,0.55)]"
+            />
             <h2
-              className="text-[28px] text-foreground leading-tight mb-1.5"
-              style={{ fontFamily: "var(--font-dm-serif)" }}
+              className="text-[34px] leading-[1.05] text-[#641d3f]"
+              style={{ fontVariationSettings: '"SOFT" 100, "WONK" 0, "opsz" 48' }}
             >
-              Bem-vindo de volta
+              Bem-vindo<br />de volta!
             </h2>
-            <p className="text-[13px] text-muted-foreground font-light">
-              Entre com suas credenciais para continuar.
+            <p className="mt-2.5 text-[13.5px] text-muted-foreground">
+              Entre com seu e-mail e senha para continuar.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="bz-rise space-y-5" style={{ animationDelay: "260ms" }}>
             <div className="space-y-1.5">
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="email" className="text-[#641d3f]">E-mail</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="seu@email.com"
                 autoComplete="email"
                 {...register("email")}
-                className={errors.email ? "border-destructive" : ""}
+                className={cn(
+                  "h-11 rounded-xl bg-card px-3.5 focus-visible:border-[#b5476f] focus-visible:ring-[#ffc9d0]/60",
+                  errors.email && "border-destructive",
+                )}
               />
               {errors.email && (
                 <p className="text-xs text-destructive">{errors.email.message}</p>
@@ -151,37 +175,47 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="senha">Senha</Label>
+              <Label htmlFor="senha" className="text-[#641d3f]">Senha</Label>
               <Input
                 id="senha"
                 type="password"
                 placeholder="••••••••"
                 autoComplete="current-password"
                 {...register("senha")}
-                className={errors.senha ? "border-destructive" : ""}
+                className={cn(
+                  "h-11 rounded-xl bg-card px-3.5 focus-visible:border-[#b5476f] focus-visible:ring-[#ffc9d0]/60",
+                  errors.senha && "border-destructive",
+                )}
               />
               {errors.senha && (
                 <p className="text-xs text-destructive">{errors.senha.message}</p>
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="group h-11 w-full rounded-xl bg-[#641d3f] text-[15px] font-semibold text-[#ffed8e] shadow-[0_10px_24px_-10px_rgba(100,29,63,0.8)] transition-all hover:-translate-y-0.5 hover:bg-[#561735] active:translate-y-0"
+            >
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   Entrando...
                 </>
               ) : (
-                "Entrar"
+                <>
+                  Entrar
+                  <PawPrint className="bz-wag ml-2 h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
+                </>
               )}
             </Button>
           </form>
 
-          <p className="text-center text-[11px] text-muted-foreground/50 mt-8 tracking-wider uppercase">
-            BEEZ PET © {new Date().getFullYear()} · Manaus, AM
+          <p className="text-center text-[10.5px] text-muted-foreground/60 mt-10 tracking-[0.2em] uppercase lg:hidden">
+            beezpet © {new Date().getFullYear()} · Manaus, AM
           </p>
         </div>
-      </div>
+      </section>
 
     </div>
   );

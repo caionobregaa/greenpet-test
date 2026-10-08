@@ -14,12 +14,12 @@ type Status =
 const STATUS_MAP: Record<Status, { label: string; className: string }> = {
   pendente:   { label: "Pendente",   className: "bg-amber-50 text-amber-800 border-amber-400" },
   aberto:     { label: "Aberto",     className: "bg-amber-50 text-amber-800 border-amber-400" },
-  fechado:    { label: "Fechado",    className: "bg-[#e8f5e9] text-[#1b5e20] border-[#a5d6a7]" },
+  fechado:    { label: "Fechado",    className: "bg-emerald-50 text-emerald-800 border-emerald-200" },
   perdido:    { label: "Perdido",    className: "bg-red-50 text-red-600 border-red-400" },
-  confirmado: { label: "Confirmado", className: "bg-[#e0f2f1] text-[#004d40] border-[#80cbc4]" },
-  recebido:   { label: "Recebido",   className: "bg-[#e8f5e9] text-[#1b5e20] border-[#a5d6a7]" },
+  confirmado: { label: "Confirmado", className: "bg-brand-50 text-brand-700 border-brand-200" },
+  recebido:   { label: "Recebido",   className: "bg-emerald-50 text-emerald-800 border-emerald-200" },
   cancelado:  { label: "Cancelado",  className: "bg-gray-100 text-gray-700 border-gray-300" },
-  ativo:      { label: "Ativo",      className: "bg-[#e8f5e9] text-[#1b5e20] border-[#a5d6a7]" },
+  ativo:      { label: "Ativo",      className: "bg-emerald-50 text-emerald-800 border-emerald-200" },
   inativo:    { label: "Inativo",    className: "bg-gray-100 text-gray-700 border-gray-300" },
 };
 

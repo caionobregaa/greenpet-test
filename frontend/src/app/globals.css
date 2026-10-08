@@ -9,8 +9,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sora);
   --font-mono: var(--font-jetbrains-mono);
-  --font-heading: var(--font-sora);
-  --font-display: var(--font-dm-serif);
+  --font-heading: var(--font-fraunces);
+  --font-display: var(--font-fraunces);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -46,18 +46,29 @@
   --radius-xl: calc(var(--radius) * 1.333);
   --radius-2xl: calc(var(--radius) * 2);
 
-  /* GreenPET brand tokens — Forest Atelier */
-  --color-brand-50: #eef6ef;
-  --color-brand-100: #d0e8d4;
-  --color-brand-200: #a2d0aa;
-  --color-brand-400: #5cbf7a;
-  --color-brand-600: #2a7a44;
-  --color-brand-700: #1e5c30;
-  --color-brand-800: #0f3319;
-  --color-teal-50: #e0f4f2;
-  --color-teal-200: #7eccc5;
-  --color-teal-600: #1a9688;
-  --color-teal-800: #0e5049;
+  /* BEEZ PET — identidade 10/2026 (specs/identidade-visual/spec-v1.md) */
+  /* Vinho #641d3f */
+  --color-brand-50: #fbf0f4;
+  --color-brand-100: #f5d9e4;
+  --color-brand-200: #e8adc4;
+  --color-brand-400: #b5476f;
+  --color-brand-600: #8a2c58;
+  --color-brand-700: #641d3f;
+  --color-brand-800: #3f1027;
+  /* Amarelo-manteiga #ffed8e */
+  --color-butter-50: #fffbe6;
+  --color-butter-100: #fff6c4;
+  --color-butter-200: #ffed8e;
+  --color-butter-400: #f2d257;
+  --color-butter-600: #c79a1e;
+  --color-butter-800: #6e5208;
+  /* Rosa #ffc9d0 */
+  --color-blush-50: #fff4f6;
+  --color-blush-100: #ffe3e7;
+  --color-blush-200: #ffc9d0;
+  --color-blush-400: #f29aa9;
+  --color-blush-600: #d0607e;
+  --color-blush-800: #8f2f4c;
   --color-amber-50: #fdf6e3;
   --color-amber-400: #e8a020;
   --color-amber-600: #c47d10;
@@ -65,41 +76,41 @@
 }
 
 :root {
-  /* GreenPET — Forest Atelier palette */
-  --background: #f5f1ea;
-  --foreground: #1c1917;
-  --card: #fefcf8;
-  --card-foreground: #1c1917;
-  --popover: #fefcf8;
-  --popover-foreground: #1c1917;
-  --primary: #1e5c30;
-  --primary-foreground: #ffffff;
-  --secondary: #ece8e0;
-  --secondary-foreground: #1c1917;
-  --muted: #ece8e0;
-  --muted-foreground: #6b6460;
-  --accent: #deeede;
-  --accent-foreground: #1e5c30;
-  --destructive: #c0392b;
-  --border: #dbd5cc;
-  --input: #dbd5cc;
-  --ring: #2a7a44;
-  --chart-1: #2a7a44;
-  --chart-2: #1a9688;
-  --chart-3: #5cbf7a;
-  --chart-4: #7eccc5;
-  --chart-5: #e8a020;
-  --radius: 0.5rem;
+  /* BEEZ PET — papel creme, tinta vinho, destaques manteiga e rosa */
+  --background: #faf4ee;
+  --foreground: #2b0f1d;
+  --card: #fffefd;
+  --card-foreground: #2b0f1d;
+  --popover: #fffefd;
+  --popover-foreground: #2b0f1d;
+  --primary: #641d3f;
+  --primary-foreground: #fffefd;
+  --secondary: #fff6c4;
+  --secondary-foreground: #641d3f;
+  --muted: #f5ebe7;
+  --muted-foreground: #7a6370;
+  --accent: #ffe3e7;
+  --accent-foreground: #641d3f;
+  --destructive: #c62f2f;
+  --border: #eedfdf;
+  --input: #e8d6d8;
+  --ring: #b5476f;
+  --chart-1: #641d3f;
+  --chart-2: #b5476f;
+  --chart-3: #f29aa9;
+  --chart-4: #e8c55a;
+  --chart-5: #8a6d7a;
+  --radius: 0.625rem;
 
-  /* Sidebar — deep forest */
-  --sidebar: #0d1a10;
-  --sidebar-foreground: #b8d4b8;
-  --sidebar-primary: #5cbf7a;
-  --sidebar-primary-foreground: #0d1a10;
-  --sidebar-accent: #152219;
-  --sidebar-accent-foreground: #92bb92;
-  --sidebar-border: #1c2f20;
-  --sidebar-ring: #5cbf7a;
+  /* Sidebar — vinho da marca, item ativo em manteiga */
+  --sidebar: #641d3f;
+  --sidebar-foreground: #fbe6ec;
+  --sidebar-primary: #ffed8e;
+  --sidebar-primary-foreground: #641d3f;
+  --sidebar-accent: #74264c;
+  --sidebar-accent-foreground: #ffed8e;
+  --sidebar-border: #7b2f54;
+  --sidebar-ring: #ffed8e;
 }
 
 @layer base {
@@ -108,8 +119,19 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-image: radial-gradient(circle, rgba(0,0,0,0.045) 1px, transparent 1px);
+    /* Papel creme com as "manchas" do mascote, bem sutis */
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(100, 29, 63, 0.05) 1px, transparent 0);
     background-size: 22px 22px;
+  }
+  h1, h2 {
+    font-family: var(--font-fraunces), serif;
+    font-variation-settings: "SOFT" 100, "WONK" 0;
+    letter-spacing: -0.01em;
+  }
+  ::selection {
+    background: #ffed8e;
+    color: #641d3f;
   }
   html {
     font-family: var(--font-sora), sans-serif;
@@ -117,7 +139,41 @@
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #b0c4b0; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #2a7a44; }
+::-webkit-scrollbar-thumb { background: #e8adc4; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #b5476f; }
+
+/* ── Movimento da marca ──────────────────────────────────────────────────── */
+@keyframes bz-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes bz-float {
+  0%, 100% { transform: translateY(0) rotate(-0.6deg); }
+  50%      { transform: translateY(-10px) rotate(0.6deg); }
+}
+@keyframes bz-wag {
+  0%, 100% { transform: rotate(-6deg); }
+  50%      { transform: rotate(6deg); }
+}
+.bz-rise  { opacity: 0; animation: bz-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.bz-float { animation: bz-float 6s ease-in-out infinite; }
+.bz-wag   { animation: bz-wag 1.2s ease-in-out infinite; transform-origin: 50% 90%; }
+
+/* Grão de papel para os painéis vinho */
+.bz-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20; /* por cima do conteúdo: o grão cobre a ilustração também, sem emenda */
+  opacity: 0.18;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bz-rise { animation: none; opacity: 1; }
+  .bz-float, .bz-wag { animation: none; }
+}

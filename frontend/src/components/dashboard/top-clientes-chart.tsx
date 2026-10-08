@@ -23,7 +23,7 @@ interface TopClientesChartProps {
   clientes: TopCliente[];
 }
 
-const COLORS = ["#1e5c30", "#2a7a44", "#3a9a58", "#5cbf7a", "#9adcaa"];
+const COLORS = ["#641d3f", "#8a2c58", "#b5476f", "#d98aa3", "#f2b8c3"];
 
 export function TopClientesChart({ clientes }: TopClientesChartProps) {
   const data = clientes.slice(0, 5).map((c) => ({
@@ -54,7 +54,7 @@ export function TopClientesChart({ clientes }: TopClientesChartProps) {
               type="number"
               domain={[0, ticks[ticks.length - 1]]}
               ticks={ticks}
-              tick={{ fontSize: 10, fill: "#6b6460" }}
+              tick={{ fontSize: 10, fill: "#7a6370" }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `R$${v}`}
@@ -62,7 +62,7 @@ export function TopClientesChart({ clientes }: TopClientesChartProps) {
             <YAxis
               type="category"
               dataKey="nome"
-              tick={{ fontSize: 11, fill: "#6b6460" }}
+              tick={{ fontSize: 11, fill: "#7a6370" }}
               axisLine={false}
               tickLine={false}
               width={64}
@@ -70,8 +70,8 @@ export function TopClientesChart({ clientes }: TopClientesChartProps) {
             <Tooltip
               formatter={(value) => [formatBRL(Number(value ?? 0)), "Total gasto"]}
               labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? ""}
-              labelStyle={{ color: "#1c1917", fontWeight: 600 }}
-              contentStyle={{ borderColor: "#dbd5cc", borderRadius: 6, fontSize: 12, background: "#fefcf8" }}
+              labelStyle={{ color: "#641d3f", fontWeight: 600 }}
+              contentStyle={{ borderColor: "#eedfdf", borderRadius: 6, fontSize: 12, background: "#fffefd" }}
             />
             <Bar dataKey="totalGasto" radius={[0, 4, 4, 0]} maxBarSize={24}>
               {data.map((_, i) => (

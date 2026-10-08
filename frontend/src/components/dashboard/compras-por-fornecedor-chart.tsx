@@ -22,7 +22,7 @@ interface ComprasPorFornecedorChartProps {
   fornecedores: CompraPorFornecedor[];
 }
 
-const COLORS = ["#8a4a1c", "#b06424", "#d68638", "#e8ac6c", "#f2cfa3"];
+const COLORS = ["#641d3f", "#a8335f", "#dc7f9a", "#dcae35", "#f8e29a"];
 
 export function ComprasPorFornecedorChart({ fornecedores }: ComprasPorFornecedorChartProps) {
   const data = fornecedores.slice(0, 5).map((f) => ({
@@ -53,7 +53,7 @@ export function ComprasPorFornecedorChart({ fornecedores }: ComprasPorFornecedor
               type="number"
               domain={[0, ticks[ticks.length - 1]]}
               ticks={ticks}
-              tick={{ fontSize: 10, fill: "#6b6460" }}
+              tick={{ fontSize: 10, fill: "#7a6370" }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `R$${v}`}
@@ -61,7 +61,7 @@ export function ComprasPorFornecedorChart({ fornecedores }: ComprasPorFornecedor
             <YAxis
               type="category"
               dataKey="nome"
-              tick={{ fontSize: 11, fill: "#6b6460" }}
+              tick={{ fontSize: 11, fill: "#7a6370" }}
               axisLine={false}
               tickLine={false}
               width={80}
@@ -69,8 +69,8 @@ export function ComprasPorFornecedorChart({ fornecedores }: ComprasPorFornecedor
             <Tooltip
               formatter={(value) => [formatBRL(Number(value ?? 0)), "Total comprado"]}
               labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? ""}
-              labelStyle={{ color: "#1c1917", fontWeight: 600 }}
-              contentStyle={{ borderColor: "#dbd5cc", borderRadius: 6, fontSize: 12, background: "#fefcf8" }}
+              labelStyle={{ color: "#641d3f", fontWeight: 600 }}
+              contentStyle={{ borderColor: "#eedfdf", borderRadius: 6, fontSize: 12, background: "#fffefd" }}
             />
             <Bar dataKey="totalComprado" radius={[0, 4, 4, 0]} maxBarSize={24}>
               {data.map((_, i) => (

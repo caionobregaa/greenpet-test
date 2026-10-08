@@ -22,7 +22,7 @@ interface TopProdutosChartProps {
   produtos: TopProduto[];
 }
 
-const COLORS = ["#0e5049", "#1a9688", "#2ab8a8", "#7eccc5", "#b2e0db"];
+const COLORS = ["#8a6508", "#b8891a", "#dcae35", "#eecb62", "#f8e29a"];
 
 export function TopProdutosChart({ produtos }: TopProdutosChartProps) {
   const data = produtos.slice(0, 5).map((p) => ({
@@ -49,7 +49,7 @@ export function TopProdutosChart({ produtos }: TopProdutosChartProps) {
             <XAxis
               type="number"
               allowDecimals={false}
-              tick={{ fontSize: 10, fill: "#6b6460" }}
+              tick={{ fontSize: 10, fill: "#7a6370" }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `${Math.round(v)}`}
@@ -57,7 +57,7 @@ export function TopProdutosChart({ produtos }: TopProdutosChartProps) {
             <YAxis
               type="category"
               dataKey="nome"
-              tick={{ fontSize: 11, fill: "#6b6460" }}
+              tick={{ fontSize: 11, fill: "#7a6370" }}
               axisLine={false}
               tickLine={false}
               width={80}
@@ -69,8 +69,8 @@ export function TopProdutosChart({ produtos }: TopProdutosChartProps) {
                   : [value, name]
               }
               labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? ""}
-              labelStyle={{ color: "#1c1917", fontWeight: 600 }}
-              contentStyle={{ borderColor: "#dbd5cc", borderRadius: 6, fontSize: 12, background: "#fefcf8" }}
+              labelStyle={{ color: "#641d3f", fontWeight: 600 }}
+              contentStyle={{ borderColor: "#eedfdf", borderRadius: 6, fontSize: 12, background: "#fffefd" }}
             />
             <Bar dataKey="quantidade" radius={[0, 4, 4, 0]} maxBarSize={24}>
               {data.map((_, i) => (

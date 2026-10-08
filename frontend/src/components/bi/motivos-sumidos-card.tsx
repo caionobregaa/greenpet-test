@@ -29,7 +29,7 @@ export function MotivosSumidosCard({ totalRegistros, motivos }: { totalRegistros
                 </span>
               </div>
               <div className="h-2 mt-1 rounded-full bg-muted overflow-hidden">
-                <div className="h-full rounded-full bg-[#b06424]" style={{ width: `${Math.min(100, m.percentual)}%` }} />
+                <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, m.percentual)}%` }} />
               </div>
             </li>
           ))}

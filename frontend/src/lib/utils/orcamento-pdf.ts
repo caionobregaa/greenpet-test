@@ -15,13 +15,12 @@ function fmtDate(iso: string | null | undefined): string {
   return `${d}/${m}/${y}`;
 }
 
-const GREEN:       [number, number, number] = [45, 122, 45];
-const LOGO_GOLD:   [number, number, number] = [212, 155, 41];  // "Beez" part of wordmark (mascote)
-const LOGO_BROWN:  [number, number, number] = [62,  44, 26];   // "Pet" part of wordmark (mascote)
-const DARK:        [number, number, number] = [30,  30,  30];
-const GRAY:        [number, number, number] = [110, 110, 110];
-const LIGHT:       [number, number, number] = [245, 249, 245];
-const WHITE:       [number, number, number] = [255, 255, 255];
+// Identidade visual BEEZ PET (specs/identidade-visual/spec-v1.md)
+const WINE:        [number, number, number] = [100, 29, 63];   // #641d3f
+const BUTTER:      [number, number, number] = [255, 237, 142]; // #ffed8e — texto sobre faixas vinho
+const DARK:        [number, number, number] = [43,  15, 29];   // #2b0f1d
+const GRAY:        [number, number, number] = [122, 99, 112];  // #7a6370
+const LIGHT:       [number, number, number] = [255, 244, 246]; // #fff4f6 — linhas alternadas
 
 const EMPRESA = {
   nome:     "Beez Pet",
@@ -70,14 +69,11 @@ export function gerarOrcamentoPDF(
 
   // ── 1. Cabeçalho: Logo wordmark (esquerda) + Dados da empresa ───────
 
-  // Logo wordmark: "Beez" (dourado) + " Pet" (marrom), espelhando a marca
+  // Logo: palavra "beezpet" em vinho, como na marca
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  doc.setTextColor(...LOGO_GOLD);
-  doc.text("Beez", M, y);
-  const beezW = doc.getTextWidth("Beez");
-  doc.setTextColor(...LOGO_BROWN);
-  doc.text(" Pet", M + beezW, y);
+  doc.setFontSize(24);
+  doc.setTextColor(...WINE);
+  doc.text("beezpet", M, y);
   y += 7;
 
   // Dados da empresa abaixo do logo
@@ -92,8 +88,8 @@ export function gerarOrcamentoPDF(
 
   y += 9;
 
-  // ── 2. Linha separadora verde ────────────────────────────────────────
-  doc.setDrawColor(...GREEN);
+  // ── 2. Linha separadora vinho ────────────────────────────────────────
+  doc.setDrawColor(...WINE);
   doc.setLineWidth(0.6);
   doc.line(M, y, W - M, y);
   y += 7;
@@ -102,11 +98,11 @@ export function gerarOrcamentoPDF(
   const pedidoNum = orcamento.numero
     ? orcamento.numero.toString().padStart(3, "0")
     : orcamento.id.slice(-6).toUpperCase();
-  doc.setFillColor(...GREEN);
+  doc.setFillColor(...WINE);
   doc.roundedRect(M, y, W - M * 2, 11, 2, 2, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
-  doc.setTextColor(...WHITE);
+  doc.setTextColor(...BUTTER);
   doc.text(`Pedido ${pedidoNum}`, W / 2, y + 7.5, { align: "center" });
   y += 17;
 
@@ -206,8 +202,8 @@ export function gerarOrcamentoPDF(
       minCellHeight: hasImages ? IMG_W : undefined,
     },
     headStyles: {
-      fillColor: GREEN,
-      textColor: WHITE,
+      fillColor: WINE,
+      textColor: BUTTER,
       fontStyle: "bold",
       fontSize: 8.5,
       minCellHeight: 8,
@@ -240,11 +236,11 @@ export function gerarOrcamentoPDF(
   // Se não cabe na página atual, adiciona nova página
   if (y + 10 > SAFE_BOTTOM) { doc.addPage(); y = M; }
 
-  doc.setFillColor(...GREEN);
+  doc.setFillColor(...WINE);
   doc.rect(M, y, W - M * 2, 10, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
-  doc.setTextColor(...WHITE);
+  doc.setTextColor(...BUTTER);
   doc.text("Total", M + 4, y + 6.8);
   doc.text(brl(orcamento.total), W - M - 4, y + 6.8, { align: "right" });
   y += 16;

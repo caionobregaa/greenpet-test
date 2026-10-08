@@ -22,7 +22,7 @@ interface DespesasPorCategoriaChartProps {
   categorias: DespesaPorCategoria[];
 }
 
-const COLORS = ["#7a3b6e", "#9a4f8c", "#b56ea8", "#cc98c1", "#e4c3db"];
+const COLORS = ["#3f1027", "#641d3f", "#8e4a6a", "#b98199", "#e2c3d0"];
 
 export function DespesasPorCategoriaChart({ categorias }: DespesasPorCategoriaChartProps) {
   const data = [...categorias]
@@ -55,7 +55,7 @@ export function DespesasPorCategoriaChart({ categorias }: DespesasPorCategoriaCh
               type="number"
               domain={[0, ticks[ticks.length - 1]]}
               ticks={ticks}
-              tick={{ fontSize: 10, fill: "#6b6460" }}
+              tick={{ fontSize: 10, fill: "#7a6370" }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `R$${v}`}
@@ -63,7 +63,7 @@ export function DespesasPorCategoriaChart({ categorias }: DespesasPorCategoriaCh
             <YAxis
               type="category"
               dataKey="nome"
-              tick={{ fontSize: 11, fill: "#6b6460" }}
+              tick={{ fontSize: 11, fill: "#7a6370" }}
               axisLine={false}
               tickLine={false}
               width={90}
@@ -71,8 +71,8 @@ export function DespesasPorCategoriaChart({ categorias }: DespesasPorCategoriaCh
             <Tooltip
               formatter={(value) => [formatBRL(Number(value ?? 0)), "Total"]}
               labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? ""}
-              labelStyle={{ color: "#1c1917", fontWeight: 600 }}
-              contentStyle={{ borderColor: "#dbd5cc", borderRadius: 6, fontSize: 12, background: "#fefcf8" }}
+              labelStyle={{ color: "#641d3f", fontWeight: 600 }}
+              contentStyle={{ borderColor: "#eedfdf", borderRadius: 6, fontSize: 12, background: "#fffefd" }}
             />
             <Bar dataKey="total" radius={[0, 4, 4, 0]} maxBarSize={24}>
               {data.map((_, i) => (

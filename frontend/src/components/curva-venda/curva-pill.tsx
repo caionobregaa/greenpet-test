@@ -4,8 +4,8 @@ import type { CurvaClasse } from "@/lib/types/curva-venda";
 const CURVA_MAP: Record<CurvaClasse, { label: string; className: string; dot: string }> = {
   A: {
     label: "A",
-    className: "bg-[#e8f5e9] text-[#1b5e20] border-[#a5d6a7]",
-    dot: "bg-brand-600",
+    className: "bg-brand-50 text-brand-700 border-brand-200",
+    dot: "bg-brand-700",
   },
   B: {
     label: "B",

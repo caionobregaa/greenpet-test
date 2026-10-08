@@ -175,7 +175,7 @@ export default function CurvaVendaPage() {
 
       {/* Legenda */}
       <div className="flex flex-wrap gap-3 mb-1 text-xs text-muted-foreground">
-        <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-brand-600 inline-block" />A: até 80% da receita acumulada</div>
+        <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-brand-700 inline-block" />A: até 80% da receita acumulada</div>
         <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-600 inline-block" />B: de 80% a 95% da receita acumulada</div>
         <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-muted-foreground/60 inline-block" />C: acima de 95% da receita acumulada</div>
       </div>

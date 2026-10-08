@@ -47,24 +47,24 @@ export function ReceitaPorMesChart({ data }: ReceitaPorMesChartProps) {
           <BarChart data={chartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }} barGap={2}>
             <defs>
               <linearGradient id="greenGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2a7a44" />
-                <stop offset="100%" stopColor="#1a9688" />
+                <stop offset="0%" stopColor="#641d3f" />
+                <stop offset="100%" stopColor="#a8335f" />
               </linearGradient>
               <linearGradient id="tealGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#5cbf7a" stopOpacity={0.7} />
-                <stop offset="100%" stopColor="#7eccc5" stopOpacity={0.5} />
+                <stop offset="0%" stopColor="#f29aa9" stopOpacity={0.7} />
+                <stop offset="100%" stopColor="#ffed8e" stopOpacity={0.5} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#dbd5cc" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#eedfdf" vertical={false} />
             <XAxis
               dataKey="label"
-              tick={{ fontSize: 11, fill: "#6b6460" }}
+              tick={{ fontSize: 11, fill: "#7a6370" }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
               yAxisId="receita"
-              tick={{ fontSize: 11, fill: "#6b6460" }}
+              tick={{ fontSize: 11, fill: "#7a6370" }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`}
@@ -73,7 +73,7 @@ export function ReceitaPorMesChart({ data }: ReceitaPorMesChartProps) {
             <YAxis
               yAxisId="vendas"
               orientation="right"
-              tick={{ fontSize: 11, fill: "#6b6460" }}
+              tick={{ fontSize: 11, fill: "#7a6370" }}
               axisLine={false}
               tickLine={false}
               width={32}
@@ -85,8 +85,8 @@ export function ReceitaPorMesChart({ data }: ReceitaPorMesChartProps) {
                   ? [formatBRL(Number(value ?? 0)), "Receita"]
                   : [value, "Vendas"]
               }
-              labelStyle={{ color: "#1c1917", fontWeight: 600 }}
-              contentStyle={{ borderColor: "#dbd5cc", borderRadius: 6, fontSize: 12, background: "#fefcf8" }}
+              labelStyle={{ color: "#641d3f", fontWeight: 600 }}
+              contentStyle={{ borderColor: "#eedfdf", borderRadius: 6, fontSize: 12, background: "#fffefd" }}
             />
             <Legend
               formatter={(value) => (value === "receita" ? "Receita" : "Nº Vendas")}

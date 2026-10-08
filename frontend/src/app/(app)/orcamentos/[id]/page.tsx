@@ -180,7 +180,7 @@ export default function OrcamentoDetailPage({ params }: Props) {
       <div className="flex flex-wrap gap-2 mb-6">
         {orcamento.status === "aberto" && (
           <>
-            <Button size="sm" onClick={() => handleStatus("fechar")} disabled={updateStatus.isPending} className="bg-[#00897b] hover:bg-[#004d40] text-white">
+            <Button size="sm" onClick={() => handleStatus("fechar")} disabled={updateStatus.isPending} className="bg-primary hover:bg-brand-800 text-primary-foreground">
               {updateStatus.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle className="w-4 h-4 mr-2" />}
               Fechar
             </Button>

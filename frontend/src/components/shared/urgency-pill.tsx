@@ -14,13 +14,13 @@ const URGENCY_MAP: Record<Urgencia, { label: string; className: string; dot: str
   },
   proximo: {
     label: "Próximo",
-    className: "bg-[#e0f2f1] text-[#004d40] border-[#80cbc4]",
-    dot: "bg-teal-600",
+    className: "bg-blush-50 text-blush-800 border-blush-200",
+    dot: "bg-blush-400",
   },
   ok: {
     label: "OK",
-    className: "bg-[#e8f5e9] text-[#1b5e20] border-[#a5d6a7]",
-    dot: "bg-brand-600",
+    className: "bg-emerald-50 text-emerald-800 border-emerald-200",
+    dot: "bg-emerald-600",
   },
 };
 

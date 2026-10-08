@@ -39,7 +39,7 @@ export function AppTopbar({ title, subtitle, onMenuToggle }: AppTopbarProps) {
         </span>
 
         <span className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted-foreground/50">
-          <span className="w-1.5 h-1.5 rounded-full bg-brand-600 inline-block" />
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
           Online
         </span>
 
@@ -48,7 +48,7 @@ export function AppTopbar({ title, subtitle, onMenuToggle }: AppTopbarProps) {
             <span className="text-[12px] font-medium text-muted-foreground hidden md:block">
               {user.nome}
             </span>
-            <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-semibold text-[11px] shrink-0">
+            <div className="w-7 h-7 rounded-full bg-butter-200 border border-primary/15 flex items-center justify-center text-primary font-semibold text-[11px] shrink-0">
               {initial}
             </div>
           </div>
