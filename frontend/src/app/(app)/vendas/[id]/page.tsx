@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
+import { use, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Trash2, Pencil, CalendarDays, Timer, ChevronDown, ChevronUp, Save, Printer } from "lucide-react";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ReciboPrint } from "@/components/vendas/recibo-print";
 import { formatDate, formatBRL } from "@/lib/utils/format";
+import { imprimirCupom } from "@/lib/utils/imprimir-cupom";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -36,6 +37,7 @@ export default function VendaDetailPage({ params }: Props) {
   const [recompraEdits, setRecompraEdits] = useState<Record<string, RecompraEdit>>({});
   const [saving, setSaving] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const reciboRef = useRef<HTMLDivElement>(null);
 
   const { data: venda, isLoading } = useVenda(id);
   const { data: clienteDetail } = useCliente(venda?.clienteId ?? "");
@@ -131,7 +133,7 @@ export default function VendaDetailPage({ params }: Props) {
           </h1>
           <p className="text-sm text-muted-foreground">{formatDate(venda.data)}</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => window.print()}>
+        <Button variant="outline" size="sm" onClick={() => reciboRef.current && imprimirCupom(reciboRef.current)}>
           <Printer className="w-3.5 h-3.5 mr-1.5" />
           Imprimir Recibo
         </Button>
@@ -318,7 +320,7 @@ export default function VendaDetailPage({ params }: Props) {
       />
     </div>
 
-    <ReciboPrint venda={venda} clienteDetail={clienteDetail} className="hidden print:block" />
+    <ReciboPrint ref={reciboRef} venda={venda} clienteDetail={clienteDetail} className="hidden print:block" />
     </>
   );
 }

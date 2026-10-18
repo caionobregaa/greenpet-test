@@ -1,3 +1,4 @@
+import type { Ref } from "react";
 import type { Venda } from "@/lib/types/venda";
 import type { ClienteDetail } from "@/lib/types/cliente";
 import { formatBRL, formatDate } from "@/lib/utils/format";
@@ -12,6 +13,7 @@ interface ReciboPrintProps {
   venda: Venda;
   clienteDetail?: ClienteDetail;
   className?: string;
+  ref?: Ref<HTMLDivElement>;
 }
 
 /** Monta "Rua X, 123 - Bairro - Cidade" a partir do cadastro do cliente,
@@ -24,7 +26,7 @@ function formatEndereco(cliente?: ClienteDetail): string | null {
   return partes.length > 0 ? partes.join(" - ") : null;
 }
 
-export function ReciboPrint({ venda, clienteDetail, className }: ReciboPrintProps) {
+export function ReciboPrint({ venda, clienteDetail, className, ref }: ReciboPrintProps) {
   const subtotalBruto = venda.itens.reduce((s, i) => s + i.qtd * i.valorUnitario, 0);
   const descontoItens = venda.itens.reduce((s, i) => s + (i.desconto ?? 0), 0);
   const descontoVenda = venda.desconto ?? 0;
@@ -40,7 +42,8 @@ export function ReciboPrint({ venda, clienteDetail, className }: ReciboPrintProp
     : venda.id.slice(-6).toUpperCase();
 
   return (
-    <div className={cn("font-mono text-black bg-white w-[80mm] p-2 text-[11px] leading-snug", className)}>
+    // Cupom térmico 80 mm (largura útil 72 mm) — specs/vendas/spec-v3.md
+    <div ref={ref} className={cn("font-mono text-black bg-white w-[72mm] px-1 py-2 text-[11px] leading-snug", className)}>
       <div className="text-center mb-1.5">
         <p className="text-sm font-bold tracking-wide">BEEZ PET</p>
         <p className="text-[10px]">Recibo de Venda</p>
@@ -78,7 +81,7 @@ export function ReciboPrint({ venda, clienteDetail, className }: ReciboPrintProp
         </div>
       )}
       {clienteElegivelRecompra && (
-        <p className="text-[10px] text-neutral-600 truncate">
+        <p className="text-[10px] truncate">
           Inclui recompra (5%)
           {quantidadeComprasAnteriores !== undefined
             ? ` — ${quantidadeComprasAnteriores}ª+ compra`

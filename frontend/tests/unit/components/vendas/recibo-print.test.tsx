@@ -164,3 +164,22 @@ describe("ReciboPrint", () => {
     expect(screen.queryByText(/Endereço:/)).not.toBeInTheDocument();
   });
 });
+
+describe("ReciboPrint — cupom térmico 80 mm (spec-v3)", () => {
+  it("tem largura útil de 72 mm", () => {
+    const { container } = render(<ReciboPrint venda={buildVenda()} />);
+    expect((container.firstChild as HTMLElement).className).toMatch(/w-\[72mm\]/);
+  });
+
+  it("não usa tons de cinza", () => {
+    const clienteDetail = { vendas: [{ id: "v1" }, { id: "v2" }] } as unknown as ClienteDetail;
+    const { container } = render(<ReciboPrint venda={buildVenda()} clienteDetail={clienteDetail} />);
+    expect(container.innerHTML).not.toMatch(/text-(neutral|gray|slate|zinc|stone)-/);
+  });
+
+  it("expõe o elemento raiz via ref, para medir a altura na impressão", () => {
+    const ref = { current: null as HTMLDivElement | null };
+    render(<ReciboPrint ref={ref} venda={buildVenda()} />);
+    expect(ref.current).toBeInstanceOf(HTMLDivElement);
+  });
+});
