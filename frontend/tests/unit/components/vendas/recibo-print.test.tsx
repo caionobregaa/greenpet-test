@@ -183,3 +183,24 @@ describe("ReciboPrint — cupom térmico 80 mm (spec-v3)", () => {
     expect(ref.current).toBeInstanceOf(HTMLDivElement);
   });
 });
+
+describe("ReciboPrint — título e forma de pagamento (spec-v4)", () => {
+  it("tem o título RECIBO", () => {
+    render(<ReciboPrint venda={buildVenda()} />);
+    expect(screen.getByText("RECIBO")).toBeInTheDocument();
+  });
+
+  it("mostra a forma de pagamento abaixo do TOTAL, sem o percentual da taxa", () => {
+    render(<ReciboPrint venda={buildVenda({ formaPag: "Cartão Crédito", taxaCartao: 4.84 })} />);
+    const pagamento = screen.getByText("Pagamento:");
+    expect(pagamento.nextSibling).toHaveTextContent("Crédito 2x");
+    expect(screen.queryByText(/4,84%/)).not.toBeInTheDocument();
+    const posicao = screen.getByText("TOTAL").compareDocumentPosition(pagamento);
+    expect(posicao & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("venda com taxa registrada mostra o formaPag gravado", () => {
+    render(<ReciboPrint venda={buildVenda({ formaPag: "Cartão Crédito", taxaCartao: 4.2 })} />);
+    expect(screen.getByText("Pagamento:").nextSibling).toHaveTextContent("Cartão Crédito");
+  });
+});

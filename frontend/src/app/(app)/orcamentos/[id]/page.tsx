@@ -1,9 +1,9 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, Trash2, CheckCircle, XCircle, RotateCcw, RefreshCw, FileDown, Share2 } from "lucide-react";
+import { ArrowLeft, Trash2, CheckCircle, XCircle, RotateCcw, RefreshCw, FileDown, Share2, Printer } from "lucide-react";
 import {
   useOrcamento,
   useDeleteOrcamento,
@@ -26,6 +26,8 @@ import { apiProdutos } from "@/lib/api/produtos";
 import { gerarOrcamentoPDF, compartilharOrcamentoPDF } from "@/lib/utils/orcamento-pdf";
 import { MOTIVOS_PERDA, type MotivoPerda } from "@/lib/schemas/orcamento.schema";
 import { OPCOES_PAGAMENTO_ORCAMENTO } from "@/lib/utils/formas-pagamento";
+import { imprimirCupom } from "@/lib/utils/imprimir-cupom";
+import { OrcamentoPrint } from "@/components/orcamentos/orcamento-print";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -48,6 +50,7 @@ export default function OrcamentoDetailPage({ params }: Props) {
   const [dataPagamento, setDataPagamento] = useState(todayLocalISO);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [waLoading, setWaLoading] = useState(false);
+  const cupomRef = useRef<HTMLDivElement>(null);
 
   // Taxas do banco (specs/vendas/spec-v2.md): iguais para link e maquininha.
   const opcaoSelecionada = OPCOES_PAGAMENTO_ORCAMENTO.find((o) => o.value === pagamento);
@@ -148,7 +151,8 @@ export default function OrcamentoDetailPage({ params }: Props) {
   if (!orcamento) return <p className="text-muted-foreground">Orçamento não encontrado.</p>;
 
   return (
-    <div>
+    <>
+    <div className="print:hidden">
       <div className="flex items-center gap-3 mb-6">
         <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => router.back()}><ArrowLeft className="w-4 h-4" /></Button>
         <div className="flex-1">
@@ -156,6 +160,10 @@ export default function OrcamentoDetailPage({ params }: Props) {
           <p className="text-sm text-muted-foreground">{formatDate(orcamento.data)}</p>
         </div>
         <StatusPill status={orcamento.status} />
+        <Button variant="outline" size="sm" onClick={() => cupomRef.current && imprimirCupom(cupomRef.current)}>
+          <Printer className="w-3.5 h-3.5 mr-1.5" />
+          Imprimir Orçamento
+        </Button>
         <Button variant="outline" size="sm" onClick={handleDownloadPDF} disabled={pdfLoading}>
           {pdfLoading ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5 mr-1.5" />}
           Baixar PDF
@@ -365,5 +373,8 @@ export default function OrcamentoDetailPage({ params }: Props) {
 
       <ConfirmDialog open={deleteOpen} onOpenChange={setDeleteOpen} title="Excluir orçamento?" description="Esta ação não pode ser desfeita." onConfirm={handleDelete} loading={deleteOrcamento.isPending} />
     </div>
+
+    <OrcamentoPrint ref={cupomRef} orcamento={orcamento} className="hidden print:block" />
+    </>
   );
 }

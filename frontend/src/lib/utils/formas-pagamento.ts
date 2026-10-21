@@ -58,3 +58,14 @@ export function opcaoDaVenda(formaPag: string, taxaCartao: number, opcoes: Opcao
     Icon: base?.Icon ?? CreditCard,
   };
 }
+
+/**
+ * Forma de pagamento como o cliente vê no recibo (specs/vendas/spec-v4.md): o nome da
+ * opção sem o percentual da taxa (ex. "Crédito 2x"). Taxa fora da tabela atual mostra
+ * o `formaPag` gravado.
+ */
+export function rotuloPagamentoCliente(formaPag: string, taxaCartao: number): string {
+  const opcao = opcaoDaVenda(formaPag, taxaCartao, OPCOES_PAGAMENTO_ORCAMENTO);
+  if (opcao.value === VALUE_TAXA_REGISTRADA) return formaPag;
+  return opcao.label.replace(/\s*\([^)]*%\)$/, "");
+}

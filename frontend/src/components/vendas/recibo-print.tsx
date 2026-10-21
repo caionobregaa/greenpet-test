@@ -2,7 +2,8 @@ import type { Ref } from "react";
 import type { Venda } from "@/lib/types/venda";
 import type { ClienteDetail } from "@/lib/types/cliente";
 import { formatBRL, formatDate } from "@/lib/utils/format";
-import { cn } from "@/lib/utils/cn";
+import { rotuloPagamentoCliente } from "@/lib/utils/formas-pagamento";
+import { CupomTermico, CupomDivisor, CupomLinha } from "@/components/shared/cupom-termico";
 
 // Regra oficial de precificação (ago/2026): a partir desse valor (já com
 // desconto de recompra, se houver — sem contar a taxa de entrega), a
@@ -42,43 +43,26 @@ export function ReciboPrint({ venda, clienteDetail, className, ref }: ReciboPrin
     : venda.id.slice(-6).toUpperCase();
 
   return (
-    // Cupom térmico 80 mm (largura útil 72 mm) — specs/vendas/spec-v3.md
-    <div ref={ref} className={cn("font-mono text-black bg-white w-[72mm] px-1 py-2 text-[11px] leading-snug", className)}>
-      <div className="text-center mb-1.5">
-        <p className="text-sm font-bold tracking-wide">BEEZ PET</p>
-        <p className="text-[10px]">Recibo de Venda</p>
-      </div>
-
-      <div className="border-t border-dashed border-black my-1" />
-
+    <CupomTermico ref={ref} titulo="RECIBO" className={className}>
       <p>Cliente: {venda.cliente?.nome ?? "—"}</p>
       {endereco && <p className="break-words">Endereço: {endereco}</p>}
       {venda.animal?.nome && <p>Pet: {venda.animal.nome}</p>}
       <p>Data: {formatDate(venda.data)}</p>
       <p>Venda: {numeroVenda}</p>
 
-      <div className="border-t border-dashed border-black my-1" />
+      <CupomDivisor />
 
       <div className="space-y-1">
         {venda.itens.map((item) => (
-          <div key={item.id} className="flex justify-between gap-2">
-            <span className="flex-1 min-w-0 break-words">{item.qtd}x {item.nome}</span>
-            <span className="shrink-0 text-right">{formatBRL(item.total)}</span>
-          </div>
+          <CupomLinha key={item.id} label={`${item.qtd}x ${item.nome}`} valor={formatBRL(item.total)} />
         ))}
       </div>
 
-      <div className="border-t border-dashed border-black my-1" />
+      <CupomDivisor />
 
-      <div className="flex justify-between">
-        <span>Subtotal</span>
-        <span>{formatBRL(subtotalBruto)}</span>
-      </div>
+      <CupomLinha label="Subtotal" valor={formatBRL(subtotalBruto)} />
       {descontoTotal > 0 && (
-        <div className="flex justify-between gap-2">
-          <span className="truncate">Desconto total</span>
-          <span className="shrink-0">−{formatBRL(descontoTotal)}</span>
-        </div>
+        <CupomLinha label="Desconto total" valor={`−${formatBRL(descontoTotal)}`} />
       )}
       {clienteElegivelRecompra && (
         <p className="text-[10px] truncate">
@@ -89,26 +73,17 @@ export function ReciboPrint({ venda, clienteDetail, className, ref }: ReciboPrin
         </p>
       )}
       {venda.taxaEntrega > 0 && (
-        <div className="flex justify-between">
-          <span>Entrega</span>
-          <span>{formatBRL(venda.taxaEntrega)}</span>
-        </div>
+        <CupomLinha label="Entrega" valor={formatBRL(venda.taxaEntrega)} />
       )}
 
-      <div className="border-t border-dashed border-black my-1" />
+      <CupomDivisor />
 
-      <div className="flex justify-between text-sm font-bold">
-        <span>TOTAL</span>
-        <span>{formatBRL(venda.total)}</span>
-      </div>
+      <CupomLinha label="TOTAL" valor={formatBRL(venda.total)} className="text-sm font-bold" />
+      <CupomLinha label="Pagamento:" valor={rotuloPagamentoCliente(venda.formaPag, venda.taxaCartao)} />
 
       {freteGratis && (
         <p className="text-center mt-1.5 font-bold">*** FRETE GRÁTIS ***</p>
       )}
-
-      <div className="border-t border-dashed border-black my-2" />
-
-      <p className="text-center text-[10px]">Obrigado pela preferência!</p>
-    </div>
+    </CupomTermico>
   );
 }

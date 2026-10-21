@@ -4,6 +4,7 @@ import {
   OPCOES_PAGAMENTO_ORCAMENTO,
   opcaoDaVenda,
   VALUE_TAXA_REGISTRADA,
+  rotuloPagamentoCliente,
 } from "@/lib/utils/formas-pagamento";
 
 const resumo = (opcoes: typeof OPCOES_PAGAMENTO) => opcoes.map((o) => [o.label, o.backend, o.taxa]);
@@ -37,5 +38,21 @@ describe("formas de pagamento (specs/vendas/spec-v2.md)", () => {
     expect(credito.label).toBe("Cartão Crédito — taxa registrada (4,2%)");
 
     expect(opcaoDaVenda("Cartão Débito", 1.37)).toMatchObject({ value: VALUE_TAXA_REGISTRADA, taxa: 1.37 });
+  });
+});
+
+describe("rotuloPagamentoCliente (specs/vendas/spec-v4.md)", () => {
+  it("mostra o nome da opção sem o percentual da taxa", () => {
+    expect(rotuloPagamentoCliente("Pix", 0)).toBe("PIX");
+    expect(rotuloPagamentoCliente("Dinheiro", 0)).toBe("Dinheiro");
+    expect(rotuloPagamentoCliente("Cartão Débito", 0.88)).toBe("Débito");
+    expect(rotuloPagamentoCliente("Cartão Crédito", 3.16)).toBe("Crédito 1x");
+    expect(rotuloPagamentoCliente("Cartão Crédito", 4.84)).toBe("Crédito 2x");
+    expect(rotuloPagamentoCliente("Cartão Crédito", 5.42)).toBe("Crédito 3x");
+    expect(rotuloPagamentoCliente("Boleto", 0)).toBe("Boleto");
+  });
+
+  it("taxa fora da tabela atual mostra o formaPag gravado", () => {
+    expect(rotuloPagamentoCliente("Cartão Crédito", 4.2)).toBe("Cartão Crédito");
   });
 });
