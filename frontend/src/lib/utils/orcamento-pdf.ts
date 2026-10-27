@@ -165,12 +165,15 @@ export function gerarOrcamentoPDF(
     ? [["", "Descrição", "Unidade", "Preço unitário", "Qtd.", "Preço"]]
     : [["Descrição", "Unidade", "Preço unitário", "Qtd.", "Preço"]];
 
-  const tableBody = orcamento.itens.map((item) =>
-    hasImages
-      // Valor cheio do item: o desconto aparece separado, abaixo da tabela (specs/orcamentos/spec-v3.md)
-      ? ["", item.nome, "un.", brl(item.valorUnitario), String(item.qtd), brl(valorBrutoItem(item))]
-      : [item.nome, "un.", brl(item.valorUnitario), String(item.qtd), brl(valorBrutoItem(item))],
-  );
+  const tableBody = orcamento.itens.map((item) => {
+    // Valor cheio do item: o desconto aparece separado, abaixo da tabela (specs/orcamentos/spec-v3.md).
+    // Brinde não mostra valor (specs/orcamentos/spec-v5.md).
+    const unitario = item.brinde ? "Brinde" : brl(item.valorUnitario);
+    const preco = item.brinde ? "Brinde" : brl(valorBrutoItem(item));
+    return hasImages
+      ? ["", item.nome, "un.", unitario, String(item.qtd), preco]
+      : [item.nome, "un.", unitario, String(item.qtd), preco];
+  });
 
   const colStylesWithImg = {
     0: { cellWidth: IMG_W, halign: "center" as const },

@@ -415,6 +415,7 @@ function EditarOrcamentoDialog({
             qtd: i.qtd,
             valorUnitario: i.valorUnitario,
             desconto: i.desconto ?? 0,
+            brinde: i.brinde ?? false,
           })),
         }
       : undefined,

@@ -257,8 +257,15 @@ export default function OrcamentoDetailPage({ params }: Props) {
               <tr key={item.id} className="border-t border-border">
                 <td className="px-4 py-3">{item.nome}</td>
                 <td className="px-4 py-3 text-center text-muted-foreground">{item.qtd}</td>
-                <td className="px-4 py-3 text-right font-mono text-muted-foreground">{formatBRL(item.valorUnitario)}</td>
-                <td className="px-4 py-3 text-right font-mono font-semibold">{formatBRL(item.total)}</td>
+                {/* Brinde não mostra valor (specs/orcamentos/spec-v5.md) */}
+                {item.brinde ? (
+                  <td colSpan={2} className="px-4 py-3 text-right font-semibold text-amber-600 dark:text-amber-400">Brinde</td>
+                ) : (
+                  <>
+                    <td className="px-4 py-3 text-right font-mono text-muted-foreground">{formatBRL(item.valorUnitario)}</td>
+                    <td className="px-4 py-3 text-right font-mono font-semibold">{formatBRL(item.total)}</td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>

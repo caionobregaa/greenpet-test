@@ -32,6 +32,7 @@ export interface OrcamentoItemData {
   qtd: number
   valorUnitario: number
   desconto?: number
+  brinde?: boolean
 }
 
 export interface OrcamentoItemReadOnly {
@@ -42,6 +43,24 @@ export interface OrcamentoItemReadOnly {
   valorUnitario: number
   desconto: number
   total: number
+  brinde: boolean
+}
+
+/** Brinde tem valor final zerado: não é cobrado nem conta como desconto (specs/orcamentos/spec-v5.md). */
+function montarItem(item: OrcamentoItemData): OrcamentoItemReadOnly {
+  const brinde = item.brinde ?? false
+  const valorUnitario = brinde ? 0 : item.valorUnitario
+  const desconto = brinde ? 0 : (item.desconto ?? 0)
+  return {
+    id: item.id ?? crypto.randomUUID(),
+    produtoId: item.produtoId,
+    nome: item.nome,
+    qtd: item.qtd,
+    valorUnitario,
+    desconto,
+    total: Math.max(0, Money.create(valorUnitario).multiply(item.qtd).value - desconto),
+    brinde,
+  }
 }
 
 interface OrcamentoProps {
@@ -86,15 +105,7 @@ export class Orcamento extends AggregateRoot<OrcamentoProps> {
       throw new ValidationError('VALIDATION_ERROR', 'motivoPerda é obrigatório para orçamento perdido')
     }
 
-    const itens: OrcamentoItemReadOnly[] = data.itens.map((item) => ({
-      id: item.id ?? crypto.randomUUID(),
-      produtoId: item.produtoId,
-      nome: item.nome,
-      qtd: item.qtd,
-      valorUnitario: item.valorUnitario,
-      desconto: item.desconto ?? 0,
-      total: Math.max(0, Money.create(item.valorUnitario).multiply(item.qtd).value - (item.desconto ?? 0)),
-    }))
+    const itens: OrcamentoItemReadOnly[] = data.itens.map(montarItem)
 
     const totalValue = itens.reduce((s, i) => s + i.total, 0)
 
@@ -187,15 +198,7 @@ export class Orcamento extends AggregateRoot<OrcamentoProps> {
     if (fields.descontoRecompraAplicado !== undefined) this.props.descontoRecompraAplicado = fields.descontoRecompraAplicado
     if (fields.valorDescontoRecompra !== undefined) this.props.valorDescontoRecompra = fields.valorDescontoRecompra
     if (fields.itens !== undefined) {
-      this.props.itens = fields.itens.map((item) => ({
-        id: item.id ?? crypto.randomUUID(),
-        produtoId: item.produtoId,
-        nome: item.nome,
-        qtd: item.qtd,
-        valorUnitario: item.valorUnitario,
-        desconto: item.desconto ?? 0,
-        total: Math.max(0, Money.create(item.valorUnitario).multiply(item.qtd).value - (item.desconto ?? 0)),
-      }))
+      this.props.itens = fields.itens.map(montarItem)
       this.props.total = Money.create(this.props.itens.reduce((s, i) => s + i.total, 0))
     }
     this.updatedAt = new Date()

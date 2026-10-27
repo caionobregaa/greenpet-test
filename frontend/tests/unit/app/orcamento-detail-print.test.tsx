@@ -45,3 +45,18 @@ describe("Tela do orçamento — imprimir (specs/orcamentos/spec-v4.md)", () => 
     expect(botao.closest('[class~="print:hidden"]')).not.toBeNull();
   });
 });
+
+describe("Tela do orçamento — brinde (specs/orcamentos/spec-v5.md)", () => {
+  it("item brinde mostra 'Brinde' no lugar dos valores", async () => {
+    orcamento.itens.push({ id: "i2", produtoId: null, nome: "Petisco", qtd: 1, valorUnitario: 0, desconto: 0, total: 0, brinde: true } as never);
+    const params = Object.assign(Promise.resolve({ id: "orc-1" }), { status: "fulfilled", value: { id: "orc-1" } });
+    render(
+      <Suspense fallback={null}>
+        <OrcamentoDetailPage params={params} />
+      </Suspense>,
+    );
+    const linha = (await screen.findAllByText("Petisco")).find((el) => el.closest("tr"))!.closest("tr")!;
+    expect(linha).toHaveTextContent("Brinde");
+    expect(linha).not.toHaveTextContent("R$");
+  });
+});

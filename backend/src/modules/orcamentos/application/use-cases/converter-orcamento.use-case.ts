@@ -44,6 +44,7 @@ export class ConverterOrcamentoUseCase {
         nome: i.nome,
         qtd: i.qtd,
         valorUnitario: i.valorUnitario,
+        brinde: i.brinde,
       })),
     })
 

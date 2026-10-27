@@ -8,6 +8,8 @@ export interface OrcamentoItem {
   valorUnitario: number;
   desconto: number;
   total: number;
+  /** Brinde: valor final zerado, não mostra valor (specs/orcamentos/spec-v5.md). */
+  brinde?: boolean;
 }
 
 export interface Orcamento {

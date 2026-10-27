@@ -9,6 +9,7 @@ const OrcamentoItemSchema = z.object({
   qtd: z.coerce.number().int().positive(),
   valorUnitario: z.coerce.number().min(0),
   desconto: z.coerce.number().min(0).optional().default(0),
+  brinde: z.boolean().optional().default(false),
 })
 
 export const UpdateOrcamentoSchema = z.object({

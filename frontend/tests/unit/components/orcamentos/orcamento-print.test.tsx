@@ -76,3 +76,19 @@ describe("OrcamentoPrint (specs/orcamentos/spec-v4.md)", () => {
     expect(container.innerHTML).not.toMatch(/text-(neutral|gray|slate|zinc|stone)-/);
   });
 });
+
+describe("OrcamentoPrint — brinde (specs/orcamentos/spec-v5.md)", () => {
+  it("item brinde mostra BRINDE e fica fora do Subtotal e do Desconto", () => {
+    const orcamento = buildOrcamento({
+      total: 100,
+      itens: [
+        { id: "i1", produtoId: "p1", nome: "Areia 4kg", qtd: 1, valorUnitario: 100, desconto: 0, total: 100 },
+        { id: "i2", produtoId: "p2", nome: "Petisco", qtd: 2, valorUnitario: 0, desconto: 0, total: 0, brinde: true },
+      ],
+    });
+    render(<OrcamentoPrint orcamento={orcamento} />);
+    expect(screen.getByText("2x Petisco").nextSibling).toHaveTextContent("BRINDE");
+    expect(screen.getByText("Subtotal").nextSibling).toHaveTextContent(/R\$\s?100,00/);
+    expect(screen.queryByText("Desconto")).not.toBeInTheDocument();
+  });
+});

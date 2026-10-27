@@ -53,6 +53,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
               qtd: i.qtd,
               valorUnitario: i.valorUnitario,
               desconto: i.desconto,
+              brinde: i.brinde,
               total: i.total,
             })),
           },
@@ -82,6 +83,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
               qtd: i.qtd,
               valorUnitario: i.valorUnitario,
               desconto: i.desconto,
+              brinde: i.brinde,
               total: i.total,
             })),
           },
@@ -119,6 +121,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
       valorUnitario: unknown
       desconto: number
       total: unknown
+      brinde?: boolean
     }>
   }): Orcamento {
     const entity = Orcamento.create({
@@ -141,6 +144,7 @@ export class PrismaOrcamentoRepository implements IOrcamentoRepository {
         qtd: i.qtd,
         valorUnitario: Number(i.valorUnitario),
         desconto: i.desconto ?? 0,
+        brinde: i.brinde ?? false,
       })),
     })
     entity.applyNumero(row.numero)

@@ -29,7 +29,13 @@ export function OrcamentoPrint({ orcamento, className, ref }: OrcamentoPrintProp
 
       <div className="space-y-1">
         {orcamento.itens.map((item) => (
-          <CupomLinha key={item.id} label={`${item.qtd}x ${item.nome}`} valor={formatBRL(valorBrutoItem(item))} />
+          <CupomLinha
+            key={item.id}
+            label={`${item.qtd}x ${item.nome}`}
+            // Brinde não mostra valor e fica fora do subtotal (specs/orcamentos/spec-v5.md)
+            valor={item.brinde ? "BRINDE" : formatBRL(valorBrutoItem(item))}
+            className={item.brinde ? "font-bold" : undefined}
+          />
         ))}
       </div>
 

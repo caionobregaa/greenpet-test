@@ -11,8 +11,9 @@ export interface ResumoValoresOrcamento {
 
 const centavos = (v: number) => Math.round(v * 100) / 100;
 
-/** Valor cheio de um item, antes do desconto. */
-export function valorBrutoItem(item: { qtd: number; valorUnitario: number }): number {
+/** Valor cheio de um item, antes do desconto. Brinde vale 0 (specs/orcamentos/spec-v5.md). */
+export function valorBrutoItem(item: { qtd: number; valorUnitario: number; brinde?: boolean }): number {
+  if (item.brinde) return 0;
   return centavos(item.qtd * item.valorUnitario);
 }
 
