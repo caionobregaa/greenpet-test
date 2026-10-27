@@ -18,6 +18,7 @@ import {
   ListOrcamentosQuerySchema,
 } from './orcamentos.schema.js'
 import { ValidationError } from '@/shared/errors/validation.error.js'
+import { avisosEstoqueDaVenda } from '@/modules/estoque/infrastructure/movimentacao-estoque.js'
 import type { Orcamento } from '../../domain/entities/orcamento.entity.js'
 
 function toResponse(o: Orcamento, extra?: { clienteNome?: string | null; animalNome?: string | null }) {
@@ -113,8 +114,9 @@ export function registerOrcamentosRoutes(app: FastifyInstance, prisma: PrismaCli
     const { id } = req.params as { id: string }
     const body = ConverterOrcamentoSchema.safeParse(req.body)
     if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
-    const venda = await converterUC.execute({ id, formaPag: body.data.formaPag, taxaCartao: body.data.taxaCartao, taxaEntrega: body.data.taxaEntrega, desconto: body.data.desconto, data: body.data.data })
-    rep.status(201).send({ data: { vendaId: venda.id } })
+    const venda = await converterUC.execute({ id, formaPag: body.data.formaPag, taxaCartao: body.data.taxaCartao, taxaEntrega: body.data.taxaEntrega, desconto: body.data.desconto, data: body.data.data, valorRecebido: body.data.valorRecebido })
+    // Itens vendidos com estoque insuficiente (estoque/spec-v2)
+    rep.status(201).send({ data: { vendaId: venda.id, avisosEstoque: await avisosEstoqueDaVenda(prisma, venda.id) } })
   })
 
   app.put('/api/v1/orcamentos/:id', async (req, rep) => {

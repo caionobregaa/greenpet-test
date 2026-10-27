@@ -2,11 +2,12 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Pencil, Package, AlertTriangle, Calendar, Search, X, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Plus, Trash2, Pencil, Package, AlertTriangle, Calendar, Search, X, Loader2, Stethoscope } from "lucide-react";
 import { useEstoque, useCreateEstoqueItem, useUpdateEstoqueItem, useDeleteEstoqueItem } from "@/lib/hooks/use-estoque";
 import { useUpdateProduto } from "@/lib/hooks/use-produtos";
 import { apiProdutos } from "@/lib/api/produtos";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -581,10 +582,16 @@ export default function EstoquePage() {
             {totalItens} unidade{totalItens !== 1 ? "s" : ""} em estoque
           </p>
         </div>
-        <Button onClick={() => { setAddParaProduto(undefined); setNovoOpen(true); }} >
-          <Plus className="w-4 h-4 mr-2" />
-          Adicionar ao Estoque
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link href="/estoque/diagnostico" className={buttonVariants({ variant: "outline" })}>
+            <Stethoscope className="w-4 h-4 mr-2" />
+            Diagnóstico
+          </Link>
+          <Button onClick={() => { setAddParaProduto(undefined); setNovoOpen(true); }} >
+            <Plus className="w-4 h-4 mr-2" />
+            Adicionar ao Estoque
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">

@@ -142,12 +142,30 @@ model Venda {
   taxaEntrega Float      @default(0)
   desconto    Float      @default(0)
   total       Decimal    @db.Decimal(10, 2)
+  // Pago no ato. Vazio = pago por inteiro (specs/vendas/spec-v6.md)
+  valorRecebido Decimal? @db.Decimal(10, 2)
   obs        String?
   itens      VendaItem[]
+  pagamentos VendaPagamento[]
   orcamento  Orcamento?
   createdAt DateTime    @default(now())
 
   @@map("vendas")
+}
+
+// Recebimento posterior do valor em aberto de uma venda (specs/vendas/spec-v6.md)
+model VendaPagamento {
+  id        String   @id @default(uuid())
+  vendaId   String
+  venda     Venda    @relation(fields: [vendaId], references: [id], onDelete: Cascade)
+  valor     Decimal  @db.Decimal(10, 2)
+  data      DateTime
+  formaPag  String
+  obs       String?
+  createdAt DateTime @default(now())
+
+  @@index([vendaId])
+  @@map("venda_pagamentos")
 }
 
 model VendaItem {
@@ -165,6 +183,9 @@ model VendaItem {
   consumoDiario Int?
   recompraData  DateTime? @db.Date
   brinde        Boolean  @default(false)
+  // Quanto este item realmente tirou do estoque. Vazio = venda antiga ainda sem baixa,
+  // pendente da correção retroativa (specs/estoque/spec-v2.md)
+  qtdBaixada    Int?
 
   @@map("venda_itens")
 }

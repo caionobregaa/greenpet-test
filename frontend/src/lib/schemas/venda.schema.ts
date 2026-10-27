@@ -24,6 +24,8 @@ export const CreateVendaSchema = z.object({
   desconto: z.number().min(0).optional(),
   obs: z.string().optional().or(z.literal("")),
   itens: z.array(VendaItemSchema).min(1, "Adicione pelo menos um item"),
+  /** Pago no ato; sem informar, a venda é paga por inteiro (specs/vendas/spec-v6.md). */
+  valorRecebido: z.number().min(0).optional(),
 });
 
 export const UpdateVendaSchema = z.object({

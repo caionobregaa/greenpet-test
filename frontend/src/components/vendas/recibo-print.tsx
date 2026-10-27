@@ -28,8 +28,10 @@ function formatEndereco(cliente?: ClienteDetail): string | null {
 }
 
 export function ReciboPrint({ venda, clienteDetail, className, ref }: ReciboPrintProps) {
-  const subtotalBruto = venda.itens.reduce((s, i) => s + i.qtd * i.valorUnitario, 0);
-  const descontoItens = venda.itens.reduce((s, i) => s + (i.desconto ?? 0), 0);
+  // Brinde tem valor final zerado: fica fora do subtotal e do desconto (specs/vendas/spec-v5.md)
+  const itensCobrados = venda.itens.filter((i) => !i.brinde);
+  const subtotalBruto = itensCobrados.reduce((s, i) => s + i.qtd * i.valorUnitario, 0);
+  const descontoItens = itensCobrados.reduce((s, i) => s + (i.desconto ?? 0), 0);
   const descontoVenda = venda.desconto ?? 0;
   const descontoTotal = descontoItens + descontoVenda;
   const endereco = formatEndereco(clienteDetail);
@@ -54,7 +56,12 @@ export function ReciboPrint({ venda, clienteDetail, className, ref }: ReciboPrin
 
       <div className="space-y-1">
         {venda.itens.map((item) => (
-          <CupomLinha key={item.id} label={`${item.qtd}x ${item.nome}`} valor={formatBRL(item.total)} />
+          <CupomLinha
+            key={item.id}
+            label={`${item.qtd}x ${item.nome}`}
+            valor={item.brinde ? "BRINDE" : formatBRL(item.total)}
+            className={item.brinde ? "font-bold" : undefined}
+          />
         ))}
       </div>
 
@@ -80,6 +87,13 @@ export function ReciboPrint({ venda, clienteDetail, className, ref }: ReciboPrin
 
       <CupomLinha label="TOTAL" valor={formatBRL(venda.total)} className="text-sm font-bold" />
       <CupomLinha label="Pagamento:" valor={rotuloPagamentoCliente(venda.formaPag, venda.taxaCartao)} />
+      {/* Comprovação do que falta pagar (specs/vendas/spec-v6.md) */}
+      {(venda.valorEmAberto ?? 0) > 0 && (
+        <>
+          <CupomLinha label="Valor pago" valor={formatBRL(venda.valorPago ?? 0)} />
+          <CupomLinha label="VALOR EM ABERTO" valor={formatBRL(venda.valorEmAberto ?? 0)} className="text-sm font-bold" />
+        </>
+      )}
 
       {freteGratis && (
         <p className="text-center mt-1.5 font-bold">*** FRETE GRÁTIS ***</p>

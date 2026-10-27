@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { avisarEstoqueInsuficiente } from "@/lib/utils/avisos-estoque";
 import { ItensTable } from "@/components/vendas/itens-table";
 import { formatBRL } from "@/lib/utils/format";
 import { cn } from "@/lib/utils";
@@ -129,7 +130,7 @@ export default function EditarVendaPage({ params }: Props) {
     if (!opcao) { toast.error("Selecione a forma de pagamento."); return; }
     const taxaPctVal = opcao.taxa;
     try {
-      await updateVenda.mutateAsync({
+      const atualizada = await updateVenda.mutateAsync({
         id,
         input: {
           ...data,
@@ -139,6 +140,14 @@ export default function EditarVendaPage({ params }: Props) {
         },
       });
       toast.success("Venda atualizada com sucesso!");
+      // Só avisa o que aumentou nesta edição e ficou sem estoque (estoque/spec-v2)
+      const qtdAntes = new Map<string, number>();
+      for (const i of venda?.itens ?? []) if (i.produtoId) qtdAntes.set(i.produtoId, (qtdAntes.get(i.produtoId) ?? 0) + i.qtd);
+      const qtdDepois = new Map<string, number>();
+      for (const i of data.itens ?? []) if (i.produtoId) qtdDepois.set(i.produtoId, (qtdDepois.get(i.produtoId) ?? 0) + i.qtd);
+      avisarEstoqueInsuficiente(
+        atualizada.avisosEstoque?.filter((a) => (qtdDepois.get(a.produtoId) ?? 0) > (qtdAntes.get(a.produtoId) ?? 0)),
+      );
       router.push(`/vendas/${id}`);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
@@ -327,6 +336,7 @@ export default function EditarVendaPage({ params }: Props) {
             setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
             errors={errors.itens as Parameters<typeof ItensTable>[0]["errors"]}
             clienteId={venda.clienteId}
+            avisosEstoque
           />
           {errors.itens && typeof errors.itens.message === "string" && (
             <p className="text-xs text-destructive mt-2">{errors.itens.message}</p>

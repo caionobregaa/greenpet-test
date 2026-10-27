@@ -1,6 +1,6 @@
 import { api } from "./client";
 import type { ApiResponse, ApiMeta } from "@/lib/types/api";
-import type { Venda } from "@/lib/types/venda";
+import type { Venda, VendaEmAberto, FormaPag } from "@/lib/types/venda";
 import type { CreateVendaInput, UpdateVendaInput } from "@/lib/schemas/venda.schema";
 
 export interface VendaSemCusto {
@@ -46,6 +46,24 @@ export const apiVendas = {
 
   delete: async (id: string): Promise<void> => {
     await api.delete(`/vendas/${id}`);
+  },
+
+  emAberto: async (): Promise<{ data: VendaEmAberto[]; meta: { totalEmAberto: number } }> => {
+    const { data } = await api.get<{ data: VendaEmAberto[]; meta: { totalEmAberto: number } }>("/vendas/em-aberto");
+    return data;
+  },
+
+  registrarPagamento: async (
+    id: string,
+    input: { valor: number; data?: string; formaPag: FormaPag; obs?: string },
+  ): Promise<Venda> => {
+    const { data } = await api.post<ApiResponse<Venda>>(`/vendas/${id}/pagamentos`, input);
+    return data.data;
+  },
+
+  removerPagamento: async (id: string, pagamentoId: string): Promise<Venda> => {
+    const { data } = await api.delete<ApiResponse<Venda>>(`/vendas/${id}/pagamentos/${pagamentoId}`);
+    return data.data;
   },
 
   semCusto: async (): Promise<VendaSemCusto[]> => {

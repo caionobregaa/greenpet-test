@@ -7,6 +7,7 @@ import {
   UpdateEstoqueItemSchema,
   ListEstoqueQuerySchema,
 } from './estoque.schema.js'
+import { registerEstoqueDiagnosticoRoutes } from './estoque-diagnostico.routes.js'
 
 const PRODUTO_SELECT = {
   id: true, nome: true, categoria: true, especie: true, fornecedor: true, imagemUrl: true,
@@ -14,6 +15,8 @@ const PRODUTO_SELECT = {
 } as const
 
 export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient): void {
+  registerEstoqueDiagnosticoRoutes(app, prisma)
+
   app.get('/api/v1/estoque', async (req, rep) => {
     const q = ListEstoqueQuerySchema.safeParse(req.query)
     if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.errors[0].message)

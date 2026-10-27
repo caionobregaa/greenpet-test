@@ -48,6 +48,8 @@ export const ConverterOrcamentoSchema = z.object({
   taxaEntrega: z.number().min(0).optional(),
   desconto: z.number().min(0).optional(),
   data: z.string().optional(),
+  /** Pago no ato; a diferença fica em aberto (vendas/spec-v6). */
+  valorRecebido: z.number().min(0).optional(),
 });
 
 export type OrcamentoItemInput = z.infer<typeof OrcamentoItemSchema>;

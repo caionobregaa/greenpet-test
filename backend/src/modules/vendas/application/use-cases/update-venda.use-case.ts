@@ -32,6 +32,9 @@ export class UpdateVendaUseCase {
       desconto: input.desconto ?? existing.desconto,
       obs: input.obs !== undefined ? input.obs : existing.obs,
       itens: input.itens ?? existing.itens,
+      // O que já foi pago não muda ao editar (specs/vendas/spec-v6.md)
+      valorRecebido: existing.valorRecebidoInformado,
+      pagamentos: existing.pagamentos,
     })
 
     await this.vendaRepo.save(updated)

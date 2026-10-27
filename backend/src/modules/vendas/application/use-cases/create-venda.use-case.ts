@@ -11,6 +11,8 @@ export interface CreateVendaInput {
   taxaCartao?: number
   obs?: string
   itens: VendaItemData[]
+  /** Pago no ato; sem informar, a venda é paga por inteiro (specs/vendas/spec-v6.md). */
+  valorRecebido?: number
 }
 
 export class CreateVendaUseCase {
@@ -24,6 +26,7 @@ export class CreateVendaUseCase {
     if (!cliente) throw new NotFoundError('NOT_FOUND', 'Cliente não encontrado')
 
     const venda = Venda.create(input)
+    venda.assertValorRecebidoValido()
     await this.vendaRepo.save(venda)
     return venda
   }

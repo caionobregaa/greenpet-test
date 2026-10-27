@@ -204,3 +204,36 @@ describe("ReciboPrint — título e forma de pagamento (spec-v4)", () => {
     expect(screen.getByText("Pagamento:").nextSibling).toHaveTextContent("Cartão Crédito");
   });
 });
+
+describe("ReciboPrint — brinde (spec-v5)", () => {
+  it("item brinde mostra BRINDE e não entra no Subtotal nem no Desconto total", () => {
+    const venda = buildVenda({
+      desconto: 0,
+      total: 108.1,
+      itens: [
+        { id: "item-1", produtoId: "p1", nome: "Ração", qtd: 1, valorUnitario: 108.1, desconto: 0, total: 108.1 },
+        // Registro antigo com valor: o recibo ainda assim trata como brinde
+        { id: "item-2", produtoId: "p2", nome: "Petisco", qtd: 2, valorUnitario: 15, desconto: 30, total: 0, brinde: true },
+      ],
+    });
+    render(<ReciboPrint venda={venda} />);
+
+    expect(screen.getByText("2x Petisco").nextSibling).toHaveTextContent("BRINDE");
+    expect(screen.getByText("Subtotal").nextSibling).toHaveTextContent(/R\$\s?108,10/);
+    expect(screen.queryByText("Desconto total")).not.toBeInTheDocument();
+  });
+});
+
+describe("ReciboPrint — valor em aberto (spec-v6)", () => {
+  it("com valor em aberto, mostra Valor pago e VALOR EM ABERTO", () => {
+    render(<ReciboPrint venda={buildVenda({ total: 102.69, valorPago: 50, valorEmAberto: 52.69 })} />);
+    expect(screen.getByText("Valor pago").nextSibling).toHaveTextContent(/R\$\s?50,00/);
+    expect(screen.getByText("VALOR EM ABERTO").nextSibling).toHaveTextContent(/R\$\s?52,69/);
+  });
+
+  it("venda quitada não mostra as linhas de valor em aberto", () => {
+    render(<ReciboPrint venda={buildVenda({ valorPago: 102.69, valorEmAberto: 0 })} />);
+    expect(screen.queryByText("VALOR EM ABERTO")).not.toBeInTheDocument();
+    expect(screen.queryByText("Valor pago")).not.toBeInTheDocument();
+  });
+});

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { PagamentoParcialField, valorRecebidoValido } from "@/components/vendas/pagamento-parcial-field";
+import { avisarEstoqueInsuficiente } from "@/lib/utils/avisos-estoque";
 import { useRouter } from "next/navigation";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -151,6 +153,8 @@ export default function NovaVendaPage() {
 
   // Recompra discount — 5% sobre o subtotal quando o cliente já comprou antes
   const [clienteRecompra, setClienteRecompra] = useState(false);
+  // Pago no ato; undefined = pago por inteiro (specs/vendas/spec-v6.md)
+  const [valorRecebido, setValorRecebido] = useState<number | undefined>(undefined);
 
   // Quick client registration
   const [showQuickCliente, setShowQuickCliente] = useState(false);
@@ -323,13 +327,15 @@ export default function NovaVendaPage() {
     if (!orcamentoSelecionado) return;
     if (!dataPagamento) { toast.error("Informe a data do pagamento."); return; }
     if (dataPagamento > todayLocalISO()) { toast.error("A data do pagamento não pode ser no futuro."); return; }
+    if (!valorRecebidoValido(totalBruto, valorRecebido)) { toast.error("O valor recebido não pode ser maior que o total."); return; }
     const taxaPctVal = opcao.taxa;
     try {
       const result = await converterOrcamento.mutateAsync({
         id: orcamentoSelecionado.id,
-        input: { formaPag: opcao.backend, taxaCartao: taxaPctVal, taxaEntrega: entrega, data: dataPagamento },
+        input: { formaPag: opcao.backend, taxaCartao: taxaPctVal, taxaEntrega: entrega, data: dataPagamento, valorRecebido },
       });
       toast.success("Venda registrada com sucesso!");
+      avisarEstoqueInsuficiente(result.avisosEstoque);
       router.push(`/vendas/${result.vendaId}`);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
@@ -341,6 +347,7 @@ export default function NovaVendaPage() {
   async function onSubmit(data: CreateVendaInput) {
     const opcao = OPCOES_PAGAMENTO.find((o) => o.value === formaPagKey);
     if (!opcao) { toast.error("Selecione a forma de pagamento."); return; }
+    if (!valorRecebidoValido(totalBruto, valorRecebido)) { toast.error("O valor recebido não pode ser maior que o total."); return; }
     const taxaPctVal = opcao.taxa;
     try {
       const venda = await createVenda.mutateAsync({
@@ -348,8 +355,10 @@ export default function NovaVendaPage() {
         formaPag: opcao.backend,
         taxaCartao: taxaPctVal,
         taxaEntrega: entrega,
+        valorRecebido,
       });
       toast.success("Venda registrada com sucesso!");
+      avisarEstoqueInsuficiente(venda.avisosEstoque);
       router.push(`/vendas/${venda.id}`);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
@@ -471,6 +480,10 @@ export default function NovaVendaPage() {
               )}
             </div>
           )}
+
+          <div className="mt-4">
+            <PagamentoParcialField total={totalBruto} value={valorRecebido} onChange={setValorRecebido} />
+          </div>
         </div>
 
         {/* Only show these fields for direct (non-imported) vendas */}
@@ -705,6 +718,7 @@ export default function NovaVendaPage() {
                 setValue={setValue as unknown as Parameters<typeof ItensTable>[0]["setValue"]}
                 errors={errors.itens as Parameters<typeof ItensTable>[0]["errors"]}
                 clienteId={clienteSelected?.id}
+                avisosEstoque
               />
               {errors.itens && typeof errors.itens.message === "string" && (
                 <p className="text-xs text-destructive mt-2">{errors.itens.message}</p>

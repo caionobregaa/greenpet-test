@@ -56,4 +56,18 @@ describe('Venda entity', () => {
     expect(venda.itens[0].valorUnitario).toBe(25)
     expect(venda.itens[0].total).toBe(75)
   })
+
+  it('item brinde é gravado com valor, desconto e total zerados e não entra no total (spec-v5)', () => {
+    const venda = Venda.create({
+      clienteId,
+      formaPag: 'Pix',
+      itens: [
+        { nome: 'Ração', qtd: 1, valorUnitario: 100 },
+        { nome: 'Petisco brinde', qtd: 2, valorUnitario: 15, desconto: 30, brinde: true },
+      ],
+    })
+    const brinde = venda.itens[1]
+    expect(brinde).toMatchObject({ brinde: true, valorUnitario: 0, desconto: 0, total: 0 })
+    expect(venda.total).toBe(100)
+  })
 })

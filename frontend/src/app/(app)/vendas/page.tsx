@@ -86,6 +86,11 @@ export default function VendasPage() {
                           liq. {formatBRL(v.total * (1 - v.taxaCartao / 100))}
                         </span>
                       )}
+                      {(v.valorEmAberto ?? 0) > 0 && (
+                        <span className="mt-0.5 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                          Em aberto {formatBRL(v.valorEmAberto ?? 0)}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">

@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ReciboPrint } from "@/components/vendas/recibo-print";
+import { PagamentosVenda } from "@/components/vendas/pagamentos-venda";
 import { formatDate, formatBRL } from "@/lib/utils/format";
 import { imprimirCupom } from "@/lib/utils/imprimir-cupom";
 
@@ -161,6 +162,8 @@ export default function VendaDetailPage({ params }: Props) {
           </div>
         ))}
       </div>
+
+      <PagamentosVenda venda={venda} />
 
       {/* Items */}
       <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm mb-4">

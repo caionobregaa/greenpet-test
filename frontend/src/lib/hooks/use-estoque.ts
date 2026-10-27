@@ -7,6 +7,25 @@ interface ListParams {
   limit?: number;
 }
 
+export function useDiagnosticoEstoque() {
+  return useQuery({
+    queryKey: ["estoque", "diagnostico"],
+    queryFn: () => apiEstoque.diagnostico(),
+  });
+}
+
+export function useCorrecaoRetroativa() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (aplicar: boolean) => apiEstoque.correcaoRetroativa(aplicar),
+    onSuccess: (r) => {
+      if (!r.aplicado) return;
+      qc.invalidateQueries({ queryKey: ["estoque"] });
+      qc.invalidateQueries({ queryKey: ["produtos"] });
+    },
+  });
+}
+
 export function useEstoque(params?: ListParams) {
   return useQuery({
     queryKey: ["estoque", params],

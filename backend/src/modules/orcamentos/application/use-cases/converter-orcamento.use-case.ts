@@ -10,7 +10,7 @@ export class ConverterOrcamentoUseCase {
     private readonly vendaRepo: IVendaRepository,
   ) {}
 
-  async execute({ id, formaPag, taxaCartao = 0, taxaEntrega = 0, desconto = 0, data }: { id: string; formaPag: string; taxaCartao?: number; taxaEntrega?: number; desconto?: number; data?: Date }): Promise<Venda> {
+  async execute({ id, formaPag, taxaCartao = 0, taxaEntrega = 0, desconto = 0, data, valorRecebido }: { id: string; formaPag: string; taxaCartao?: number; taxaEntrega?: number; desconto?: number; data?: Date; valorRecebido?: number }): Promise<Venda> {
     const orcamento = await this.orcamentoRepo.findById(id)
     if (!orcamento) throw new NotFoundError('NOT_FOUND', 'Orçamento não encontrado')
 
@@ -37,6 +37,8 @@ export class ConverterOrcamentoUseCase {
       taxaEntrega,
       desconto,
       obs: orcamento.obs,
+      // Pago no ato; a diferença fica em aberto (specs/vendas/spec-v6.md)
+      valorRecebido,
       itens: orcamento.itens.map((i) => ({
         produtoId: i.produtoId,
         nome: i.nome,
@@ -45,6 +47,7 @@ export class ConverterOrcamentoUseCase {
       })),
     })
 
+    venda.assertValorRecebidoValido()
     await this.vendaRepo.save(venda)
     orcamento.vincularVenda(venda.id)
     await this.orcamentoRepo.save(orcamento)

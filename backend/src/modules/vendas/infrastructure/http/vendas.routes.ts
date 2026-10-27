@@ -7,8 +7,11 @@ import { GetVendaUseCase } from '../../application/use-cases/get-venda.use-case.
 import { ListVendasUseCase } from '../../application/use-cases/list-vendas.use-case.js'
 import { DeleteVendaUseCase } from '../../application/use-cases/delete-venda.use-case.js'
 import { UpdateVendaUseCase } from '../../application/use-cases/update-venda.use-case.js'
-import { CreateVendaSchema, UpdateVendaSchema, ListVendasQuerySchema } from './vendas.schema.js'
+import { RegistrarPagamentoVendaUseCase } from '../../application/use-cases/registrar-pagamento-venda.use-case.js'
+import { RemoverPagamentoVendaUseCase } from '../../application/use-cases/remover-pagamento-venda.use-case.js'
+import { CreateVendaSchema, UpdateVendaSchema, ListVendasQuerySchema, RegistrarPagamentoSchema } from './vendas.schema.js'
 import { ValidationError } from '@/shared/errors/validation.error.js'
+import { avisosEstoqueDaVenda } from '@/modules/estoque/infrastructure/movimentacao-estoque.js'
 import type { Venda } from '../../domain/entities/venda.entity.js'
 
 function toResponse(v: Venda, extra?: { clienteNome?: string | null; animalNome?: string | null; lucroBruto?: number }) {
@@ -25,6 +28,10 @@ function toResponse(v: Venda, extra?: { clienteNome?: string | null; animalNome?
     total: v.total,
     obs: v.obs,
     itens: v.itens,
+    valorRecebido: v.valorRecebido,
+    valorPago: v.valorPago,
+    valorEmAberto: v.valorEmAberto,
+    pagamentos: v.pagamentos,
     cliente: extra?.clienteNome ? { nome: extra.clienteNome } : undefined,
     animal: extra?.animalNome ? { nome: extra.animalNome } : undefined,
     lucroBruto: extra?.lucroBruto,
@@ -40,6 +47,66 @@ export function registerVendasRoutes(app: FastifyInstance, prisma: PrismaClient)
   const listUC = new ListVendasUseCase(vendaRepo)
   const deleteUC = new DeleteVendaUseCase(vendaRepo)
   const updateUC = new UpdateVendaUseCase(vendaRepo)
+  const registrarPagamentoUC = new RegistrarPagamentoVendaUseCase(vendaRepo)
+  const removerPagamentoUC = new RemoverPagamentoVendaUseCase(vendaRepo)
+
+  async function nomes(id: string) {
+    const row = await prisma.venda.findUnique({
+      where: { id },
+      select: { cliente: { select: { nome: true } }, animal: { select: { nome: true } } },
+    })
+    return { clienteNome: row?.cliente?.nome, animalNome: row?.animal?.nome }
+  }
+
+  // Vendas com valor em aberto, da mais antiga para a mais nova (spec-v6)
+  app.get('/api/v1/vendas/em-aberto', async (_req, rep) => {
+    const rows = await prisma.$queryRaw<Array<{
+      vendaId: string
+      vendaNumero: number
+      vendaData: Date
+      clienteId: string
+      clienteNome: string
+      clienteTelefone: string
+      total: string
+      valorPago: string
+    }>>`
+      SELECT
+        v.id AS "vendaId",
+        v.numero AS "vendaNumero",
+        v.data AS "vendaData",
+        c.id AS "clienteId",
+        c.nome AS "clienteNome",
+        c.telefone AS "clienteTelefone",
+        v.total::text AS "total",
+        (v."valorRecebido" + COALESCE((SELECT SUM(p.valor) FROM venda_pagamentos p WHERE p."vendaId" = v.id), 0))::text AS "valorPago"
+      FROM vendas v
+      JOIN clientes c ON c.id = v."clienteId"
+      WHERE v."valorRecebido" IS NOT NULL
+        AND v.total - v."valorRecebido" - COALESCE((SELECT SUM(p.valor) FROM venda_pagamentos p WHERE p."vendaId" = v.id), 0) > 0
+      ORDER BY v.data ASC, v.numero ASC
+    `
+    const data = rows.map((r) => {
+      const total = Number(r.total)
+      const valorPago = Number(r.valorPago)
+      return { ...r, total, valorPago, valorEmAberto: Math.round((total - valorPago) * 100) / 100 }
+    })
+    const totalEmAberto = Math.round(data.reduce((s, r) => s + r.valorEmAberto, 0) * 100) / 100
+    rep.send({ data, meta: { totalEmAberto } })
+  })
+
+  app.post('/api/v1/vendas/:id/pagamentos', async (req, rep) => {
+    const { id } = req.params as { id: string }
+    const body = RegistrarPagamentoSchema.safeParse(req.body)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    const venda = await registrarPagamentoUC.execute({ vendaId: id, ...body.data })
+    rep.status(201).send({ data: toResponse(venda, await nomes(id)) })
+  })
+
+  app.delete('/api/v1/vendas/:id/pagamentos/:pagamentoId', async (req, rep) => {
+    const { id, pagamentoId } = req.params as { id: string; pagamentoId: string }
+    const venda = await removerPagamentoUC.execute({ vendaId: id, pagamentoId })
+    rep.send({ data: toResponse(venda, await nomes(id)) })
+  })
 
   app.get('/api/v1/vendas/sem-custo', async (_req, rep) => {
     const noventa = new Date()
@@ -109,7 +176,9 @@ export function registerVendasRoutes(app: FastifyInstance, prisma: PrismaClient)
     const body = CreateVendaSchema.safeParse(req.body)
     if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
     const venda = await createUC.execute(body.data)
-    rep.status(201).send({ data: toResponse(venda) })
+    // Itens vendidos com estoque insuficiente (specs/estoque/spec-v2.md)
+    const avisosEstoque = await avisosEstoqueDaVenda(prisma, venda.id)
+    rep.status(201).send({ data: { ...toResponse(venda), avisosEstoque } })
   })
 
   app.get('/api/v1/vendas/:id', async (req, rep) => {
@@ -144,7 +213,8 @@ export function registerVendasRoutes(app: FastifyInstance, prisma: PrismaClient)
       where: { id },
       select: { cliente: { select: { nome: true } }, animal: { select: { nome: true } } },
     })
-    rep.send({ data: toResponse(venda, { clienteNome: row?.cliente?.nome, animalNome: row?.animal?.nome }) })
+    const avisosEstoque = await avisosEstoqueDaVenda(prisma, id)
+    rep.send({ data: { ...toResponse(venda, { clienteNome: row?.cliente?.nome, animalNome: row?.animal?.nome }), avisosEstoque } })
   })
 
   app.delete('/api/v1/vendas/:id', async (req, rep) => {

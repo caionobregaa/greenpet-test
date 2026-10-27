@@ -28,6 +28,8 @@ import { MOTIVOS_PERDA, type MotivoPerda } from "@/lib/schemas/orcamento.schema"
 import { OPCOES_PAGAMENTO_ORCAMENTO } from "@/lib/utils/formas-pagamento";
 import { imprimirCupom } from "@/lib/utils/imprimir-cupom";
 import { OrcamentoPrint } from "@/components/orcamentos/orcamento-print";
+import { PagamentoParcialField, valorRecebidoValido } from "@/components/vendas/pagamento-parcial-field";
+import { avisarEstoqueInsuficiente } from "@/lib/utils/avisos-estoque";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -48,6 +50,8 @@ export default function OrcamentoDetailPage({ params }: Props) {
   const [motivoPerda, setMotivoPerda] = useState<MotivoPerda | "">("");
   const [pagamento, setPagamento] = useState("");
   const [dataPagamento, setDataPagamento] = useState(todayLocalISO);
+  // Pago no ato; undefined = pago por inteiro (vendas/spec-v6)
+  const [valorRecebido, setValorRecebido] = useState<number | undefined>(undefined);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [waLoading, setWaLoading] = useState(false);
   const cupomRef = useRef<HTMLDivElement>(null);
@@ -81,10 +85,12 @@ export default function OrcamentoDetailPage({ params }: Props) {
     if (!opcao) return;
     if (!dataPagamento) { toast.error("Informe a data do pagamento."); return; }
     if (dataPagamento > todayLocalISO()) { toast.error("A data do pagamento não pode ser no futuro."); return; }
+    if (!valorRecebidoValido(totalBruto, valorRecebido)) { toast.error("O valor recebido não pode ser maior que o total."); return; }
     const taxaPct = opcao.taxa;
     try {
-      const result = await converter.mutateAsync({ id, input: { formaPag: opcao.backend, taxaCartao: taxaPct, data: dataPagamento } });
+      const result = await converter.mutateAsync({ id, input: { formaPag: opcao.backend, taxaCartao: taxaPct, data: dataPagamento, valorRecebido } });
       toast.success("Orçamento convertido em venda!");
+      avisarEstoqueInsuficiente(result.avisosEstoque);
       router.push(`/vendas/${result.vendaId}`);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
@@ -266,7 +272,7 @@ export default function OrcamentoDetailPage({ params }: Props) {
       </div>
 
       {/* Converter Dialog */}
-      <Dialog open={converterOpen} onOpenChange={(o) => { setConverterOpen(o); if (!o) { setPagamento(""); setDataPagamento(todayLocalISO()); } }}>
+      <Dialog open={converterOpen} onOpenChange={(o) => { setConverterOpen(o); if (!o) { setPagamento(""); setDataPagamento(todayLocalISO()); setValorRecebido(undefined); } }}>
         <DialogContent className="sm:max-w-5xl sm:p-8 max-h-[90dvh] overflow-y-auto">
           <DialogHeader><DialogTitle>Fechar Venda</DialogTitle></DialogHeader>
           <div className="space-y-5">
@@ -326,6 +332,8 @@ export default function OrcamentoDetailPage({ params }: Props) {
                 )}
               </div>
             )}
+
+            <PagamentoParcialField total={totalBruto} value={valorRecebido} onChange={setValorRecebido} />
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setConverterOpen(false)}>Cancelar</Button>

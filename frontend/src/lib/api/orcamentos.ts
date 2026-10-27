@@ -1,6 +1,7 @@
 import { api } from "./client";
 import type { ApiResponse, ApiMeta } from "@/lib/types/api";
 import type { Orcamento } from "@/lib/types/orcamento";
+import type { AvisoEstoque } from "@/lib/types/estoque";
 import type { CreateOrcamentoInput, UpdateOrcamentoInput, ConverterOrcamentoInput, MotivoPerda } from "@/lib/schemas/orcamento.schema";
 import type { Venda } from "@/lib/types/venda";
 
@@ -49,8 +50,8 @@ export const apiOrcamentos = {
     return data.data;
   },
 
-  converter: async (id: string, input: ConverterOrcamentoInput): Promise<{ vendaId: string }> => {
-    const { data } = await api.post<ApiResponse<{ vendaId: string }>>(`/orcamentos/${id}/converter`, input);
+  converter: async (id: string, input: ConverterOrcamentoInput): Promise<{ vendaId: string; avisosEstoque?: AvisoEstoque[] }> => {
+    const { data } = await api.post<ApiResponse<{ vendaId: string; avisosEstoque?: AvisoEstoque[] }>>(`/orcamentos/${id}/converter`, input);
     return data.data;
   },
 

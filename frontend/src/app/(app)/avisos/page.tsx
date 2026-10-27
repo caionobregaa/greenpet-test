@@ -14,6 +14,7 @@ import { useLembretes, useCreateLembrete, useDeleteLembrete } from "@/lib/hooks/
 import { useVendasSemCusto } from "@/lib/hooks/use-vendas";
 import Link from "next/link";
 import { LembreteMensagens } from "@/components/avisos/lembrete-mensagens";
+import { ValoresEmAberto } from "@/components/avisos/valores-em-aberto";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,6 +62,9 @@ export default function AvisosPage() {
 
   return (
     <div className="space-y-8">
+      {/* ── Valores em aberto (vendas/spec-v6) ─────────────────────────────── */}
+      <ValoresEmAberto />
+
       {/* ── Lembrete de mensagens (recompra) ───────────────────────────────── */}
       <section>
         <div className="flex items-center gap-2 mb-1">

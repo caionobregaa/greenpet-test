@@ -13,6 +13,7 @@ export async function truncateAll(): Promise<void> {
   await prismaTest.$transaction([
     prismaTest.orcamentoItem.deleteMany(),
     prismaTest.orcamento.deleteMany(),
+    prismaTest.vendaPagamento.deleteMany(),
     prismaTest.vendaItem.deleteMany(),
     prismaTest.venda.deleteMany(),
     prismaTest.compraItem.deleteMany(),

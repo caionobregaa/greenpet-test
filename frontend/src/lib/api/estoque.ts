@@ -1,6 +1,6 @@
 import { api } from "./client";
 import type { ApiResponse, ApiMeta } from "@/lib/types/api";
-import type { EstoqueItem } from "@/lib/types/estoque";
+import type { EstoqueItem, DiagnosticoEstoque, ResultadoCorrecao } from "@/lib/types/estoque";
 
 interface ListParams {
   produtoId?: string;
@@ -26,6 +26,17 @@ export interface UpdateEstoqueItemInput {
 }
 
 export const apiEstoque = {
+  diagnostico: async (): Promise<DiagnosticoEstoque> => {
+    const { data } = await api.get<ApiResponse<DiagnosticoEstoque>>("/estoque/diagnostico");
+    return data.data;
+  },
+
+  /** `aplicar: false` só simula (specs/estoque/spec-v2.md). */
+  correcaoRetroativa: async (aplicar: boolean): Promise<ResultadoCorrecao> => {
+    const { data } = await api.post<ApiResponse<ResultadoCorrecao>>("/estoque/correcao-retroativa", { aplicar });
+    return data.data;
+  },
+
   list: async (params?: ListParams): Promise<{ data: EstoqueItem[]; meta: ApiMeta }> => {
     const { data } = await api.get<{ data: EstoqueItem[]; meta: ApiMeta }>("/estoque", { params });
     return data;

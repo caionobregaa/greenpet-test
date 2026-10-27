@@ -2,7 +2,7 @@
 
 import { useFieldArray, useWatch, type Control, type UseFormSetValue } from "react-hook-form";
 import { useRef, useState, useEffect, memo } from "react";
-import { Plus, Trash2, Search, Minus, PackageSearch, Timer, CalendarDays, GripVertical, Gift } from "lucide-react";
+import { Plus, Trash2, Search, Minus, PackageSearch, Timer, CalendarDays, GripVertical, Gift, PackageX } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -34,6 +34,7 @@ interface ProdutoSelect {
   valorCusto?: number;
   categoria?: string;
   pesoEmbalagem?: number | null;
+  estoque?: number;
 }
 
 interface ItemRow {
@@ -53,6 +54,10 @@ interface ItemExtra {
   categoria?: string;
   pesoEmbalagem?: number | null;
   qtdEmbalagem?: number;
+  /** Preço que o item volta a ter ao desmarcar o brinde (specs/vendas/spec-v5.md). */
+  valorAntesBrinde?: number;
+  /** Estoque do produto escolhido (specs/estoque/spec-v2.md). */
+  estoque?: number;
 }
 
 interface ItensTableProps {
@@ -62,6 +67,8 @@ interface ItensTableProps {
   showPesoKg?: boolean;
   useCusto?: boolean;
   clienteId?: string;
+  /** Avisa estoque insuficiente e item sem produto (só nas vendas — specs/estoque/spec-v2.md). */
+  avisosEstoque?: boolean;
 }
 
 function calcDuracao(consumoDiario: number | null | undefined, extra: ItemExtra): { dias: number; semanas: number } | null {
@@ -122,7 +129,7 @@ const ProdutoSearch = memo(function ProdutoSearch({
   }
 
   function pick(p: Produto) {
-    onSelect({ id: p.id, nome: p.nome, valorVenda: p.valorVenda, valorCusto: p.valorCusto, categoria: p.categoria, pesoEmbalagem: p.pesoEmbalagem });
+    onSelect({ id: p.id, nome: p.nome, valorVenda: p.valorVenda, valorCusto: p.valorCusto, categoria: p.categoria, pesoEmbalagem: p.pesoEmbalagem, estoque: p.estoque });
     setQuery(p.nome);
     setResults([]); setOpen(false); setSearched(false);
   }
@@ -197,10 +204,37 @@ interface SortableItemRowProps {
   errors: ItensTableProps["errors"];
   showPesoKg: boolean;
   clienteAnimais: { id: string; nome: string; especie: string }[];
+  avisosEstoque: boolean;
   onSelectProduto: (p: ProdutoSelect) => void;
   onUpdateExtra: (patch: Partial<ItemExtra>) => void;
   onStepQtd: (delta: number) => void;
   onRemove: () => void;
+}
+
+/**
+ * Venda com estoque insuficiente é registrada tirando só o que existe; item sem produto
+ * cadastrado não sai do estoque (specs/estoque/spec-v2.md).
+ */
+function AvisoEstoqueItem({ item, estoque }: { item: ItemRow; estoque?: number }) {
+  const qtd = Number(item.qtd) || 0;
+  if (!item.produtoId) {
+    if (!item.nome?.trim()) return null;
+    return (
+      <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+        <PackageX className="w-3 h-3 shrink-0" />
+        Item sem produto cadastrado — não sai do estoque
+      </p>
+    );
+  }
+  if (estoque === undefined || qtd <= estoque) return null;
+  return (
+    <p data-testid="aviso-estoque" className="flex items-center gap-1.5 text-[11px] font-medium text-amber-700 dark:text-amber-400">
+      <PackageX className="w-3 h-3 shrink-0" />
+      {estoque <= 0
+        ? "Sem estoque — a venda será registrada sem tirar do estoque"
+        : `Só há ${estoque} em estoque — a venda tira o que existe`}
+    </p>
+  );
 }
 
 function SortableItemRow({
@@ -215,6 +249,7 @@ function SortableItemRow({
   errors,
   showPesoKg,
   clienteAnimais,
+  avisosEstoque,
   onSelectProduto,
   onUpdateExtra,
   onStepQtd,
@@ -236,7 +271,6 @@ function SortableItemRow({
   const showConsumoSection = isRacao || isMedSupl || (consumoDiarioVal !== undefined);
   const recompraDataVal = item.recompraData ?? null;
   const isBrinde = !!item.brinde;
-  const originalValorUnitario = useRef<number | null>(null);
 
   return (
     <div
@@ -332,6 +366,9 @@ function SortableItemRow({
               type="number" step="0.01" min="0"
               {...control.register(`itens.${index}.valorUnitario` as never, { valueAsNumber: true })}
               placeholder="0,00"
+              readOnly={isBrinde}
+              tabIndex={isBrinde ? -1 : undefined}
+              className={isBrinde ? "bg-muted/50 text-muted-foreground cursor-not-allowed" : undefined}
             />
           </div>
 
@@ -341,15 +378,21 @@ function SortableItemRow({
               type="number" step="0.01" min="0"
               {...control.register(`itens.${index}.desconto` as never, { valueAsNumber: true })}
               placeholder="0,00"
-              className="text-primary/80"
+              readOnly={isBrinde}
+              tabIndex={isBrinde ? -1 : undefined}
+              className={isBrinde ? "bg-muted/50 text-muted-foreground cursor-not-allowed" : "text-primary/80"}
             />
           </div>
 
           <div className="space-y-1.5 flex-1 min-w-[80px]">
             <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">Subtotal</p>
             <div className="flex items-center h-9">
-              <span className="text-[13px] font-bold text-primary tabular-nums">{formatBRL(subtotal)}</span>
-              {(Number(item.desconto) || 0) > 0 && (
+              {isBrinde ? (
+                <span className="text-[13px] font-bold text-amber-600 dark:text-amber-400">Brinde</span>
+              ) : (
+                <span className="text-[13px] font-bold text-primary tabular-nums">{formatBRL(subtotal)}</span>
+              )}
+              {!isBrinde && (Number(item.desconto) || 0) > 0 && (
                 <span className="ml-1 text-[10px] text-primary/60">−{formatBRL(Number(item.desconto))}</span>
               )}
             </div>
@@ -363,13 +406,13 @@ function SortableItemRow({
             onClick={() => {
               const nextBrinde = !isBrinde;
               setValue(`itens.${index}.brinde` as never, nextBrinde as never);
+              // Brinde tem valor final zerado (specs/vendas/spec-v5.md)
               if (nextBrinde) {
-                originalValorUnitario.current = item.valorUnitario;
+                onUpdateExtra({ valorAntesBrinde: Number(item.valorUnitario) || 0 });
                 setValue(`itens.${index}.valorUnitario` as never, 0 as never);
                 setValue(`itens.${index}.desconto` as never, 0 as never);
-              } else if (originalValorUnitario.current !== null) {
-                setValue(`itens.${index}.valorUnitario` as never, originalValorUnitario.current as never);
-                originalValorUnitario.current = null;
+              } else {
+                setValue(`itens.${index}.valorUnitario` as never, (extra.valorAntesBrinde ?? 0) as never);
               }
             }}
             className={`h-9 w-9 p-0 shrink-0 ${isBrinde ? "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-200 hover:text-amber-700" : "text-muted-foreground/40 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20"}`}
@@ -380,6 +423,7 @@ function SortableItemRow({
             <Trash2 className="w-3.5 h-3.5" />
           </Button>
         </div>
+        {avisosEstoque && <AvisoEstoqueItem item={item} estoque={extra.estoque} />}
         {isBrinde && (
           <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 text-[11px] font-medium">
             <Gift className="w-3 h-3" />
@@ -517,7 +561,7 @@ function SortableItemRow({
 
 // ── Main table ───────────────────────────────────────────────────────────────
 
-export function ItensTable({ control, setValue, errors, showPesoKg = false, useCusto = false, clienteId }: ItensTableProps) {
+export function ItensTable({ control, setValue, errors, showPesoKg = false, useCusto = false, clienteId, avisosEstoque = false }: ItensTableProps) {
   const { fields, append, remove, move } = useFieldArray({ control, name: "itens" as never });
   const itens = useWatch({ control, name: "itens" as never }) as unknown as ItemRow[];
   const [lastAddedIndex, setLastAddedIndex] = useState<number | null>(null);
@@ -550,10 +594,19 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false, useC
   function selectProduto(index: number, p: ProdutoSelect) {
     setValue(`itens.${index}.produtoId` as never, p.id as never);
     setValue(`itens.${index}.nome` as never, p.nome as never);
-    setValue(`itens.${index}.valorUnitario` as never, (useCusto ? (p.valorCusto ?? 0) : p.valorVenda) as never);
+    const preco = useCusto ? (p.valorCusto ?? 0) : p.valorVenda;
+    // Item brinde fica com valor 0; o preço só volta se o brinde for desmarcado
+    const isBrinde = !!(itens ?? [])[index]?.brinde;
+    if (!isBrinde) setValue(`itens.${index}.valorUnitario` as never, preco as never);
     setItemExtras((prev) => ({
       ...prev,
-      [index]: { ...prev[index], categoria: p.categoria, pesoEmbalagem: p.pesoEmbalagem },
+      [index]: {
+        ...prev[index],
+        categoria: p.categoria,
+        pesoEmbalagem: p.pesoEmbalagem,
+        estoque: p.id ? p.estoque : undefined,
+        ...(isBrinde ? { valorAntesBrinde: preco } : {}),
+      },
     }));
   }
 
@@ -642,6 +695,7 @@ export function ItensTable({ control, setValue, errors, showPesoKg = false, useC
                   errors={errors}
                   showPesoKg={showPesoKg}
                   clienteAnimais={clienteAnimais}
+                  avisosEstoque={avisosEstoque}
                   onSelectProduto={(p) => selectProduto(index, p)}
                   onUpdateExtra={(patch) => updateExtra(index, patch)}
                   onStepQtd={(delta) => stepQtd(index, delta)}
