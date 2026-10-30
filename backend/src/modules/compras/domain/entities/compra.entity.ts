@@ -1,3 +1,4 @@
+import { normalizarDistribuidora } from '@/shared/domain/distribuidoras.js'
 import { AggregateRoot } from '@/shared/domain/aggregate-root.base.js'
 import { Money } from '@/shared/domain/value-objects/money.vo.js'
 import { ValidationError } from '@/shared/errors/validation.error.js'
@@ -36,6 +37,11 @@ interface CompraProps {
   itens: CompraItemReadOnly[]
 }
 
+/** Só em "Produtos Pets" o campo é a distribuidora (specs/produtos/spec-v5.md). */
+function fornecedorDaCategoria(fornecedor: string, categoria: string): string {
+  return categoria === 'Produtos Pets' ? normalizarDistribuidora(fornecedor) : fornecedor
+}
+
 export class Compra extends AggregateRoot<CompraProps> {
   static create(data: {
     id?: string
@@ -64,12 +70,14 @@ export class Compra extends AggregateRoot<CompraProps> {
       ? itens.reduce((s, i) => s + i.total, 0)
       : (data.totalManual ?? 0)
 
+    const categoria = data.categoria ?? 'Produtos Pets'
+
     return new Compra(
       {
-        fornecedor: data.fornecedor,
+        fornecedor: fornecedorDaCategoria(data.fornecedor, categoria),
         dataPedido: data.dataPedido ?? new Date(),
         dataRecebimento: data.dataRecebimento,
-        categoria: data.categoria ?? 'Produtos Pets',
+        categoria,
         descricaoSimples: data.descricaoSimples,
         formaPag: data.formaPag,
         status: data.status ?? 'pendente',
@@ -129,6 +137,7 @@ export class Compra extends AggregateRoot<CompraProps> {
     if (fields.obs !== undefined) this.props.obs = fields.obs
     if (fields.dataPedido !== undefined) this.props.dataPedido = fields.dataPedido
     if (fields.categoria !== undefined) this.props.categoria = fields.categoria
+    this.props.fornecedor = fornecedorDaCategoria(this.props.fornecedor, this.props.categoria)
     if (fields.descricaoSimples !== undefined) this.props.descricaoSimples = fields.descricaoSimples
     if (fields.formaPag !== undefined) this.props.formaPag = fields.formaPag
     if (fields.totalManual !== undefined && (fields.itens === undefined || fields.itens.length === 0)) {

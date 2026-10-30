@@ -23,6 +23,7 @@ import { composeNomeRacao } from "@/lib/utils/produtos";
 import type { Produto } from "@/lib/types/produto";
 import {
   DISTRIBUIDORAS_PADRAO,
+  normalizarDistribuidora,
   carregarDistribuidorasCustomizadas,
   salvarDistribuidorasCustomizadas,
 } from "@/lib/utils/distribuidoras";
@@ -272,7 +273,9 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
     if (marcado) setValue("codigoBarras", "");
   }
 
-  function handleFornecedorChange(valor: string) {
+  // Variação de uma distribuidora oficial vira a oficial (specs/produtos/spec-v5.md)
+  function handleFornecedorChange(digitado: string): string {
+    const valor = normalizarDistribuidora(digitado);
     if (valor && !distribuidoras.includes(valor)) {
       const nova = [...distribuidoras, valor];
       setDistribuidoras(nova);
@@ -281,6 +284,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
       salvarDistribuidorasCustomizadas(customizadas);
     }
     setValue("fornecedor", valor);
+    return valor;
   }
 
   function handleFormSubmit(data: CreateProdutoInput & { imagemUrl?: string | null }) {
@@ -444,7 +448,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
             <ComboboxComAdicao
               label="Distribuidora / Fornecedor"
               value={field.value ?? ""}
-              onChange={(v) => { handleFornecedorChange(v); field.onChange(v); }}
+              onChange={(v) => { field.onChange(handleFornecedorChange(v)); }}
               options={distribuidoras}
               placeholder="Selecione a distribuidora..."
               addLabel="Nome da nova distribuidora"

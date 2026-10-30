@@ -1,3 +1,4 @@
+import { normalizarDistribuidora } from '@/shared/domain/distribuidoras.js'
 import { AggregateRoot } from '@/shared/domain/aggregate-root.base.js'
 import { Money } from '@/shared/domain/value-objects/money.vo.js'
 import { ValidationError } from '@/shared/errors/validation.error.js'
@@ -92,7 +93,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
         porte: data.porte,
         sabor: data.sabor,
         marca: data.marca,
-        fornecedor: data.fornecedor,
+        fornecedor: data.fornecedor === undefined ? undefined : normalizarDistribuidora(data.fornecedor),
         codigoBarras: data.codigoBarras ?? undefined,
         semCodigoBarras: data.semCodigoBarras ?? false,
         pesoEmbalagem: data.pesoEmbalagem,
@@ -192,7 +193,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     if (fields.porte !== undefined) this.props.porte = fields.porte
     if (fields.sabor !== undefined) this.props.sabor = fields.sabor
     if (fields.marca !== undefined) this.props.marca = fields.marca
-    if (fields.fornecedor !== undefined) this.props.fornecedor = fields.fornecedor
+    if (fields.fornecedor !== undefined) this.props.fornecedor = normalizarDistribuidora(fields.fornecedor)
     if (fields.codigoBarras !== undefined) this.props.codigoBarras = fields.codigoBarras ?? undefined
     if (fields.semCodigoBarras !== undefined) this.props.semCodigoBarras = fields.semCodigoBarras
     if (fields.pesoEmbalagem !== undefined) this.props.pesoEmbalagem = fields.pesoEmbalagem

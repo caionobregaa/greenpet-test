@@ -29,7 +29,7 @@ function item(id: string, nome: string, fornecedor: string): EstoqueItem {
 }
 
 vi.mocked(useEstoque).mockReturnValue({
-  data: { data: [item("3", "Simparic 40mg", "Central Pec"), item("1", "Bravecto 500mg", "Market"), item("2", "Apoquel 16mg", "Market")], meta: { page: 1, limit: 1000, total: 3 } },
+  data: { data: [item("3", "Simparic 40mg", "CENTRAL PEC"), item("1", "Bravecto 500mg", "MARKET"), item("2", "Apoquel 16mg", "MARKET")], meta: { page: 1, limit: 1000, total: 3 } },
   isLoading: false,
 } as unknown as ReturnType<typeof useEstoque>);
 
@@ -49,7 +49,7 @@ describe("EstoquePage", () => {
     render(<EstoquePage />);
     expect(screen.queryByRole("button", { name: /Limpar filtros/ })).not.toBeInTheDocument();
 
-    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Distribuidora" }), "Market");
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Distribuidora" }), "MARKET");
     expect(nomesNaTela()).toEqual(["Apoquel 16mg", "Bravecto 500mg"]);
 
     await userEvent.click(screen.getByRole("button", { name: /Limpar filtros/ }));
