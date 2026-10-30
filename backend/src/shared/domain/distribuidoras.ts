@@ -1,11 +1,12 @@
 // Lista oficial de distribuidoras e união das grafias repetidas (specs/produtos/spec-v5.md).
 // A mesma regra está em frontend/src/lib/utils/distribuidoras.ts e na migração
-// 20261030120000_unificar_distribuidoras: ao mudar aqui, mude lá também.
+// 20261030120000_unificar_distribuidoras: ao mudar aqui, mude lá também (e crie uma migração nova).
 
 const ALIASES: Record<string, string> = {
   prime: 'PRIME',
   zoocenter: 'ZOOCENTER',
   market: 'MARKET',
+  marketprime: 'MARKET',
   petz: 'PETZ',
   amazon: 'AMAZON',
   basso: 'BASSO PANCOTTE',

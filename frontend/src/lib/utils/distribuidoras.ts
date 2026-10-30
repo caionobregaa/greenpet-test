@@ -19,6 +19,7 @@ const ALIASES: Record<string, string> = {
   prime: "PRIME",
   zoocenter: "ZOOCENTER",
   market: "MARKET",
+  marketprime: "MARKET",
   petz: "PETZ",
   amazon: "AMAZON",
   basso: "BASSO PANCOTTE",

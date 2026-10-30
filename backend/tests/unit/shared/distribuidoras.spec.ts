@@ -7,7 +7,7 @@ import { Compra } from '@/modules/compras/domain/entities/compra.entity'
 describe('normalizarDistribuidora', () => {
   it.each([
     ['zoo center', 'ZOOCENTER'], ['Zoo Center', 'ZOOCENTER'], ['ZOOCENTER', 'ZOOCENTER'], ['Zoo-Center ', 'ZOOCENTER'],
-    ['Prime', 'PRIME'], ['Market', 'MARKET'], ['petz', 'PETZ'], ['Amazon', 'AMAZON'],
+    ['Prime', 'PRIME'], ['Market', 'MARKET'], ['Market/Prime', 'MARKET'], ['MARKET / PRIME', 'MARKET'], ['petz', 'PETZ'], ['Amazon', 'AMAZON'],
     ['dunort', 'DUNORTE'], ['Dunorte Distribuidora', 'DUNORTE'],
     ['Basso', 'BASSO PANCOTTE'], ['Basso Pancotte', 'BASSO PANCOTTE'], ['BASSO PACOTTE', 'BASSO PANCOTTE'], ['Basso & Pancotte', 'BASSO PANCOTTE'], ['Basso e Pancotte', 'BASSO PANCOTTE'],
     ['Agrominas', 'AGROMINAS'], ['Agro Minas', 'AGROMINAS'], ['Latidus', 'LATIDUS'],

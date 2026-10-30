@@ -18,7 +18,7 @@ describe("distribuidoras", () => {
   });
 
   it.each([
-    ["zoo center", "ZOOCENTER"], ["Zoo Center", "ZOOCENTER"], ["Dunorte Ltda", "DUNORTE"],
+    ["zoo center", "ZOOCENTER"], ["Zoo Center", "ZOOCENTER"], ["Market/Prime", "MARKET"], ["Dunorte Ltda", "DUNORTE"],
     ["BASSO PACOTTE", "BASSO PANCOTTE"], ["Basso & Pancotte", "BASSO PANCOTTE"], ["Central Pec", "CENTRAL PEC"],
   ])("%s → %s", (entrada, oficial) => {
     expect(normalizarDistribuidora(entrada)).toBe(oficial);
@@ -29,7 +29,7 @@ describe("distribuidoras", () => {
   });
 
   it("variações salvas no navegador não geram opção repetida", () => {
-    localStorage.setItem("beezpet:distribuidoras", JSON.stringify(["Amazon", "petz", "Zoo center", "Latidus", "Nova Dist", "nova dist"]));
+    localStorage.setItem("beezpet:distribuidoras", JSON.stringify(["Amazon", "Market/Prime", "petz", "Zoo center", "Latidus", "Nova Dist", "nova dist"]));
     expect(carregarDistribuidorasCustomizadas()).toEqual(["Nova Dist"]);
     expect(todasAsDistribuidoras()).toEqual([...DISTRIBUIDORAS_PADRAO, "Nova Dist"]);
   });
