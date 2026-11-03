@@ -169,7 +169,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     fornecedor: string
     codigoBarras: string | null
     semCodigoBarras: boolean
-    pesoEmbalagem: number
+    pesoEmbalagem: number | null
     unidadeEmbalagem: string
     valorCusto: number
     valorVenda: number
@@ -201,7 +201,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     if (fields.fornecedor !== undefined) this.props.fornecedor = normalizarDistribuidora(fields.fornecedor)
     if (fields.codigoBarras !== undefined) this.props.codigoBarras = fields.codigoBarras ?? undefined
     if (fields.semCodigoBarras !== undefined) this.props.semCodigoBarras = fields.semCodigoBarras
-    if (fields.pesoEmbalagem !== undefined) this.props.pesoEmbalagem = fields.pesoEmbalagem
+    if (fields.pesoEmbalagem !== undefined) this.props.pesoEmbalagem = fields.pesoEmbalagem ?? undefined
     if (fields.unidadeEmbalagem !== undefined) this.props.unidadeEmbalagem = fields.unidadeEmbalagem
     if (fields.margemCartao !== undefined) this.props.margemCartao = fields.margemCartao
     if (fields.margemImposto !== undefined) this.props.margemImposto = fields.margemImposto

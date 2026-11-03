@@ -97,7 +97,7 @@ export function registerVendasRoutes(app: FastifyInstance, prisma: PrismaClient)
   app.post('/api/v1/vendas/:id/pagamentos', async (req, rep) => {
     const { id } = req.params as { id: string }
     const body = RegistrarPagamentoSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const venda = await registrarPagamentoUC.execute({ vendaId: id, ...body.data })
     rep.status(201).send({ data: toResponse(venda, await nomes(id)) })
   })
@@ -152,7 +152,7 @@ export function registerVendasRoutes(app: FastifyInstance, prisma: PrismaClient)
 
   app.get('/api/v1/vendas', async (req, rep) => {
     const q = ListVendasQuerySchema.safeParse(req.query)
-    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.errors[0].message)
+    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.issues[0].message)
     const result = await listUC.execute(q.data)
 
     const ids = result.vendas.map((v) => v.id)
@@ -174,7 +174,7 @@ export function registerVendasRoutes(app: FastifyInstance, prisma: PrismaClient)
 
   app.post('/api/v1/vendas', async (req, rep) => {
     const body = CreateVendaSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const venda = await createUC.execute(body.data)
     // Itens vendidos com estoque insuficiente (specs/estoque/spec-v2.md)
     const avisosEstoque = await avisosEstoqueDaVenda(prisma, venda.id)
@@ -207,7 +207,7 @@ export function registerVendasRoutes(app: FastifyInstance, prisma: PrismaClient)
   app.patch('/api/v1/vendas/:id', async (req, rep) => {
     const { id } = req.params as { id: string }
     const body = UpdateVendaSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const venda = await updateUC.execute({ id, ...body.data })
     const row = await prisma.venda.findUnique({
       where: { id },

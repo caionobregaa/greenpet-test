@@ -117,7 +117,7 @@ export function registerEstoqueDiagnosticoRoutes(app: FastifyInstance, prisma: P
 
   app.post('/api/v1/estoque/correcao-retroativa', async (req, rep) => {
     const body = CorrecaoSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
 
     let itens: ItemCorrigido[] = []
     try {

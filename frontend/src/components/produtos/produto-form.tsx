@@ -137,6 +137,13 @@ function ComboboxComAdicao({
 
 // ── Form principal ───────────────────────────────────────────────────────────
 
+/** Campo numérico opcional: vazio vira null, que limpa o valor salvo (specs/produtos/spec-v8.md). */
+function numeroOpcional(valor: unknown): number | null {
+  if (valor === "" || valor === null || valor === undefined) return null;
+  const numero = Number(valor);
+  return Number.isNaN(numero) ? null : numero;
+}
+
 export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoFormProps) {
   const [estoqueInicial, setEstoqueInicial] = useState<number | "">("");
   const [estoqueValidade, setEstoqueValidade] = useState("");
@@ -233,7 +240,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
   }
 
   const nomeComposto = categoria === "Ração" && nomeRacao.trim()
-    ? composeNomeRacao({ nomeRacao, especie, faseDaVida, porte, sabor, pesoEmbalagem: pesoEmbalagemWatch, unidadeEmbalagem })
+    ? composeNomeRacao({ nomeRacao, especie, faseDaVida, porte, sabor, pesoEmbalagem: pesoEmbalagemWatch ?? undefined, unidadeEmbalagem })
     : null;
 
   useEffect(() => {
@@ -549,7 +556,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
                 type="number"
                 step={unidadeStep}
                 min="0"
-                {...register("pesoEmbalagem", { valueAsNumber: true })}
+                {...register("pesoEmbalagem", { setValueAs: numeroOpcional })}
                 placeholder={unidadePlaceholder}
                 disabled={!unidadeEmbalagem}
               />
@@ -570,7 +577,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
             type="number"
             min="0"
             step="1"
-            {...register("estoqueMinimo", { valueAsNumber: true })}
+            {...register("estoqueMinimo", { setValueAs: numeroOpcional })}
             placeholder="Ex: 10"
           />
           <p className="text-xs text-muted-foreground/70">

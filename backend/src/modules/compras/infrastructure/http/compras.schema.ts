@@ -4,7 +4,7 @@ import { MES_REGEX } from '@/shared/domain/mes.js'
 const FORMAS_PAG = ['Pix', 'Dinheiro', 'Cartão Crédito', 'Cartão Débito', 'Boleto'] as const
 
 const CompraItemSchema = z.object({
-  produtoId: z.string().uuid().nullish().transform((v) => v ?? undefined),
+  produtoId: z.string().guid().nullish().transform((v) => v ?? undefined),
   nome: z.string().min(1),
   qtd: z.number().int().positive(),
   pesoKg: z.number().min(0).optional().nullable().transform((v) => v ?? undefined),

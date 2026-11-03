@@ -15,7 +15,7 @@ export class AuthController {
   async login(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     const body = LoginBodySchema.safeParse(request.body)
     if (!body.success) {
-      throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+      throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     }
     const result = await this.loginUseCase.execute(body.data)
     reply.status(200).send({ data: result })
@@ -24,7 +24,7 @@ export class AuthController {
   async refresh(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     const body = RefreshBodySchema.safeParse(request.body)
     if (!body.success) {
-      throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+      throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     }
     const result = await this.refreshTokenUseCase.execute(body.data.refreshToken)
     reply.status(200).send({ data: result })

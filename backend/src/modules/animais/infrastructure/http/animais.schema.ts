@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const CreateAnimalSchema = z.object({
   nome: z.string().min(1),
-  clienteId: z.string().uuid(),
+  clienteId: z.string().guid(),
   especie: z.enum(['Cão', 'Gato']),
   raca: z.string().optional(),
   sexo: z.enum(['M', 'F', 'Indefinido']).default('Indefinido'),
@@ -11,10 +11,15 @@ export const CreateAnimalSchema = z.object({
   obs: z.string().optional(),
 })
 
-export const UpdateAnimalSchema = CreateAnimalSchema.omit({ clienteId: true }).partial()
+// Edição parcial sem valores padrão: no zod 4 o padrão também vale dentro de .partial(),
+// e um campo ausente na edição seria sobrescrito pelo padrão.
+export const UpdateAnimalSchema = CreateAnimalSchema.omit({ clienteId: true }).extend({
+  sexo: z.enum(['M', 'F', 'Indefinido']),
+  peso: z.number().min(0),
+}).partial()
 
 export const ListAnimaisQuerySchema = z.object({
-  clienteId: z.string().uuid().optional(),
+  clienteId: z.string().guid().optional(),
   especie: z.string().optional(),
   sexo: z.string().optional(),
   q: z.string().optional(),

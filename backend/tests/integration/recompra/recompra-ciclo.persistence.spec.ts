@@ -13,7 +13,7 @@ const USUARIO = 'caio@beezpet.com'
 async function buildApp() {
   const app = Fastify()
   app.setErrorHandler(errorHandler)
-  app.decorateRequest('user', null)
+  app.decorateRequest('user', null as unknown as string)
   app.addHook('onRequest', async (req) => {
     ;(req as unknown as { user: { email: string } }).user = { email: USUARIO }
   })

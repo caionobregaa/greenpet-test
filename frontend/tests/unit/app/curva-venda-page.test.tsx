@@ -24,6 +24,8 @@ describe("CurvaVendaPage", () => {
             percentualReceita: 60,
             percentualAcumulado: 60,
             curva: "A",
+            melhorMargem: 32.5,
+            melhorMargemOrigem: "compra",
           },
           {
             produtoId: "p2",
@@ -34,6 +36,8 @@ describe("CurvaVendaPage", () => {
             percentualReceita: 20,
             percentualAcumulado: 80,
             curva: "A",
+            melhorMargem: 25,
+            melhorMargemOrigem: "custoCadastrado",
           },
         ],
         meta: { page: 1, limit: 20, total: 2, resumo: { A: 2, B: 0, C: 0 } },

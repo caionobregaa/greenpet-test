@@ -12,7 +12,7 @@ export const CreateProdutoSchema = z.object({
   fornecedor: z.string().optional().or(z.literal("")),
   codigoBarras: z.string().optional().or(z.literal("")).nullable(),
   semCodigoBarras: z.boolean().optional(),
-  pesoEmbalagem: z.number().min(0).optional(),
+  pesoEmbalagem: z.number().min(0).optional().nullable(),
   unidadeEmbalagem: z.string().optional().or(z.literal("")),
   valorCusto: z.number().min(0, "Valor de custo inválido"),
   valorVenda: z.number().min(0.01, "Valor de venda deve ser maior que zero"),

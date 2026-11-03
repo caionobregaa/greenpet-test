@@ -19,6 +19,22 @@ describe('Produto — persistência da última alteração', () => {
     await prismaTest.$disconnect()
   })
 
+  it('aceita peso e estoque mínimo nulos e limpar apaga os valores salvos (spec-v8)', async () => {
+    const repo = new PrismaProdutoRepository(prismaTest)
+    const vazio = await new CreateProdutoUseCase(repo).execute({
+      nome: 'Sem Peso', categoria: 'Petisco', valorVenda: 10, pesoEmbalagem: null, estoqueMinimo: null,
+    })
+    expect((await repo.findById(vazio.id))?.pesoEmbalagem).toBeUndefined()
+
+    const criado = await new CreateProdutoUseCase(repo).execute({
+      nome: 'Com Peso', categoria: 'Petisco', valorVenda: 10, pesoEmbalagem: 15, estoqueMinimo: 3,
+    })
+    await new UpdateProdutoUseCase(repo).execute({ id: criado.id, pesoEmbalagem: null, estoqueMinimo: null })
+    const salvo = await repo.findById(criado.id)
+    expect(salvo?.pesoEmbalagem).toBeUndefined()
+    expect(salvo?.estoqueMinimo).toBeUndefined()
+  })
+
   it('mantém os valores da última edição após múltiplas alterações em sequência', async () => {
     const repo = new PrismaProdutoRepository(prismaTest)
     const createUC = new CreateProdutoUseCase(repo)

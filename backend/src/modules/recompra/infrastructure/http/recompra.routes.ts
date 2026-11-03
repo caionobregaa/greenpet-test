@@ -8,23 +8,23 @@ import { UnprocessableError } from '@/shared/errors/unprocessable.error.js'
 import { isSumido, validarMotivosSumido } from '../../domain/services/recompra-alert.service.js'
 
 const QuerySchema = z.object({
-  clienteId: z.string().uuid().optional(),
+  clienteId: z.string().guid().optional(),
   urgencia: z.enum(['vencido', 'urgente', 'proximo', 'ok']).optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 })
 
 const DismissSchema = z.object({
-  produtoId: z.string().uuid(),
-  clienteId: z.string().uuid(),
+  produtoId: z.string().guid(),
+  clienteId: z.string().guid(),
   animalId: z.string().optional().default(''),
   reason: z.enum(['ok', 'cancelado']),
 })
 
 const ManualSchema = z.object({
-  clienteId: z.string().uuid(),
+  clienteId: z.string().guid(),
   animalId: z.string().optional().default(''),
-  produtoId: z.string().uuid(),
+  produtoId: z.string().guid(),
   ultimaCompra: z.string().datetime().optional().nullable(),
   previsaoData: z.string().datetime().optional().nullable(),
   diasRecompra: z.number().int().min(1).optional().nullable(),
@@ -32,8 +32,8 @@ const ManualSchema = z.object({
 
 // Chave de um ciclo de recompra (specs/recompra/spec-v2.md).
 const CicloSchema = z.object({
-  clienteId: z.string().uuid(),
-  produtoId: z.string().uuid(),
+  clienteId: z.string().guid(),
+  produtoId: z.string().guid(),
   animalId: z.string().optional().default(''),
   ultimaCompra: z.string().datetime().transform((v) => new Date(v)),
 })
@@ -49,7 +49,7 @@ export function registerRecompraRoutes(app: FastifyInstance, prisma: PrismaClien
 
   app.get('/api/v1/recompra', async (req, rep) => {
     const q = QuerySchema.safeParse(req.query)
-    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.errors[0].message)
+    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.issues[0].message)
     const result = await listUC.execute(q.data)
     rep.send({
       data: result.alertas,
@@ -59,7 +59,7 @@ export function registerRecompraRoutes(app: FastifyInstance, prisma: PrismaClien
 
   app.post('/api/v1/recompra/dismiss', async (req, rep) => {
     const body = DismissSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const { produtoId, clienteId, animalId, reason } = body.data
     await prisma.recompraDismissal.upsert({
       where: { produtoId_clienteId_animalId: { produtoId, clienteId, animalId } },
@@ -71,7 +71,7 @@ export function registerRecompraRoutes(app: FastifyInstance, prisma: PrismaClien
 
   app.post('/api/v1/recompra/contato', async (req, rep) => {
     const body = CicloSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const { email } = req.user as { email: string }
     await repo.marcarMensagemEnviada(body.data, email)
     rep.status(204).send()
@@ -79,7 +79,7 @@ export function registerRecompraRoutes(app: FastifyInstance, prisma: PrismaClien
 
   app.delete('/api/v1/recompra/contato', async (req, rep) => {
     const body = CicloSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     await repo.desmarcarMensagemEnviada(body.data)
     rep.status(204).send()
   })
@@ -95,7 +95,7 @@ export function registerRecompraRoutes(app: FastifyInstance, prisma: PrismaClien
 
   app.put('/api/v1/recompra/sumidos/motivos', async (req, rep) => {
     const body = MotivosSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const { motivos, outroTexto, ...ciclo } = body.data
     const erro = validarMotivosSumido(motivos, outroTexto)
     if (erro) throw new ValidationError('VALIDATION_ERROR', erro)
@@ -122,7 +122,7 @@ export function registerRecompraRoutes(app: FastifyInstance, prisma: PrismaClien
 
   app.post('/api/v1/recompra/manual', async (req, rep) => {
     const body = ManualSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const { clienteId, animalId, produtoId, ultimaCompra, previsaoData, diasRecompra } = body.data
     if (!previsaoData && !diasRecompra) {
       throw new ValidationError('VALIDATION_ERROR', 'Informe a data de previsão ou o número de dias para recompra')

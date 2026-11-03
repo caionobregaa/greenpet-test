@@ -14,7 +14,7 @@ export interface CreateProdutoInput {
   fornecedor?: string
   codigoBarras?: string | null
   semCodigoBarras?: boolean
-  pesoEmbalagem?: number
+  pesoEmbalagem?: number | null
   unidadeEmbalagem?: string
   valorCusto?: number
   valorVenda: number
@@ -23,7 +23,7 @@ export interface CreateProdutoInput {
   margemOperacao?: number
   margemLucro?: number
   diasRecompra?: number
-  estoqueMinimo?: number
+  estoqueMinimo?: number | null
   descricao?: string
   imagemUrl?: string | null
   ocultarCatalogo?: boolean
@@ -38,7 +38,13 @@ export class CreateProdutoUseCase {
 
     // SKU é sempre gerado pelo backend a partir da categoria — nunca vem do input do usuário.
     const sku = await this.repo.generateSkuForCategoria(input.categoria)
-    const produto = Produto.create({ ...input, sku, imagemUrl: input.imagemUrl ?? undefined })
+    const produto = Produto.create({
+      ...input,
+      sku,
+      imagemUrl: input.imagemUrl ?? undefined,
+      pesoEmbalagem: input.pesoEmbalagem ?? undefined,
+      estoqueMinimo: input.estoqueMinimo ?? undefined,
+    })
     await this.repo.save(produto)
     return produto
   }

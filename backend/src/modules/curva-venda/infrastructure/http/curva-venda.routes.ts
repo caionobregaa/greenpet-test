@@ -21,7 +21,7 @@ export function registerCurvaVendaRoutes(app: FastifyInstance, prisma: PrismaCli
 
   app.get('/api/v1/curva-venda', async (req, rep) => {
     const q = QuerySchema.safeParse(req.query)
-    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.errors[0].message)
+    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.issues[0].message)
 
     const result = await getUC.execute({
       dataInicio: q.data.dataInicio ? new Date(q.data.dataInicio) : undefined,

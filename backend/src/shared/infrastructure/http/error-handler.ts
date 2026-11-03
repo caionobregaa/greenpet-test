@@ -69,6 +69,15 @@ export function errorHandler(
     return
   }
 
+  // Outros erros do próprio Fastify com status 4xx (ex.: 415 content-type não suportado,
+  // 413 corpo grande demais): devolve o status certo, sem expor detalhes internos.
+  const status = (error as { statusCode?: number }).statusCode
+  const fastifyCode = (error as { code?: string }).code
+  if (typeof status === 'number' && status >= 400 && status < 500 && fastifyCode?.startsWith('FST_')) {
+    reply.status(status).send({ error: { code: 'REQUISICAO_INVALIDA', message: 'Requisição inválida' } })
+    return
+  }
+
   console.error(error)
   reply.status(500).send({
     error: {

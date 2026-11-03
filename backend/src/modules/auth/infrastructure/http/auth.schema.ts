@@ -6,7 +6,7 @@ export const LoginBodySchema = z.object({
 })
 
 export const RefreshBodySchema = z.object({
-  refreshToken: z.string().uuid(),
+  refreshToken: z.string().guid(),
 })
 
 export type LoginBody = z.infer<typeof LoginBodySchema>

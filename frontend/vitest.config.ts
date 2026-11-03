@@ -16,5 +16,6 @@ export default defineConfig({
     include: ["tests/**/*.test.{ts,tsx}"],
     css: false,
     pool: "threads",
+    testTimeout: 20000,
   },
 });

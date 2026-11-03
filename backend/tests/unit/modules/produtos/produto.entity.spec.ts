@@ -90,6 +90,22 @@ describe('Produto entity', () => {
     })
   })
 
+  describe('peso e estoque mínimo opcionais (spec-v8)', () => {
+    it('null via update apaga os valores', () => {
+      const p = Produto.create({ nome: 'A', sku: 'PET-0001', categoria: 'Petisco', valorVenda: 10, pesoEmbalagem: 15, estoqueMinimo: 3 })
+      p.update({ pesoEmbalagem: null, estoqueMinimo: null })
+      expect(p.pesoEmbalagem).toBeUndefined()
+      expect(p.estoqueMinimo).toBeUndefined()
+    })
+
+    it('update sem os campos mantém os valores', () => {
+      const p = Produto.create({ nome: 'A', sku: 'PET-0001', categoria: 'Petisco', valorVenda: 10, pesoEmbalagem: 15, estoqueMinimo: 3 })
+      p.update({ valorVenda: 20 })
+      expect(p.pesoEmbalagem).toBe(15)
+      expect(p.estoqueMinimo).toBe(3)
+    })
+  })
+
   describe('codigoBarras / semCodigoBarras', () => {
     it('semCodigoBarras vem false por padrão quando não informado', () => {
       const p = Produto.create({ nome: 'Ração', sku: 'RAC-0001', categoria: 'Ração', valorVenda: 10 })

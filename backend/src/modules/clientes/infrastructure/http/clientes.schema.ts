@@ -19,7 +19,11 @@ export const CreateClienteSchema = z.object({
   obs: z.string().optional(),
 })
 
-export const UpdateClienteSchema = CreateClienteSchema.partial()
+// Edição parcial sem valores padrão: no zod 4 o padrão também vale dentro de .partial(),
+// e um campo ausente na edição seria sobrescrito pelo padrão.
+export const UpdateClienteSchema = CreateClienteSchema.extend({
+  cidade: z.string(),
+}).partial()
 
 export const ListClientesQuerySchema = z.object({
   q: z.string().optional(),

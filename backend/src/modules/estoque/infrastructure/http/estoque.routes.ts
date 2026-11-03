@@ -19,7 +19,7 @@ export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient
 
   app.get('/api/v1/estoque', async (req, rep) => {
     const q = ListEstoqueQuerySchema.safeParse(req.query)
-    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.errors[0].message)
+    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.issues[0].message)
 
     const where = q.data.produtoId ? { produtoId: q.data.produtoId } : {}
     const [rows, total] = await prisma.$transaction([
@@ -55,7 +55,7 @@ export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient
 
   app.post('/api/v1/estoque', async (req, rep) => {
     const body = CreateEstoqueItemSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
 
     const produto = await prisma.produto.findUnique({ where: { id: body.data.produtoId } })
     if (!produto) throw new NotFoundError('NOT_FOUND', 'Produto não encontrado')
@@ -81,7 +81,7 @@ export function registerEstoqueRoutes(app: FastifyInstance, prisma: PrismaClient
   app.put('/api/v1/estoque/:id', async (req, rep) => {
     const { id } = req.params as { id: string }
     const body = UpdateEstoqueItemSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
 
     const existing = await prisma.estoqueItem.findUnique({ where: { id } })
     if (!existing) throw new NotFoundError('NOT_FOUND', 'Item de estoque não encontrado')

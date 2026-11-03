@@ -60,7 +60,7 @@ export function registerProdutosRoutes(app: FastifyInstance, prisma: PrismaClien
 
   app.get('/api/v1/produtos', async (req, rep) => {
     const q = ListProdutosQuerySchema.safeParse(req.query)
-    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.errors[0].message)
+    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.issues[0].message)
     const result = await listUC.execute(q.data)
     const ids = result.produtos.map((p) => p.id)
     const estoqueGroups = ids.length > 0
@@ -79,7 +79,7 @@ export function registerProdutosRoutes(app: FastifyInstance, prisma: PrismaClien
 
   app.post('/api/v1/produtos', async (req, rep) => {
     const body = CreateProdutoSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const produto = await createUC.execute(body.data)
     rep.status(201).send({ data: toResponse(produto) })
   })
@@ -93,7 +93,7 @@ export function registerProdutosRoutes(app: FastifyInstance, prisma: PrismaClien
   app.put('/api/v1/produtos/:id', async (req, rep) => {
     const { id } = req.params as { id: string }
     const body = UpdateProdutoSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const produto = await updateUC.execute({ id, ...body.data })
     rep.send({ data: toResponse(produto) })
   })

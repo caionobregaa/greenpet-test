@@ -37,14 +37,14 @@ export class AnimaisController {
 
   async create(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     const body = CreateAnimalSchema.safeParse(request.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const animal = await this.createUseCase.execute(body.data)
     reply.status(201).send({ data: toResponse(animal) })
   }
 
   async list(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     const query = ListAnimaisQuerySchema.safeParse(request.query)
-    if (!query.success) throw new ValidationError('VALIDATION_ERROR', query.error.errors[0].message)
+    if (!query.success) throw new ValidationError('VALIDATION_ERROR', query.error.issues[0].message)
     const result = await this.listUseCase.execute({ ...query.data })
     reply.status(200).send({
       data: result.animais.map((a) => toResponse(a, result.clienteNomes[a.id])),
@@ -59,7 +59,7 @@ export class AnimaisController {
 
   async update(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void> {
     const body = UpdateAnimalSchema.safeParse(request.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const animal = await this.updateUseCase.execute({ id: request.params.id, ...body.data })
     reply.status(200).send({ data: toResponse(animal) })
   }

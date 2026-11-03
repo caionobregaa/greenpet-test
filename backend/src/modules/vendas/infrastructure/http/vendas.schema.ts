@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 const VendaItemSchema = z.object({
-  produtoId: z.string().uuid().nullable().optional().transform((v) => v ?? undefined),
+  produtoId: z.string().guid().nullable().optional().transform((v) => v ?? undefined),
   nome: z.string().min(1),
   qtd: z.number().int().positive(),
   valorUnitario: z.number().min(0),
@@ -13,8 +13,8 @@ const VendaItemSchema = z.object({
 })
 
 export const CreateVendaSchema = z.object({
-  clienteId: z.string().uuid(),
-  animalId: z.string().uuid().nullable().optional().transform((v) => v ?? undefined),
+  clienteId: z.string().guid(),
+  animalId: z.string().guid().nullable().optional().transform((v) => v ?? undefined),
   data: z.string().date().optional().transform((v) => v ? new Date(v + 'T12:00:00.000Z') : undefined),
   formaPag: z.enum(['Pix', 'Dinheiro', 'Cartão Crédito', 'Cartão Débito', 'Boleto']),
   taxaCartao: z.number().min(0).max(100).optional().default(0),
@@ -27,7 +27,7 @@ export const CreateVendaSchema = z.object({
 })
 
 export const UpdateVendaSchema = z.object({
-  animalId: z.string().uuid().nullable().optional().transform((v) => v ?? undefined),
+  animalId: z.string().guid().nullable().optional().transform((v) => v ?? undefined),
   data: z.string().date().optional().transform((v) => v ? new Date(v + 'T12:00:00.000Z') : undefined),
   formaPag: z.enum(['Pix', 'Dinheiro', 'Cartão Crédito', 'Cartão Débito', 'Boleto']).optional(),
   taxaCartao: z.number().min(0).max(100).optional(),
@@ -45,8 +45,8 @@ export const RegistrarPagamentoSchema = z.object({
 })
 
 export const ListVendasQuerySchema = z.object({
-  clienteId: z.string().uuid().optional(),
-  animalId: z.string().uuid().optional(),
+  clienteId: z.string().guid().optional(),
+  animalId: z.string().guid().optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 })

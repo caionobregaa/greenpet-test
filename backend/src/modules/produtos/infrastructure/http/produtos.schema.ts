@@ -12,7 +12,7 @@ export const CreateProdutoSchema = z.object({
   fornecedor: z.string().optional(),
   codigoBarras: z.string().optional().nullable(),
   semCodigoBarras: z.boolean().optional(),
-  pesoEmbalagem: z.number().positive().optional(),
+  pesoEmbalagem: z.number().positive().optional().nullable(),
   unidadeEmbalagem: z.string().optional(),
   valorCusto: z.number().min(0).default(0),
   valorVenda: z.number().min(0),
@@ -21,13 +21,21 @@ export const CreateProdutoSchema = z.object({
   margemOperacao: z.number().min(0).default(0),
   margemLucro: z.number().min(0).default(0),
   diasRecompra: z.number().int().positive().optional(),
-  estoqueMinimo: z.number().int().min(0).optional(),
+  estoqueMinimo: z.number().int().min(0).optional().nullable(),
   descricao: z.string().optional(),
   imagemUrl: z.string().optional().nullable(),
   ocultarCatalogo: z.boolean().optional(),
 })
 
-export const UpdateProdutoSchema = CreateProdutoSchema.partial()
+// Edição parcial sem valores padrão: no zod 4 o padrão também vale dentro de .partial(),
+// e um campo ausente na edição seria sobrescrito pelo padrão.
+export const UpdateProdutoSchema = CreateProdutoSchema.extend({
+  valorCusto: z.number().min(0),
+  margemCartao: z.number().min(0),
+  margemImposto: z.number().min(0),
+  margemOperacao: z.number().min(0),
+  margemLucro: z.number().min(0),
+}).partial()
 
 export const ListProdutosQuerySchema = z.object({
   q: z.string().optional(),

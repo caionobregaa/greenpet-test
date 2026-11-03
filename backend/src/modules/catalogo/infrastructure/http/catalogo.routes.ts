@@ -19,7 +19,7 @@ export function registerCatalogoRoutes(app: FastifyInstance, prisma: PrismaClien
     const { id } = req.params as { id: string }
     const imagem = await imagemUC.execute(id)
     if (imagem.tipo === 'redirecionar') {
-      rep.redirect(302, imagem.url)
+      rep.redirect(imagem.url, 302)
       return
     }
     rep

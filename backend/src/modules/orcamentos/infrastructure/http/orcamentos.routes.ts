@@ -61,7 +61,7 @@ export function registerOrcamentosRoutes(app: FastifyInstance, prisma: PrismaCli
 
   app.get('/api/v1/orcamentos', async (req, rep) => {
     const q = ListOrcamentosQuerySchema.safeParse(req.query)
-    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.errors[0].message)
+    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.issues[0].message)
     const result = await listUC.execute(q.data)
 
     // Fetch cliente/animal data in one batch query
@@ -84,7 +84,7 @@ export function registerOrcamentosRoutes(app: FastifyInstance, prisma: PrismaCli
 
   app.post('/api/v1/orcamentos', async (req, rep) => {
     const body = CreateOrcamentoSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const o = await createUC.execute(body.data)
     rep.status(201).send({ data: toResponse(o) })
   })
@@ -105,7 +105,7 @@ export function registerOrcamentosRoutes(app: FastifyInstance, prisma: PrismaCli
   app.patch('/api/v1/orcamentos/:id/status', async (req, rep) => {
     const { id } = req.params as { id: string }
     const body = UpdateOrcamentoStatusSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const o = await statusUC.execute({ id, acao: body.data.acao, motivo: body.data.motivo })
     rep.send({ data: toResponse(o) })
   })
@@ -113,7 +113,7 @@ export function registerOrcamentosRoutes(app: FastifyInstance, prisma: PrismaCli
   app.post('/api/v1/orcamentos/:id/converter', async (req, rep) => {
     const { id } = req.params as { id: string }
     const body = ConverterOrcamentoSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const venda = await converterUC.execute({ id, formaPag: body.data.formaPag, taxaCartao: body.data.taxaCartao, taxaEntrega: body.data.taxaEntrega, desconto: body.data.desconto, data: body.data.data, valorRecebido: body.data.valorRecebido })
     // Itens vendidos com estoque insuficiente (estoque/spec-v2)
     rep.status(201).send({ data: { vendaId: venda.id, avisosEstoque: await avisosEstoqueDaVenda(prisma, venda.id) } })
@@ -122,7 +122,7 @@ export function registerOrcamentosRoutes(app: FastifyInstance, prisma: PrismaCli
   app.put('/api/v1/orcamentos/:id', async (req, rep) => {
     const { id } = req.params as { id: string }
     const body = UpdateOrcamentoSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const o = await updateUC.execute({ id, ...body.data })
     rep.send({ data: toResponse(o) })
   })

@@ -65,14 +65,14 @@ export function registerComprasRoutes(app: FastifyInstance, prisma: PrismaClient
 
   app.get('/api/v1/compras', async (req, rep) => {
     const q = ListComprasQuerySchema.safeParse(req.query)
-    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.errors[0].message)
+    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.issues[0].message)
     const result = await listUC.execute(q.data)
     rep.send({ data: result.compras.map(toResponse), meta: { page: q.data.page, limit: q.data.limit, total: result.total, totalValor: result.totalValor } })
   })
 
   app.post('/api/v1/compras', async (req, rep) => {
     const body = CreateCompraSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const compra = await createUC.execute(body.data)
     rep.status(201).send({ data: toResponse(compra) })
   })
@@ -111,7 +111,7 @@ export function registerComprasRoutes(app: FastifyInstance, prisma: PrismaClient
   app.put('/api/v1/compras/:id', async (req, rep) => {
     const { id } = req.params as { id: string }
     const body = UpdateCompraSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const compra = await updateUC.execute({ id, ...body.data })
     rep.send({ data: toResponse(compra) })
   })
@@ -119,7 +119,7 @@ export function registerComprasRoutes(app: FastifyInstance, prisma: PrismaClient
   app.patch('/api/v1/compras/:id/status', async (req, rep) => {
     const { id } = req.params as { id: string }
     const body = UpdateCompraStatusSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
     const compra = await statusUC.execute({ id, acao: body.data.acao })
     rep.send({ data: toResponse(compra) })
   })

@@ -23,7 +23,7 @@ export function registerDashboardRoutes(app: FastifyInstance, prisma: PrismaClie
 
   app.get('/api/v1/dashboard', async (req, rep) => {
     const q = QuerySchema.safeParse(req.query)
-    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.errors[0].message)
+    if (!q.success) throw new ValidationError('VALIDATION_ERROR', q.error.issues[0].message)
     const overview = await useCase.execute({
       inicio: new Date(q.data.inicio),
       fim: new Date(q.data.fim + 'T23:59:59.999Z'),

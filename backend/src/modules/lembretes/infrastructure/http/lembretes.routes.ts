@@ -18,7 +18,7 @@ export function registerLembretesRoutes(app: FastifyInstance, prisma: PrismaClie
 
   app.post('/api/v1/lembretes', async (req, rep) => {
     const body = CreateSchema.safeParse(req.body)
-    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.errors[0].message)
+    if (!body.success) throw new ValidationError('VALIDATION_ERROR', body.error.issues[0].message)
 
     const { email } = req.user as { email: string }
 

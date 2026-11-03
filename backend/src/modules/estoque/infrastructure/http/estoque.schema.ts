@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const CreateEstoqueItemSchema = z.object({
-  produtoId: z.string().uuid(),
+  produtoId: z.string().guid(),
   quantidade: z.coerce.number().int().positive(),
   validade: z.string().date().optional().transform((v) => v ? new Date(v) : undefined),
   lote: z.string().optional(),
@@ -18,7 +18,7 @@ export const UpdateEstoqueItemSchema = z.object({
 })
 
 export const ListEstoqueQuerySchema = z.object({
-  produtoId: z.string().uuid().optional(),
+  produtoId: z.string().guid().optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(1000).default(100),
 })
