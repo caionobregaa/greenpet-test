@@ -24,6 +24,7 @@ export interface Produto {
   estoqueMinimo: number | null;
   descricao: string | null;
   imagemUrl: string | null;
+  ocultarCatalogo: boolean;
   estoque: number;
   deletedAt: string | null;
   createdAt: string;

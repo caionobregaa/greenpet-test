@@ -1,0 +1,197 @@
+@import "tailwindcss";
+
+/* BEEZ PET: identidade em specs/identidade-visual/spec-v1.md */
+@theme inline {
+  --font-sans: var(--font-sora);
+  --font-display: var(--font-fraunces);
+
+  --color-vinho: #641d3f;
+  --color-vinho-escuro: #3f1027;
+  --color-vinho-claro: #7a2a50;
+  --color-manteiga: #ffed8e;
+  --color-manteiga-claro: #fff6c4;
+  --color-rosa: #ffc9d0;
+  --color-rosa-claro: #ffe3e7;
+  --color-creme: #fffefd;
+  --color-papel: #fff8ef;
+  --color-tinta: #2b0f1d;
+  --color-tinta-suave: #6d4d5d;
+  --color-kraft: #c99a63;
+  --color-whatsapp: #25d366;
+  --color-whatsapp-escuro: #128c4b;
+  --color-erro: #b3261e;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5.5rem;
+}
+
+body {
+  background: var(--color-papel);
+  color: var(--color-tinta);
+  font-family: var(--font-sora), sans-serif;
+}
+
+.titulo {
+  font-family: var(--font-fraunces), serif;
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  letter-spacing: -0.02em;
+}
+
+/* Granulado de papel, sobre a arte para ela não destacar do fundo vinho */
+.grao::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.09;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Fita adesiva rosa das caixas do mascote */
+.fita {
+  background: var(--color-rosa);
+  background-image: repeating-linear-gradient(
+    100deg,
+    transparent 0 14px,
+    rgb(255 255 255 / 0.18) 14px 15px
+  );
+}
+
+.etiqueta-fita {
+  display: inline-block;
+  background: var(--color-rosa);
+  color: var(--color-vinho);
+  padding: 0.2rem 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: rotate(-1.5deg);
+  clip-path: polygon(0 0, 100% 0, 98.5% 50%, 100% 100%, 0 100%, 1.5% 50%);
+}
+
+/* Cartão como etiqueta de caixa: borda firme e sombra dura */
+.adesivo {
+  border: 2px solid var(--color-vinho);
+  box-shadow: 4px 4px 0 var(--color-vinho);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+@media (hover: hover) {
+  .adesivo:hover {
+    transform: translate(-2px, -2px) rotate(-0.4deg);
+    box-shadow: 7px 7px 0 var(--color-vinho);
+  }
+}
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  font-weight: 700;
+  transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+.botao:active {
+  transform: translateY(2px);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-vinho);
+  outline-offset: 2px;
+}
+
+/* Campos de texto já marcam o foco na própria borda */
+input:not([type="radio"]):focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
+
+.sobre-vinho :focus-visible {
+  outline-color: var(--color-manteiga);
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes caixa-cai {
+  from {
+    opacity: 0;
+    transform: translateY(-28px) rotate(-3deg);
+  }
+  70% {
+    transform: translateY(4px) rotate(0.5deg);
+  }
+}
+
+@keyframes fita-corre {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes gaveta {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes gaveta-lado {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes aparece {
+  from {
+    opacity: 0;
+  }
+}
+
+.entrar {
+  animation: entrar 620ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.caixa-cai {
+  animation: caixa-cai 780ms cubic-bezier(0.2, 0.8, 0.2, 1) 180ms both;
+}
+
+.fita-corre {
+  animation: fita-corre 34s linear infinite;
+}
+
+.gaveta {
+  animation: gaveta 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (min-width: 640px) {
+  .gaveta {
+    animation-name: gaveta-lado;
+  }
+}
+
+.aparece {
+  animation: aparece 200ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

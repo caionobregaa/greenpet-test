@@ -157,6 +157,11 @@ export default function ProdutosPage() {
                           <p className="font-medium">{p.nome}</p>
                           <p className="text-[11px] font-mono text-muted-foreground/70">{p.sku}</p>
                           {p.marca && <p className="text-xs text-muted-foreground">{p.marca}</p>}
+                          {p.ocultarCatalogo && (
+                            <span className="mt-1 inline-block rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                              Oculto no catálogo
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>

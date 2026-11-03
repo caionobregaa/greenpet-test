@@ -197,6 +197,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
       margemLucro:       produto?.margemLucro ?? 0,
       descricao:         produto?.descricao ?? "",
       imagemUrl:         produto?.imagemUrl ?? null,
+      ocultarCatalogo:   produto?.ocultarCatalogo ?? false,
     },
   });
 
@@ -502,6 +503,18 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
               Sem código de barras
             </label>
           </div>
+        </div>
+
+        {/* Catálogo público (specs/produtos/spec-v7.md) */}
+        <div className="col-span-1 sm:col-span-2">
+          <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+            <input
+              type="checkbox"
+              {...register("ocultarCatalogo")}
+              className="h-4 w-4 rounded border-input"
+            />
+            Ocultar produto no catálogo oficial
+          </label>
         </div>
 
         {/* Quantidade na embalagem: seletor de unidade + campo de valor */}

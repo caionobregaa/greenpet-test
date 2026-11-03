@@ -36,8 +36,7 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   <p><span class="badge">online</span> &nbsp; Versão 1.0.0</p>
   <p>A API está funcionando. Use um cliente REST (Postman, Insomnia) para interagir.</p>
   <h3>Autenticação</h3>
-  <p>Faça login em <code>POST /api/v1/auth/login</code> com:</p>
-  <pre>{ "email": "admin@beezpet.com", "password": "admin123" }</pre>
+  <p>Faça login em <code>POST /api/v1/auth/login</code>.</p>
   <h3>Rotas disponíveis</h3>
   <ul>
     <li><code>POST /api/v1/auth/login</code></li>

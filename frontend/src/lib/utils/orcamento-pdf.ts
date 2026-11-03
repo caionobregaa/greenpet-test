@@ -31,7 +31,7 @@ const EMPRESA = {
   bairro:   "Praça 14 de Janeiro, Manaus-AM",
   cep:      "CEP 69020-141",
   email:    "greenpet.am@gmail.com",
-  telefone: "(92) 98127-7831",
+  telefone: "(92) 98470-3686",
   pix:      "(92) 98127-7831",
 };
 

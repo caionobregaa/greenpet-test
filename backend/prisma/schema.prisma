@@ -113,6 +113,7 @@ model Produto {
   estoqueMinimo  Int?
   descricao      String?
   imagemUrl      String?
+  ocultarCatalogo Boolean      @default(false)
   deletedAt      DateTime?
   compraItens    CompraItem[]
   vendaItens     VendaItem[]

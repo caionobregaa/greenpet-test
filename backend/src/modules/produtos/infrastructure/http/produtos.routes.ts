@@ -43,6 +43,7 @@ function toResponse(p: Produto, estoque = 0) {
     estoqueMinimo: p.estoqueMinimo ?? null,
     descricao: p.descricao,
     imagemUrl: p.imagemUrl ?? null,
+    ocultarCatalogo: p.ocultarCatalogo,
     estoque,
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,

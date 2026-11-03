@@ -61,10 +61,37 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
+  test-site:
+    name: Site — Type Check & Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate route types
+        run: npx next typegen
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Tests with coverage
+        run: npm run test:coverage
+
   # ── Build & Push ───────────────────────────────────────────────────────────
   build-and-push:
     name: Build & Push Images
-    needs: [test-backend, lint-frontend]
+    needs: [test-backend, lint-frontend, test-site]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:

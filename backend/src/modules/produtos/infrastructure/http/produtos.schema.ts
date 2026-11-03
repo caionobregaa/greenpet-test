@@ -24,6 +24,7 @@ export const CreateProdutoSchema = z.object({
   estoqueMinimo: z.number().int().min(0).optional(),
   descricao: z.string().optional(),
   imagemUrl: z.string().optional().nullable(),
+  ocultarCatalogo: z.boolean().optional(),
 })
 
 export const UpdateProdutoSchema = CreateProdutoSchema.partial()

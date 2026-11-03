@@ -26,6 +26,7 @@ export interface CreateProdutoInput {
   estoqueMinimo?: number
   descricao?: string
   imagemUrl?: string | null
+  ocultarCatalogo?: boolean
 }
 
 export class CreateProdutoUseCase {

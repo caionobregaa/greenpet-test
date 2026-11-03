@@ -110,6 +110,7 @@ export class PrismaProdutoRepository implements IProdutoRepository {
       estoqueMinimo: produto.estoqueMinimo ?? null,
       descricao: produto.descricao ?? null,
       imagemUrl: produto.imagemUrl ?? null,
+      ocultarCatalogo: produto.ocultarCatalogo,
       deletedAt: produto.deletedAt ?? null,
     }
     await this.prisma.produto.upsert({
@@ -146,6 +147,7 @@ export class PrismaProdutoRepository implements IProdutoRepository {
       estoqueMinimo: (row.estoqueMinimo as number | null) ?? undefined,
       descricao: (row.descricao as string | null) ?? undefined,
       imagemUrl: (row.imagemUrl as string | null) ?? undefined,
+      ocultarCatalogo: (row.ocultarCatalogo as boolean | null) ?? false,
       deletedAt: (row.deletedAt as Date | null) ?? undefined,
     })
   }

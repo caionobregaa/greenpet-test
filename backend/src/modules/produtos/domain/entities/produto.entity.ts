@@ -44,6 +44,7 @@ interface ProdutoProps {
   estoqueMinimo?: number
   descricao?: string
   imagemUrl?: string
+  ocultarCatalogo: boolean
   deletedAt?: Date
 }
 
@@ -74,6 +75,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     estoqueMinimo?: number
     descricao?: string
     imagemUrl?: string
+    ocultarCatalogo?: boolean
     deletedAt?: Date
   }): Produto {
     if (!CATEGORIAS_VALIDAS.includes(data.categoria as Categoria)) {
@@ -108,6 +110,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
         estoqueMinimo: data.estoqueMinimo,
         descricao: data.descricao,
         imagemUrl: data.imagemUrl,
+        ocultarCatalogo: data.ocultarCatalogo ?? false,
         deletedAt: data.deletedAt,
       },
       data.id,
@@ -138,6 +141,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
   get estoqueMinimo(): number | undefined { return this.props.estoqueMinimo }
   get descricao(): string | undefined { return this.props.descricao }
   get imagemUrl(): string | undefined { return this.props.imagemUrl }
+  get ocultarCatalogo(): boolean { return this.props.ocultarCatalogo }
   get deletedAt(): Date | undefined { return this.props.deletedAt }
   get isActive(): boolean { return !this.props.deletedAt }
 
@@ -177,6 +181,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     estoqueMinimo: number | null
     descricao: string
     imagemUrl: string | null
+    ocultarCatalogo: boolean
   }>): void {
     if (fields.nome !== undefined) this.props.nome = fields.nome
     if (fields.categoria !== undefined) {
@@ -206,6 +211,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     if (fields.estoqueMinimo !== undefined) this.props.estoqueMinimo = fields.estoqueMinimo ?? undefined
     if (fields.descricao !== undefined) this.props.descricao = fields.descricao
     if (fields.imagemUrl !== undefined) this.props.imagemUrl = fields.imagemUrl ?? undefined
+    if (fields.ocultarCatalogo !== undefined) this.props.ocultarCatalogo = fields.ocultarCatalogo
     this.updatedAt = new Date()
   }
 }
