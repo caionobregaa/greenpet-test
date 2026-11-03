@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Sora, Fraunces } from "next/font/google";
-import { LOJA } from "@/lib/loja";
+import { FRASE_PRINCIPAL, LOJA } from "@/lib/loja";
 import "./globals.css";
 
 const sora = Sora({
@@ -18,18 +18,19 @@ const fraunces = Fraunces({
 });
 
 const descricao =
-  "Pet shop 100% online com produtos selecionados para cães e gatos: rações com padrão mínimo de qualidade e recomendação de veterinários. Escolha no catálogo e envie o pedido pelo WhatsApp.";
+  "Pet shop com produtos selecionados para cães e gatos. Escolha no catálogo e envie o pedido pelo WhatsApp.";
+const titulo = `beezpet – ${FRASE_PRINCIPAL}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(LOJA.url),
-  title: { default: "beezpet – Pet shop online com produtos selecionados", template: "%s | beezpet" },
+  title: { default: titulo, template: "%s | beezpet" },
   description: descricao,
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "pt_BR",
     siteName: "beezpet",
-    title: "beezpet – Pet shop online com produtos selecionados",
+    title: titulo,
     description: descricao,
     url: "/",
     images: [{ url: "/brand/logo-beezpet.png", alt: "Logo da beezpet" }],

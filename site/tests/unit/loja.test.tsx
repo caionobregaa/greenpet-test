@@ -293,7 +293,15 @@ describe("Topo e rodapé", () => {
     expect(screen.getByText("Atendimento das 8h às 17h")).toBeInTheDocument();
     expect(screen.getByText("Dados da empresa")).toBeInTheDocument();
     expect(screen.getByText("L C DO N AMORIM NETA")).toBeInTheDocument();
-    expect(container.innerHTML).not.toMatch(/maps|Ver no mapa|Passa aqui|Tudo pro seu pet/i);
+    expect(container.innerHTML).not.toMatch(/maps|Ver no mapa|Passa aqui|Tudo pro seu pet|veterin|100% online|Duque de Caxias|69020/i);
+  });
+
+  it("topo e rodapé levam para a página da marca, e o rodapé traz a frase principal", () => {
+    renderLoja();
+    const links = screen.getAllByRole("link", { name: /A marca|Conheça a marca/ });
+    expect(links.length).toBeGreaterThanOrEqual(2);
+    for (const link of links) expect(link).toHaveAttribute("href", "/a-marca");
+    expect(screen.getByText("Produtos que fazem sentido de verdade para a rotina do seu pet.")).toBeInTheDocument();
   });
 
 });

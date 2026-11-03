@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ProdutoCatalogo } from "@/lib/catalogo";
 import { formatBRL } from "@/lib/format";
-import { ENDERECO_COMPLETO, LOJA } from "@/lib/loja";
+import { FRASE_PRINCIPAL, LOJA } from "@/lib/loja";
 import { WHATSAPP_CONTATO_URL } from "@/lib/pedido";
 import { CarrinhoGaveta } from "./carrinho-gaveta";
 import { CarrinhoProvider, useCarrinho } from "./carrinho-provider";
@@ -18,8 +18,11 @@ function Cabecalho() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/wordmark-amarelo.png" alt="beezpet" className="h-9 w-auto sm:h-11" />
         </Link>
-        <nav className="flex items-center gap-1 sm:gap-2">
-          <Link href="/catalogo" className="rounded-full px-3 py-2 text-sm font-semibold hover:bg-vinho-claro">
+        <nav className="flex items-center gap-0.5 sm:gap-2">
+          <Link href="/a-marca" className="rounded-full px-2.5 py-2 text-sm font-semibold hover:bg-vinho-claro sm:px-3">
+            A marca
+          </Link>
+          <Link href="/catalogo" className="rounded-full px-2.5 py-2 text-sm font-semibold hover:bg-vinho-claro sm:px-3">
             Catálogo
           </Link>
           <a
@@ -94,7 +97,12 @@ function Rodape() {
         <div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/wordmark-amarelo.png" alt="beezpet" loading="lazy" className="h-12 w-auto" />
-          <p className="mt-3 text-sm">Pet shop 100% online, com produtos selecionados.</p>
+          <p className="mt-3 text-sm">{FRASE_PRINCIPAL}.</p>
+          <p className="mt-3 text-sm">
+            <Link href="/a-marca" className="font-semibold text-manteiga underline-offset-4 hover:underline">
+              Conheça a marca
+            </Link>
+          </p>
         </div>
         <div className="space-y-1.5 text-sm">
           <p className="font-bold text-manteiga">Contato</p>
@@ -114,7 +122,6 @@ function Rodape() {
           <p className="font-bold text-manteiga">Dados da empresa</p>
           <p className="text-xs opacity-80">{LOJA.razaoSocial}</p>
           <p className="text-xs opacity-80">CNPJ {LOJA.cnpj}</p>
-          <p className="text-xs opacity-80">{ENDERECO_COMPLETO}</p>
         </div>
       </div>
     </footer>

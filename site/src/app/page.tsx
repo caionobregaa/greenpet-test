@@ -7,7 +7,7 @@ import { montarVitrine } from "@/lib/catalogo";
 import { LOJA } from "@/lib/loja";
 import { WHATSAPP_CONTATO_URL } from "@/lib/pedido";
 
-const FITA = ["Produtos selecionados", "Recomendação de veterinários", "Entrega grátis acima de R$ 80", "Pedido pelo WhatsApp"];
+const FITA = ["Produtos selecionados", "Farejado e aprovado", "Entrega grátis acima de R$ 80", "Pedido pelo WhatsApp"];
 
 const PASSOS = [
   { titulo: "Escolha", texto: "Veja o catálogo e coloque no carrinho o que seu pet precisa." },
@@ -18,7 +18,7 @@ const PASSOS = [
 const DIFERENCIAIS = [
   {
     titulo: "Produtos selecionados",
-    texto: "Não vendemos qualquer ração. Cada uma precisa passar pelo nosso padrão mínimo de qualidade e ter recomendação de veterinários.",
+    texto: "Não vendemos qualquer ração. Cada uma precisa passar pelo nosso padrão mínimo de qualidade.",
   },
   { titulo: "Entrega grátis acima de R$ 80", texto: "Abaixo desse valor, a taxa é combinada na conversa." },
   { titulo: "Lembrete de recompra", texto: "A gente avisa quando a ração ou o produto do seu pet deve estar acabando." },
@@ -65,12 +65,13 @@ export default async function HomePage() {
         <Manchas className="pointer-events-none absolute -left-16 -top-10 w-72 text-vinho-claro/40 sm:w-96" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-4 px-4 pb-10 pt-10 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:pb-16 lg:pt-14">
           <div>
-            <p className="etiqueta-fita entrar">Pet shop 100% online</p>
-            <h1 className="titulo entrar mt-5 text-[3.4rem] font-bold leading-[0.95] [animation-delay:80ms] sm:text-7xl lg:text-[5.4rem]">
-              Só entra aqui <em className="font-medium text-rosa">o que a gente confia.</em>
+            <p className="etiqueta-fita entrar">Pet shop</p>
+            {/* Frase principal do negócio: FRASE_PRINCIPAL em src/lib/loja.ts */}
+            <h1 className="titulo entrar mt-5 text-balance text-[2.6rem] font-bold leading-[1] [animation-delay:80ms] sm:text-6xl lg:text-[4.1rem]">
+              Produtos que fazem sentido <em className="font-medium text-rosa">de verdade</em> para a rotina do seu pet.
             </h1>
             <p className="entrar mt-6 max-w-lg text-base leading-relaxed text-rosa-claro [animation-delay:160ms] sm:text-lg">
-              Trabalhamos com produtos selecionados: rações que passam pelo nosso padrão mínimo de qualidade e têm recomendação de veterinários.
+              Escolha no catálogo e feche o pedido direto pelo nosso WhatsApp.
             </p>
             <div className="entrar mt-8 flex flex-col gap-3 [animation-delay:240ms] sm:flex-row">
               <Link
@@ -178,6 +179,24 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="grao sobre-vinho relative overflow-hidden bg-vinho text-manteiga">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-14 sm:px-6 md:grid-cols-[auto_1fr] md:gap-12">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/mascote.png" alt="" loading="lazy" className="mx-auto h-40 w-40 rounded-full md:h-52 md:w-52" />
+          <div>
+            <p className="etiqueta-fita">A marca</p>
+            <p className="titulo mt-4 text-3xl font-bold leading-tight sm:text-5xl">
+              Beez é o amigo que <em className="font-medium text-rosa">entende de pet.</em>
+            </p>
+            <Link
+              href="/a-marca"
+              className="botao mt-6 min-h-12 bg-manteiga px-7 text-vinho shadow-[4px_4px_0_var(--color-rosa)] hover:bg-white"
+            >
+              Conheça a marca
+            </Link>
+          </div>
+        </div>
+      </section>
     </LojaShell>
   );
 }
