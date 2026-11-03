@@ -192,6 +192,8 @@ describe("Envio pelo WhatsApp", () => {
   it("mostra o aviso de entrega conforme o total", async () => {
     await abrirCarrinho();
     expect(screen.getByText("Entrega grátis neste pedido")).toBeInTheDocument();
+    expect(screen.getByText("Entregamos somente em Manaus, em toda a cidade.")).toBeInTheDocument();
+    expect(screen.getByLabelText("Endereço")).toHaveAttribute("placeholder", expect.stringContaining("Manaus"));
   });
 
   it("remover o último item mostra o carrinho vazio", async () => {

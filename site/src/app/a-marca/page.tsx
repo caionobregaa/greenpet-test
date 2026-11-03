@@ -36,15 +36,14 @@ export default async function MarcaPage() {
               “É o amigo que entende de pet, a quem se recorre quando surge uma dúvida.”
             </p>
           </div>
-          {/* A arte tem o mesmo fundo #641d3f da seção (specs/identidade-visual/spec-v1.md). */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/brand/mascote-caixas.webp"
-            alt="Beez, o mascote da Beez Pet, sentado ao lado de caixas de entrega"
-            width={900}
-            height={602}
+            src="/brand/mascote-sentado.webp"
+            alt="Beez, o mascote da Beez Pet, sentado e sorrindo"
+            width={1048}
+            height={1100}
             fetchPriority="high"
-            className="caixa-cai w-full max-w-2xl justify-self-center"
+            className="caixa-cai w-full max-w-sm justify-self-center drop-shadow-[0_18px_0_rgb(63_16_39/0.35)]"
           />
         </div>
       </section>

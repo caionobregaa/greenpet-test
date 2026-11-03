@@ -6,6 +6,7 @@
 - Alterações no sistema aparecem no site em até 5 minutos
 - No filtro de espécie, `Cão e Gato` e produto sem espécie cadastrada aparecem em qualquer opção, para nenhum produto sumir
 - WhatsApp oficial: (92) 98470-3686
+- Entrega só em Manaus, em toda a cidade (usuário, 03/11/2026)
 - Entrega grátis a partir de R$ 80 no total dos produtos. Abaixo disso, a taxa é combinada na conversa
 - Campos obrigatórios do pedido:
   - Nome do cliente

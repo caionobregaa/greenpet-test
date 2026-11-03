@@ -7,7 +7,7 @@ import { montarVitrine } from "@/lib/catalogo";
 import { LOJA } from "@/lib/loja";
 import { WHATSAPP_CONTATO_URL } from "@/lib/pedido";
 
-const FITA = ["Produtos selecionados", "Farejado e aprovado", "Entrega grátis acima de R$ 80", "Pedido pelo WhatsApp"];
+const FITA = ["Produtos selecionados", "Farejado e aprovado", "Entrega em toda Manaus", "Entrega grátis acima de R$ 80", "Pedido pelo WhatsApp"];
 
 const PASSOS = [
   { titulo: "Escolha", texto: "Veja o catálogo e coloque no carrinho o que seu pet precisa." },
@@ -20,7 +20,7 @@ const DIFERENCIAIS = [
     titulo: "Produtos selecionados",
     texto: "Não vendemos qualquer ração. Cada uma precisa passar pelo nosso padrão mínimo de qualidade.",
   },
-  { titulo: "Entrega grátis acima de R$ 80", texto: "Abaixo desse valor, a taxa é combinada na conversa." },
+  { titulo: "Entrega grátis acima de R$ 80", texto: "Entregamos em toda Manaus. Abaixo desse valor, a taxa é combinada na conversa." },
   { titulo: "Lembrete de recompra", texto: "A gente avisa quando a ração ou o produto do seu pet deve estar acabando." },
   { titulo: "Atendimento pelo WhatsApp", texto: "Você fala direto com a loja para tirar dúvidas e fechar o pedido." },
 ];
@@ -33,6 +33,7 @@ const DADOS_ESTRUTURADOS = {
   image: `${LOJA.url}/brand/logo-beezpet.png`,
   telephone: "+5592984703686",
   sameAs: [LOJA.instagramUrl],
+  areaServed: { "@type": "City", name: "Manaus" },
 };
 
 function Fita() {
@@ -65,7 +66,7 @@ export default async function HomePage() {
         <Manchas className="pointer-events-none absolute -left-16 -top-10 w-72 text-vinho-claro/40 sm:w-96" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-4 px-4 pb-10 pt-10 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:pb-16 lg:pt-14">
           <div>
-            <p className="etiqueta-fita entrar">Pet shop</p>
+            <p className="etiqueta-fita entrar">Pet shop online</p>
             {/* Frase principal do negócio: FRASE_PRINCIPAL em src/lib/loja.ts */}
             <h1 className="titulo entrar mt-5 text-balance text-[2.6rem] font-bold leading-[1] [animation-delay:80ms] sm:text-6xl lg:text-[4.1rem]">
               Produtos que fazem sentido <em className="font-medium text-rosa">de verdade</em> para a rotina do seu pet.
@@ -90,16 +91,19 @@ export default async function HomePage() {
                 Chamar no WhatsApp
               </a>
             </div>
+            <p className="entrar mt-5 flex items-center gap-2 text-sm font-semibold text-manteiga [animation-delay:300ms]">
+              <span className="h-2 w-2 rounded-full bg-rosa" aria-hidden="true" />
+              {LOJA.areaEntrega}
+            </p>
           </div>
-          {/* A arte tem o mesmo fundo #641d3f da seção (specs/identidade-visual/spec-v1.md). */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/brand/mascote-caixas.webp"
-            alt="Mascote da beezpet, um cachorro amarelo com manchas vinho, sentado ao lado de caixas de entrega"
-            width={900}
-            height={602}
+            src="/brand/mascote-entrega.webp"
+            alt="Beez, o mascote da beezpet, correndo com caixas de entrega nas costas e boné rosa"
+            width={1100}
+            height={850}
             fetchPriority="high"
-            className="caixa-cai w-full max-w-2xl justify-self-center"
+            className="caixa-cai w-full max-w-xl justify-self-center drop-shadow-[0_18px_0_rgb(63_16_39/0.35)]"
           />
         </div>
       </section>
@@ -182,7 +186,7 @@ export default async function HomePage() {
       <section className="grao sobre-vinho relative overflow-hidden bg-vinho text-manteiga">
         <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-14 sm:px-6 md:grid-cols-[auto_1fr] md:gap-12">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/mascote.png" alt="" loading="lazy" className="mx-auto h-40 w-40 rounded-full md:h-52 md:w-52" />
+          <img src="/brand/mascote-brincando.webp" alt="" loading="lazy" width={1100} height={956} className="mx-auto w-56 md:w-72" />
           <div>
             <p className="etiqueta-fita">A marca</p>
             <p className="titulo mt-4 text-3xl font-bold leading-tight sm:text-5xl">

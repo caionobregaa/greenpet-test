@@ -8,6 +8,7 @@ export const LOJA = {
   instagramUrl: "https://instagram.com/beezpetbr",
   cnpj: "65.788.498/0001-44",
   freteGratisPiso: 80,
+  areaEntrega: "Entrega em toda Manaus",
   // Dias da semana não informados: só o horário aparece (specs/site/spec-v2.md).
   horario: "das 8h às 17h",
 };

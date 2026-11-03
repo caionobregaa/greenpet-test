@@ -18,7 +18,7 @@ const fraunces = Fraunces({
 });
 
 const descricao =
-  "Pet shop com produtos selecionados para cães e gatos. Escolha no catálogo e envie o pedido pelo WhatsApp.";
+  "Pet shop online com produtos selecionados para cães e gatos, com entrega em toda Manaus. Escolha no catálogo e envie o pedido pelo WhatsApp.";
 const titulo = `beezpet – ${FRASE_PRINCIPAL}`;
 
 export const metadata: Metadata = {

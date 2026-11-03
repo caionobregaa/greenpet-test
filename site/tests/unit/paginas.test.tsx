@@ -16,7 +16,11 @@ describe("Página inicial", () => {
   it("tem a frase principal como título, a etiqueta Pet shop e a faixa nova", async () => {
     const { container } = render(await HomePage());
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Produtos que fazem sentido de verdade para a rotina do seu pet.");
-    expect(screen.getByText("Pet shop")).toBeInTheDocument();
+    expect(screen.getByText("Pet shop online")).toBeInTheDocument();
+    // Primeira dobra e faixa
+    expect(screen.getAllByText("Entrega em toda Manaus").length).toBeGreaterThanOrEqual(2);
+    expect(container.querySelector('img[src="/brand/mascote-entrega.webp"]')).toHaveAttribute("alt", expect.stringContaining("Beez"));
+    expect(container.querySelector('img[src="/brand/mascote-brincando.webp"]')).toBeInTheDocument();
     expect(container.innerHTML).toContain("Farejado e aprovado");
     expect(container.innerHTML).not.toMatch(/veterin|100% online|Só entra aqui|Duque de Caxias/i);
     const marca = screen.getAllByRole("link", { name: "Conheça a marca" });
@@ -39,5 +43,6 @@ describe("Página da marca", () => {
     ]) expect(texto).toContain(trecho);
     expect(screen.getByRole("link", { name: "Ver catálogo" })).toHaveAttribute("href", "/catalogo");
     expect(texto).not.toMatch(/veterin/i);
+    expect(container.querySelector('img[src="/brand/mascote-sentado.webp"]')).toHaveAttribute("alt", expect.stringContaining("Beez"));
   });
 });

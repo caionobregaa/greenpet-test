@@ -236,7 +236,7 @@ export function CarrinhoGaveta() {
                     id="endereco"
                     rows={2}
                     autoComplete="street-address"
-                    placeholder="Rua, número, bairro e referência"
+                    placeholder="Rua, número, bairro e referência (Manaus)"
                     value={dados.endereco}
                     onChange={(e) => atualizar("endereco", e.target.value)}
                     aria-invalid={!!erros.endereco}
@@ -264,6 +264,7 @@ export function CarrinhoGaveta() {
               <p className={`text-xs ${total >= LOJA.freteGratisPiso ? "font-bold text-whatsapp-escuro" : "text-tinta-suave"}`}>
                 {avisoEntrega(total)}
               </p>
+              <p className="text-xs text-tinta-suave">Entregamos somente em Manaus, em toda a cidade.</p>
               <button type="submit" className="botao min-h-13 w-full bg-whatsapp-escuro px-4 py-3 text-white hover:bg-[#0f7a41]">
                 <IconeWhatsApp className="h-5 w-5" />
                 Enviar pedido pelo WhatsApp

@@ -13,11 +13,17 @@ export default async function CatalogoPage({ searchParams }: { searchParams: Pro
   const [produtos, { categoria }] = await Promise.all([buscarProdutos(), searchParams]);
   return (
     <LojaShell produtos={produtos}>
-      <div className="sobre-vinho bg-vinho px-4 py-10 text-center text-manteiga sm:py-14">
-        <h1 className="titulo text-5xl font-bold sm:text-6xl">Catálogo</h1>
-        <p className="mx-auto mt-3 max-w-md text-sm text-rosa-claro sm:text-base">
-          Escolha os produtos, coloque no carrinho e envie tudo para o nosso WhatsApp.
-        </p>
+      <div className="sobre-vinho bg-vinho px-4 py-8 text-manteiga sm:py-10">
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 text-center sm:flex-row sm:gap-8 sm:text-left">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/mascote-osso.webp" alt="" width={1100} height={722} fetchPriority="high" className="w-44 shrink-0 sm:w-60" />
+          <div>
+            <h1 className="titulo text-5xl font-bold sm:text-6xl">Catálogo</h1>
+            <p className="mt-3 max-w-md text-sm text-rosa-claro sm:text-base">
+              Escolha os produtos, coloque no carrinho e envie tudo para o nosso WhatsApp. Entrega em toda Manaus.
+            </p>
+          </div>
+        </div>
       </div>
       {produtos ? (
         <CatalogoCliente produtos={produtos} categoriaInicial={categoria} />
