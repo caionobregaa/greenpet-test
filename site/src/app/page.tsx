@@ -3,7 +3,7 @@ import { IconeWhatsApp, Manchas } from "@/components/icones";
 import { LojaShell, ProdutosIndisponiveis } from "@/components/loja-shell";
 import { ProdutoCard } from "@/components/produto-card";
 import { buscarProdutos } from "@/lib/api";
-import { montarVitrine } from "@/lib/catalogo";
+import { emPromocao, montarVitrine } from "@/lib/catalogo";
 import { LOJA } from "@/lib/loja";
 import { WHATSAPP_CONTATO_URL } from "@/lib/pedido";
 
@@ -57,6 +57,11 @@ function Fita() {
 export default async function HomePage() {
   const produtos = await buscarProdutos();
   const vitrine = produtos ? montarVitrine(produtos) : [];
+  // Campanhas ativas (specs/promocoes/spec-v1.md): maior desconto primeiro.
+  const promocoes = (produtos ?? [])
+    .filter(emPromocao)
+    .sort((a, b) => b.valorOriginal! - b.valorVenda - (a.valorOriginal! - a.valorVenda))
+    .slice(0, 8);
 
   return (
     <LojaShell produtos={produtos}>
@@ -128,6 +133,27 @@ export default async function HomePage() {
           </ol>
         </div>
       </section>
+
+      {promocoes.length > 0 && (
+        <section id="promocoes" className="bg-manteiga-claro py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className="etiqueta-fita">Por tempo limitado</p>
+                <h2 className="titulo mt-3 text-4xl font-bold text-vinho sm:text-6xl">Promoções</h2>
+              </div>
+              <Link href="/catalogo?promocoes" className="botao min-h-12 bg-vinho px-6 text-manteiga hover:bg-vinho-claro">
+                Ver todas as promoções
+              </Link>
+            </div>
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+              {promocoes.map((p) => (
+                <ProdutoCard key={p.id} produto={p} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section id="produtos" className="border-t-2 border-vinho/15 bg-creme py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">

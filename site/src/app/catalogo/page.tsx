@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/catalogo" },
 };
 
-export default async function CatalogoPage({ searchParams }: { searchParams: Promise<{ categoria?: string }> }) {
-  const [produtos, { categoria }] = await Promise.all([buscarProdutos(), searchParams]);
+export default async function CatalogoPage({ searchParams }: { searchParams: Promise<{ categoria?: string; promocoes?: string }> }) {
+  const [produtos, { categoria, promocoes }] = await Promise.all([buscarProdutos(), searchParams]);
   return (
     <LojaShell produtos={produtos}>
       <div className="sobre-vinho bg-vinho px-4 py-8 text-manteiga sm:py-10">
@@ -26,7 +26,7 @@ export default async function CatalogoPage({ searchParams }: { searchParams: Pro
         </div>
       </div>
       {produtos ? (
-        <CatalogoCliente produtos={produtos} categoriaInicial={categoria} />
+        <CatalogoCliente produtos={produtos} categoriaInicial={categoria} promocaoInicial={promocoes !== undefined} />
       ) : (
         <div className="px-4 py-16">
           <ProdutosIndisponiveis />

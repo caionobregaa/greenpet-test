@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { agruparPorCategoria, filtrarProdutos, type ProdutoCatalogo } from "@/lib/catalogo";
+import { agruparPorCategoria, emPromocao, filtrarProdutos, type ProdutoCatalogo } from "@/lib/catalogo";
 import { ProdutoCard } from "./produto-card";
 
 const ESPECIES = ["Cão", "Gato"];
@@ -24,9 +24,11 @@ function Filtro({ ativo, children, onClick }: { ativo: boolean; children: React.
 export function CatalogoCliente({
   produtos,
   categoriaInicial,
+  promocaoInicial,
 }: {
   produtos: ProdutoCatalogo[];
   categoriaInicial?: string;
+  promocaoInicial?: boolean;
 }) {
   const categorias = useMemo(() => agruparPorCategoria(produtos).map((g) => g.categoria), [produtos]);
   const [busca, setBusca] = useState("");
@@ -34,10 +36,12 @@ export function CatalogoCliente({
     categoriaInicial && categorias.includes(categoriaInicial) ? categoriaInicial : "",
   );
   const [especie, setEspecie] = useState("");
+  const [promocao, setPromocao] = useState(!!promocaoInicial);
+  const temPromocao = useMemo(() => produtos.some(emPromocao), [produtos]);
 
   const grupos = useMemo(
-    () => agruparPorCategoria(filtrarProdutos(produtos, { busca, categoria, especie })),
-    [produtos, busca, categoria, especie],
+    () => agruparPorCategoria(filtrarProdutos(produtos, { busca, categoria, especie, promocao: promocao && temPromocao })),
+    [produtos, busca, categoria, especie, promocao, temPromocao],
   );
 
   return (
@@ -52,6 +56,9 @@ export function CatalogoCliente({
           className="w-full rounded-full border-2 border-vinho bg-creme px-5 py-3 text-base outline-none placeholder:text-tinta-suave/70 focus:shadow-[3px_3px_0_var(--color-vinho)]"
         />
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+          {temPromocao && (
+            <Filtro ativo={promocao} onClick={() => setPromocao(!promocao)}>Promoções</Filtro>
+          )}
           <Filtro ativo={!categoria} onClick={() => setCategoria("")}>Todas</Filtro>
           {categorias.map((c) => (
             <Filtro key={c} ativo={categoria === c} onClick={() => setCategoria(c)}>{c}</Filtro>

@@ -12,6 +12,7 @@ const PAGE_TITLES: Record<string, { title: string; subtitle?: string }> = {
   "/clientes": { title: "Clientes", subtitle: "Gerenciamento de clientes" },
   "/animais": { title: "Animais", subtitle: "Gerenciamento de animais" },
   "/produtos": { title: "Produtos", subtitle: "Catálogo de produtos" },
+  "/promocoes": { title: "Promoções", subtitle: "Preços promocionais com data de duração" },
   "/vendas": { title: "Histórico de Vendas", subtitle: "Registro de vendas" },
   "/vendas/nova": { title: "Nova Venda", subtitle: "Registrar nova venda" },
   "/orcamentos": { title: "Orçamentos", subtitle: "Gerenciamento de orçamentos" },

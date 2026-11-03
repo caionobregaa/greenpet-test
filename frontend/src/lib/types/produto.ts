@@ -1,3 +1,5 @@
+import type { PromocaoAtivaProduto } from "./promocao";
+
 export interface Produto {
   id: string;
   nome: string;
@@ -26,6 +28,8 @@ export interface Produto {
   imagemUrl: string | null;
   ocultarCatalogo: boolean;
   estoque: number;
+  /** Campanha ativa agora; valorVenda continua sendo o preço normal. */
+  promocao?: PromocaoAtivaProduto | null;
   deletedAt: string | null;
   createdAt: string;
   updatedAt: string;

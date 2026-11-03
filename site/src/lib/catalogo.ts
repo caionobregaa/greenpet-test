@@ -3,7 +3,11 @@ export interface ProdutoCatalogo {
   nome: string;
   categoria: string;
   especie: string | null;
+  /** Preço a pagar: o promocional durante uma campanha ativa. */
   valorVenda: number;
+  /** Preço normal, para riscar; ausente ou null fora de promoção (specs/promocoes/spec-v1.md). */
+  valorOriginal?: number | null;
+  promocaoFim?: string | null;
   imagemUrl: string | null;
 }
 
@@ -16,6 +20,8 @@ export interface FiltrosCatalogo {
   busca?: string;
   categoria?: string;
   especie?: string;
+  /** Só produtos em promoção ativa. */
+  promocao?: boolean;
 }
 
 const ORDEM_CATEGORIAS = ["Ração", "Petisco", "Medicamento", "Acessório", "Higiene"];
@@ -63,11 +69,20 @@ function atendeEspecie(produto: ProdutoCatalogo, especie: string): boolean {
 export function filtrarProdutos(produtos: ProdutoCatalogo[], filtros: FiltrosCatalogo): ProdutoCatalogo[] {
   const termos = normalizar(filtros.busca ?? "").split(/\s+/).filter(Boolean);
   return produtos.filter((p) => {
+    if (filtros.promocao && !emPromocao(p)) return false;
     if (filtros.categoria && p.categoria !== filtros.categoria) return false;
     if (filtros.especie && !atendeEspecie(p, filtros.especie)) return false;
     const nome = normalizar(p.nome);
     return termos.every((termo) => nome.includes(termo));
   });
+}
+
+export function emPromocao(p: Pick<ProdutoCatalogo, "valorOriginal" | "valorVenda">): boolean {
+  return !!p.valorOriginal && p.valorOriginal > p.valorVenda;
+}
+
+export function descontoPercentual(p: Pick<ProdutoCatalogo, "valorOriginal" | "valorVenda">): number {
+  return emPromocao(p) ? Math.round((1 - p.valorVenda / p.valorOriginal!) * 100) : 0;
 }
 
 /** Foto servida pelo próprio site, a partir do caminho devolvido pela API. */

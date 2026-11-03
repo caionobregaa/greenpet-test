@@ -14,8 +14,9 @@ import {
 import { ValidationError } from '@/shared/errors/validation.error.js'
 import { NotFoundError } from '@/shared/errors/not-found.error.js'
 import type { Produto } from '../../domain/entities/produto.entity.js'
+import { buscarPromocoesAtivas, type PromocaoAtiva } from '@/modules/promocoes/infrastructure/promocoes-ativas.js'
 
-function toResponse(p: Produto, estoque = 0) {
+function toResponse(p: Produto, estoque = 0, promocao: PromocaoAtiva | null = null) {
   return {
     id: p.id,
     nome: p.nome,
@@ -45,6 +46,10 @@ function toResponse(p: Produto, estoque = 0) {
     imagemUrl: p.imagemUrl ?? null,
     ocultarCatalogo: p.ocultarCatalogo,
     estoque,
+    // Campanha ativa agora (specs/promocoes/spec-v1.md); valorVenda segue o preço normal.
+    promocao: promocao
+      ? { campanhaId: promocao.campanhaId, nome: promocao.nome, valorPromocional: promocao.valorPromocional, fim: promocao.fim }
+      : null,
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
   }
@@ -71,8 +76,9 @@ export function registerProdutosRoutes(app: FastifyInstance, prisma: PrismaClien
         })
       : []
     const estoqueMap = new Map(estoqueGroups.map((g) => [g.produtoId, g._sum.quantidade ?? 0]))
+    const promocoes = await buscarPromocoesAtivas(prisma, ids)
     rep.send({
-      data: result.produtos.map((p) => toResponse(p, estoqueMap.get(p.id) ?? 0)),
+      data: result.produtos.map((p) => toResponse(p, estoqueMap.get(p.id) ?? 0, promocoes.get(p.id) ?? null)),
       meta: { page: q.data.page, limit: q.data.limit, total: result.total },
     })
   })
@@ -87,7 +93,8 @@ export function registerProdutosRoutes(app: FastifyInstance, prisma: PrismaClien
   app.get('/api/v1/produtos/:id', async (req, rep) => {
     const { id } = req.params as { id: string }
     const produto = await getUC.execute({ id })
-    rep.send({ data: toResponse(produto) })
+    const promocoes = await buscarPromocoesAtivas(prisma, [id])
+    rep.send({ data: toResponse(produto, 0, promocoes.get(id) ?? null) })
   })
 
   app.put('/api/v1/produtos/:id', async (req, rep) => {

@@ -11,6 +11,8 @@ export const prismaTest = new PrismaClient({ datasources: { db: { url: testDb } 
 export async function truncateAll(): Promise<void> {
   // Delete in reverse FK dependency order
   await prismaTest.$transaction([
+    prismaTest.promocaoItem.deleteMany(),
+    prismaTest.promocao.deleteMany(),
     prismaTest.orcamentoItem.deleteMany(),
     prismaTest.orcamento.deleteMany(),
     prismaTest.vendaPagamento.deleteMany(),

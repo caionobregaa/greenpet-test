@@ -46,6 +46,7 @@ import { registerDashboardOperacionalRoutes } from './modules/dashboard-operacio
 import { registerBiAvancadoRoutes } from './modules/bi-avancado/infrastructure/http/bi-avancado.routes.js'
 import { registerLembretesRoutes } from './modules/lembretes/infrastructure/http/lembretes.routes.js'
 import { registerCatalogoRoutes } from './modules/catalogo/infrastructure/http/catalogo.routes.js'
+import { registerPromocoesRoutes } from './modules/promocoes/infrastructure/http/promocoes.routes.js'
 
 async function bootstrap(): Promise<void> {
   const app = await buildApp({ jwtSecret: env.JWT_SECRET, logger: env.NODE_ENV !== 'test' })
@@ -96,6 +97,7 @@ async function bootstrap(): Promise<void> {
   registerBiAvancadoRoutes(app, prisma)
   registerLembretesRoutes(app, prisma)
   registerCatalogoRoutes(app, prisma)
+  registerPromocoesRoutes(app, prisma)
 
   await app.listen({ port: env.PORT, host: env.HOST })
   console.log(`🚀 BEEZ PET API rodando em http://${env.HOST}:${env.PORT}`)

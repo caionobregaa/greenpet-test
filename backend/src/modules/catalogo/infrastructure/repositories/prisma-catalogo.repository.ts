@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@prisma/client'
-import type { ICatalogoRepository, ProdutoCatalogoRow } from '../../domain/catalogo.repository.interface.js'
+import type { ICatalogoRepository, ProdutoCatalogoRow, PromocaoCatalogo } from '../../domain/catalogo.repository.interface.js'
+import { buscarPromocoesAtivas } from '@/modules/promocoes/infrastructure/promocoes-ativas.js'
 
 // Regra de publicação em specs/catalogo/rules.md
 const CATEGORIA_FORA_DO_CATALOGO = 'Serviço'
@@ -20,6 +21,10 @@ export class PrismaCatalogoRepository implements ICatalogoRepository {
       ORDER BY nome ASC
     `
     return rows.map((r) => ({ ...r, valorVenda: Number(r.valorVenda) }))
+  }
+
+  async promocoesAtivas(): Promise<Map<string, PromocaoCatalogo>> {
+    return buscarPromocoesAtivas(this.prisma)
   }
 
   async buscarImagem(id: string): Promise<string | null> {

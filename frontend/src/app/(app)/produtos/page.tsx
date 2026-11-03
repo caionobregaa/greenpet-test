@@ -171,7 +171,14 @@ export default function ProdutosPage() {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{p.fornecedor ?? "—"}</td>
                     <td className="px-4 py-3 text-right font-mono text-muted-foreground">{p.estoque}</td>
-                    <td className="px-4 py-3 text-right font-mono font-semibold text-foreground">{formatBRL(p.valorVenda)}</td>
+                    <td className="px-4 py-3 text-right font-mono font-semibold text-foreground">
+                      {formatBRL(p.valorVenda)}
+                      {p.promocao && (
+                        <div className="mt-1 text-[11px] font-semibold text-emerald-700" title={p.promocao.nome}>
+                          Promoção {formatBRL(p.promocao.valorPromocional)}
+                        </div>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground" onClick={() => setInfoProduto(p)}>

@@ -22,6 +22,7 @@ import {
   TrendingUp,
   Gauge,
   Wallet,
+  Tag,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
@@ -61,6 +62,7 @@ const NAV_ITEMS: NavEntry[] = [
   { href: "/clientes", label: "Clientes", icon: Users },
   { href: "/animais", label: "Animais", icon: PawPrint },
   { href: "/produtos", label: "Produtos", icon: Package },
+  { href: "/promocoes", label: "Promoções", icon: Tag },
   { href: "/estoque", label: "Estoque", icon: Warehouse },
   { href: "/vendas", label: "Histórico de Vendas", icon: ClipboardList },
   { href: "/orcamentos", label: "Orçamentos", icon: FileText },

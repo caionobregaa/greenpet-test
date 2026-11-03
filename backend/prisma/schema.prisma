@@ -118,6 +118,7 @@ model Produto {
   compraItens    CompraItem[]
   vendaItens     VendaItem[]
   estoqueItens   EstoqueItem[]
+  promocaoItens  PromocaoItem[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
@@ -271,6 +272,37 @@ model Compra {
   updatedAt        DateTime     @updatedAt
 
   @@map("compras")
+}
+
+// ─────────────── PROMOÇÕES ───────────────
+// Campanhas com preço promocional por período (specs/promocoes/spec-v1.md).
+// A situação (agendada/ativa/encerrada) é calculada pela data; o valorVenda do
+// produto nunca é alterado.
+
+model Promocao {
+  id        String         @id @default(uuid())
+  nome      String
+  inicio    DateTime
+  fim       DateTime
+  itens     PromocaoItem[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([inicio, fim])
+  @@map("promocoes")
+}
+
+model PromocaoItem {
+  id               String   @id @default(uuid())
+  promocaoId       String
+  promocao         Promocao @relation(fields: [promocaoId], references: [id], onDelete: Cascade)
+  produtoId        String
+  produto          Produto  @relation(fields: [produtoId], references: [id])
+  valorPromocional Decimal  @db.Decimal(10, 2)
+
+  @@unique([promocaoId, produtoId])
+  @@index([produtoId])
+  @@map("promocao_itens")
 }
 
 // ─────────────── LEMBRETES ───────────────

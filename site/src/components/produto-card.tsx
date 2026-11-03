@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { urlDaFoto, type ProdutoCatalogo } from "@/lib/catalogo";
+import { descontoPercentual, emPromocao, urlDaFoto, type ProdutoCatalogo } from "@/lib/catalogo";
 import { formatBRL } from "@/lib/format";
 import { useCarrinho } from "./carrinho-provider";
 
@@ -63,11 +63,25 @@ export function SeletorQuantidade({ produto, compacto }: { produto: ProdutoCatal
 export function ProdutoCard({ produto }: { produto: ProdutoCatalogo }) {
   const { itens, definirQuantidade } = useCarrinho();
   return (
-    <article className="adesivo flex h-full flex-col overflow-hidden rounded-2xl bg-creme">
+    <article className="adesivo relative flex h-full flex-col overflow-hidden rounded-2xl bg-creme">
+      {emPromocao(produto) && (
+        <span className="etiqueta-fita absolute left-2 top-2 z-10" aria-label={`${descontoPercentual(produto)}% de desconto`}>
+          -{descontoPercentual(produto)}%
+        </span>
+      )}
       <FotoProduto produto={produto} className="aspect-square w-full border-b-2 border-vinho" />
       <div className="flex flex-1 flex-col gap-3 p-3 sm:p-4">
         <h3 className="line-clamp-3 min-h-[3.75rem] text-[0.8rem] font-semibold leading-5 sm:text-sm sm:leading-5">{produto.nome}</h3>
-        <p className="titulo mt-auto text-xl font-bold text-vinho sm:text-2xl">{formatBRL(produto.valorVenda)}</p>
+        <div className="mt-auto">
+          {emPromocao(produto) && (
+            <p className="text-xs text-tinta-suave">
+              <span className="sr-only">De </span>
+              <s>{formatBRL(produto.valorOriginal!)}</s>
+              <span className="sr-only"> por</span>
+            </p>
+          )}
+          <p className="titulo text-xl font-bold text-vinho sm:text-2xl">{formatBRL(produto.valorVenda)}</p>
+        </div>
         {itens[produto.id] ? (
           <SeletorQuantidade produto={produto} />
         ) : (

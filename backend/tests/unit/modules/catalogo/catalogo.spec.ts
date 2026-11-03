@@ -46,12 +46,15 @@ describe('Rotas públicas do catálogo', () => {
   let app: FastifyInstance
   const queryRaw = vi.fn()
   const findFirst = vi.fn()
+  const promocoes = vi.fn()
 
   beforeEach(async () => {
     queryRaw.mockReset()
     findFirst.mockReset()
+    promocoes.mockReset()
+    promocoes.mockResolvedValue([])
     app = await buildApp({ jwtSecret: 'segredo-de-teste-com-mais-de-32-caracteres' })
-    registerCatalogoRoutes(app, { $queryRaw: queryRaw, produto: { findFirst } } as unknown as PrismaClient)
+    registerCatalogoRoutes(app, { $queryRaw: queryRaw, produto: { findFirst }, promocaoItem: { findMany: promocoes } } as unknown as PrismaClient)
     // Rota privada de controle: prova que o hook de login segue ativo neste app.
     app.get('/privada', async () => ({ ok: true }))
     await app.ready()
@@ -74,9 +77,19 @@ describe('Rotas públicas do catálogo', () => {
     const [produto] = res.json().data
     expect(produto).toEqual({
       id: 'p1', nome: 'Ração X', categoria: 'Ração', especie: 'Cão', valorVenda: 189.9,
+      valorOriginal: null, promocaoFim: null,
       imagemUrl: `/api/v1/catalogo/produtos/p1/imagem?v=${ATUALIZADO.getTime()}`,
     })
     for (const campo of CAMPOS_INTERNOS) expect(produto).not.toHaveProperty(campo)
+  })
+
+  it('produto em promoção ativa vende pelo preço promocional e mostra o normal riscado', async () => {
+    const fim = new Date('2026-11-18T03:59:59.999Z')
+    queryRaw.mockResolvedValue([{ id: 'p1', nome: 'A', categoria: 'Ração', especie: null, valorVenda: 189.9, temImagem: false, atualizadoEm: ATUALIZADO }])
+    promocoes.mockResolvedValue([{ produtoId: 'p1', valorPromocional: '159.90', promocao: { id: 'c1', nome: 'Semana', fim } }])
+    const [produto] = (await app.inject({ url: '/api/v1/catalogo/produtos' })).json().data
+    expect(produto).toMatchObject({ valorVenda: 159.9, valorOriginal: 189.9, promocaoFim: fim.toISOString() })
+    expect(produto).not.toHaveProperty('campanhaId')
   })
 
   it('produto sem foto vem com imagemUrl null', async () => {

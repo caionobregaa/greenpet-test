@@ -37,6 +37,11 @@ interface ProdutoSelect {
   estoque?: number;
 }
 
+/** Preço sugerido na venda: o promocional enquanto a campanha está ativa (specs/promocoes/spec-v1.md). */
+export function precoDeVenda(p: Pick<Produto, "valorVenda" | "promocao">): number {
+  return p.promocao?.valorPromocional ?? p.valorVenda;
+}
+
 interface ItemRow {
   produtoId?: string | null;
   nome: string;
@@ -129,7 +134,7 @@ const ProdutoSearch = memo(function ProdutoSearch({
   }
 
   function pick(p: Produto) {
-    onSelect({ id: p.id, nome: p.nome, valorVenda: p.valorVenda, valorCusto: p.valorCusto, categoria: p.categoria, pesoEmbalagem: p.pesoEmbalagem, estoque: p.estoque });
+    onSelect({ id: p.id, nome: p.nome, valorVenda: precoDeVenda(p), valorCusto: p.valorCusto, categoria: p.categoria, pesoEmbalagem: p.pesoEmbalagem, estoque: p.estoque });
     setQuery(p.nome);
     setResults([]); setOpen(false); setSearched(false);
   }
@@ -167,7 +172,17 @@ const ProdutoSearch = memo(function ProdutoSearch({
               onClick={() => pick(p)}
             >
               <p className="font-medium text-[13px] text-foreground">{p.nome}</p>
-              <p className="text-[11px] text-muted-foreground">{p.categoria} · {formatBRL(p.valorVenda)}</p>
+              <p className="text-[11px] text-muted-foreground">
+                {p.categoria} ·{" "}
+                {p.promocao ? (
+                  <>
+                    <span className="line-through">{formatBRL(p.valorVenda)}</span>{" "}
+                    <span className="font-semibold text-emerald-700">{formatBRL(p.promocao.valorPromocional)} · Promoção</span>
+                  </>
+                ) : (
+                  formatBRL(p.valorVenda)
+                )}
+              </p>
             </button>
           ))}
           {searched && results.length === 0 && query.trim().length >= 2 && (
