@@ -3,7 +3,8 @@ import { z } from 'zod'
 export const CreateEstoqueItemSchema = z.object({
   produtoId: z.string().guid(),
   quantidade: z.coerce.number().int().positive(),
-  validade: z.string().date().optional().transform((v) => v ? new Date(v) : undefined),
+  // O sistema envia null quando o lote não tem validade (specs/estoque/spec-v3.md)
+  validade: z.string().date().optional().nullable().transform((v) => v ? new Date(v) : undefined),
   lote: z.string().optional(),
   precoCompra: z.coerce.number().min(0).optional(),
   obs: z.string().optional(),

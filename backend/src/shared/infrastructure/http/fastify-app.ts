@@ -12,7 +12,13 @@ export interface AppOptions {
 export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({ logger: opts.logger ?? false })
 
-  await app.register(fastifyCors, { origin: true, credentials: true })
+  // Métodos explícitos: a partir do @fastify/cors 10 o padrão é só GET,HEAD,POST, e o
+  // navegador bloquearia edições (PUT/PATCH) e exclusões (DELETE) vindas do sistema.
+  await app.register(fastifyCors, {
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  })
   await app.register(fastifyJwt, { secret: opts.jwtSecret })
 
   app.get('/', { config: { public: true } }, async (_req, reply) => {
