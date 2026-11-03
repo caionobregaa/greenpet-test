@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Sora, Fraunces } from "next/font/google";
-import { ENDERECO_COMPLETO, LOJA } from "@/lib/loja";
+import { LOJA } from "@/lib/loja";
 import "./globals.css";
 
 const sora = Sora({
@@ -17,18 +17,19 @@ const fraunces = Fraunces({
   axes: ["SOFT", "WONK", "opsz"],
 });
 
-const descricao = `Ração, petiscos, medicamentos, acessórios e higiene para cães e gatos em Manaus. Escolha no catálogo e envie o pedido pelo WhatsApp. ${ENDERECO_COMPLETO}.`;
+const descricao =
+  "Pet shop 100% online com produtos selecionados para cães e gatos: rações com padrão mínimo de qualidade e recomendação de veterinários. Escolha no catálogo e envie o pedido pelo WhatsApp.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(LOJA.url),
-  title: { default: "beezpet – Tudo pro seu pet em Manaus", template: "%s | beezpet" },
+  title: { default: "beezpet – Pet shop online com produtos selecionados", template: "%s | beezpet" },
   description: descricao,
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "pt_BR",
     siteName: "beezpet",
-    title: "beezpet – Tudo pro seu pet em Manaus",
+    title: "beezpet – Pet shop online com produtos selecionados",
     description: descricao,
     url: "/",
     images: [{ url: "/brand/logo-beezpet.png", alt: "Logo da beezpet" }],

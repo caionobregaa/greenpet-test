@@ -32,7 +32,7 @@ const EMPRESA = {
   cep:      "CEP 69020-141",
   email:    "greenpet.am@gmail.com",
   telefone: "(92) 98470-3686",
-  pix:      "(92) 98127-7831",
+  pix:      "65.788.498/0001-44", // CNPJ (specs/orcamentos/spec-v7.md)
 };
 
 // Margens padrão para impressão A4 (20mm = ~0.79in — compatível com todas as impressoras)
@@ -304,7 +304,7 @@ export function gerarOrcamentoPDF(
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(...GRAY);
-  doc.text("(mesmo número do WhatsApp)", midX, y);
+  doc.text("(chave CNPJ)", midX, y);
 
   y += metodoLines.length * 4 + 8;
 

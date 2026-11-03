@@ -4,10 +4,10 @@ import { LojaShell, ProdutosIndisponiveis } from "@/components/loja-shell";
 import { ProdutoCard } from "@/components/produto-card";
 import { buscarProdutos } from "@/lib/api";
 import { montarVitrine } from "@/lib/catalogo";
-import { ENDERECO_COMPLETO, LOJA, MAPA_URL } from "@/lib/loja";
+import { LOJA } from "@/lib/loja";
 import { WHATSAPP_CONTATO_URL } from "@/lib/pedido";
 
-const FITA = ["Entrega grátis acima de R$ 80", "Pedido pelo WhatsApp", "Para cães e gatos", "Praça 14 de Janeiro, Manaus"];
+const FITA = ["Produtos selecionados", "Recomendação de veterinários", "Entrega grátis acima de R$ 80", "Pedido pelo WhatsApp"];
 
 const PASSOS = [
   { titulo: "Escolha", texto: "Veja o catálogo e coloque no carrinho o que seu pet precisa." },
@@ -16,6 +16,10 @@ const PASSOS = [
 ];
 
 const DIFERENCIAIS = [
+  {
+    titulo: "Produtos selecionados",
+    texto: "Não vendemos qualquer ração. Cada uma precisa passar pelo nosso padrão mínimo de qualidade e ter recomendação de veterinários.",
+  },
   { titulo: "Entrega grátis acima de R$ 80", texto: "Abaixo desse valor, a taxa é combinada na conversa." },
   { titulo: "Lembrete de recompra", texto: "A gente avisa quando a ração ou o produto do seu pet deve estar acabando." },
   { titulo: "Atendimento pelo WhatsApp", texto: "Você fala direto com a loja para tirar dúvidas e fechar o pedido." },
@@ -23,20 +27,12 @@ const DIFERENCIAIS = [
 
 const DADOS_ESTRUTURADOS = {
   "@context": "https://schema.org",
-  "@type": "PetStore",
+  "@type": "OnlineStore",
   name: LOJA.nome,
   url: LOJA.url,
   image: `${LOJA.url}/brand/logo-beezpet.png`,
   telephone: "+5592984703686",
   sameAs: [LOJA.instagramUrl],
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: LOJA.endereco,
-    addressLocality: LOJA.cidade,
-    addressRegion: LOJA.uf,
-    postalCode: LOJA.cep,
-    addressCountry: "BR",
-  },
 };
 
 function Fita() {
@@ -69,12 +65,12 @@ export default async function HomePage() {
         <Manchas className="pointer-events-none absolute -left-16 -top-10 w-72 text-vinho-claro/40 sm:w-96" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-4 px-4 pb-10 pt-10 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:pb-16 lg:pt-14">
           <div>
-            <p className="etiqueta-fita entrar">Pet shop em Manaus</p>
+            <p className="etiqueta-fita entrar">Pet shop 100% online</p>
             <h1 className="titulo entrar mt-5 text-[3.4rem] font-bold leading-[0.95] [animation-delay:80ms] sm:text-7xl lg:text-[5.4rem]">
-              Tudo pro seu pet, <em className="font-medium text-rosa">sem sair de casa.</em>
+              Só entra aqui <em className="font-medium text-rosa">o que a gente confia.</em>
             </h1>
             <p className="entrar mt-6 max-w-lg text-base leading-relaxed text-rosa-claro [animation-delay:160ms] sm:text-lg">
-              Escolha no catálogo, envie o pedido pelo WhatsApp e a gente cuida do resto com você.
+              Trabalhamos com produtos selecionados: rações que passam pelo nosso padrão mínimo de qualidade e têm recomendação de veterinários.
             </p>
             <div className="entrar mt-8 flex flex-col gap-3 [animation-delay:240ms] sm:flex-row">
               <Link
@@ -132,8 +128,8 @@ export default async function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="etiqueta-fita">Direto da loja</p>
-              <h2 className="titulo mt-3 text-4xl font-bold text-vinho sm:text-6xl">Produtos da loja</h2>
+              <p className="etiqueta-fita">Selecionados</p>
+              <h2 className="titulo mt-3 text-4xl font-bold text-vinho sm:text-6xl">Nossa seleção</h2>
             </div>
             <Link href="/catalogo" className="botao min-h-12 bg-vinho px-6 text-manteiga hover:bg-vinho-claro">
               Ver catálogo completo
@@ -171,9 +167,9 @@ export default async function HomePage() {
       <section className="bg-rosa py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <h2 className="titulo text-4xl font-bold text-vinho sm:text-5xl">Por que a beezpet</h2>
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
+          <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             {DIFERENCIAIS.map((item, i) => (
-              <div key={item.titulo} className={`adesivo rounded-2xl bg-creme p-6 ${i === 1 ? "md:-rotate-1" : ""}`}>
+              <div key={item.titulo} className={`adesivo rounded-2xl bg-creme p-6 ${i === 0 ? "bg-manteiga-claro lg:-rotate-1" : ""}`}>
                 <h3 className="titulo text-2xl font-bold leading-tight text-vinho">{item.titulo}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-tinta-suave">{item.texto}</p>
               </div>
@@ -182,31 +178,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="loja" className="grao sobre-vinho relative overflow-hidden bg-vinho py-16 text-manteiga">
-        <Manchas className="pointer-events-none absolute -bottom-20 -right-16 w-80 text-vinho-claro/40" />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
-          <h2 className="titulo text-4xl font-bold sm:text-6xl">Passa aqui na loja</h2>
-          <p className="mt-4 max-w-xl text-lg text-rosa-claro">{ENDERECO_COMPLETO}</p>
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <a
-              href={MAPA_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="botao min-h-13 bg-manteiga px-7 py-3 text-vinho hover:bg-white"
-            >
-              Ver no mapa
-            </a>
-            <a
-              href={LOJA.instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="botao min-h-13 px-7 py-3 text-manteiga ring-2 ring-manteiga hover:bg-vinho-claro"
-            >
-              Instagram @{LOJA.instagram}
-            </a>
-          </div>
-        </div>
-      </section>
     </LojaShell>
   );
 }

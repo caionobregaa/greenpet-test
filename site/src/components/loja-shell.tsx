@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ProdutoCatalogo } from "@/lib/catalogo";
 import { formatBRL } from "@/lib/format";
-import { ENDERECO_COMPLETO, LOJA, MAPA_URL } from "@/lib/loja";
+import { ENDERECO_COMPLETO, LOJA } from "@/lib/loja";
 import { WHATSAPP_CONTATO_URL } from "@/lib/pedido";
 import { CarrinhoGaveta } from "./carrinho-gaveta";
 import { CarrinhoProvider, useCarrinho } from "./carrinho-provider";
@@ -94,7 +94,7 @@ function Rodape() {
         <div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/wordmark-amarelo.png" alt="beezpet" loading="lazy" className="h-12 w-auto" />
-          <p className="mt-3 text-sm">Tudo pro seu pet, em Manaus.</p>
+          <p className="mt-3 text-sm">Pet shop 100% online, com produtos selecionados.</p>
         </div>
         <div className="space-y-1.5 text-sm">
           <p className="font-bold text-manteiga">Contato</p>
@@ -103,6 +103,7 @@ function Rodape() {
               WhatsApp {LOJA.whatsapp}
             </a>
           </p>
+          <p>Atendimento {LOJA.horario}</p>
           <p>
             <a href={LOJA.instagramUrl} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline">
               Instagram @{LOJA.instagram}
@@ -110,13 +111,10 @@ function Rodape() {
           </p>
         </div>
         <div className="space-y-1.5 text-sm">
-          <p className="font-bold text-manteiga">Endereço</p>
-          <p>
-            <a href={MAPA_URL} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline">
-              {ENDERECO_COMPLETO}
-            </a>
-          </p>
+          <p className="font-bold text-manteiga">Dados da empresa</p>
+          <p className="text-xs opacity-80">{LOJA.razaoSocial}</p>
           <p className="text-xs opacity-80">CNPJ {LOJA.cnpj}</p>
+          <p className="text-xs opacity-80">{ENDERECO_COMPLETO}</p>
         </div>
       </div>
     </footer>

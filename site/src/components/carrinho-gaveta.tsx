@@ -143,7 +143,7 @@ export function CarrinhoGaveta() {
           <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
             <p className="titulo text-3xl font-bold text-vinho">Pedido pronto no WhatsApp</p>
             <p className="text-sm text-tinta-suave">
-              Confira a mensagem e toque em enviar por lá. A loja continua o atendimento com você na conversa.
+              Confira a mensagem e toque em enviar por lá. Respondemos {LOJA.horario} e seguimos o atendimento com você na conversa.
             </p>
             <button type="button" onClick={concluir} className="botao min-h-12 bg-vinho px-6 text-manteiga">
               Concluir e limpar carrinho

@@ -172,6 +172,7 @@ describe("Envio pelo WhatsApp", () => {
     expect(texto).toContain("Pagamento: PIX");
     expect(JSON.stringify({ ...localStorage })).not.toContain("Maria");
     expect(screen.getByText("Pedido pronto no WhatsApp")).toBeInTheDocument();
+    expect(screen.getByText(/Respondemos das 8h às 17h/)).toBeInTheDocument();
     // Não limpa sozinho: o cliente pode não ter concluído o envio no WhatsApp.
     expect(localStorage.getItem("beezpet:carrinho")).toBe('{"r1":1}');
   });
@@ -285,6 +286,14 @@ describe("Topo e rodapé", () => {
     expect(screen.getByText(/CNPJ 65\.788\.498/)).toBeInTheDocument();
     expect(container.innerHTML).not.toContain("app.beezpet");
     expect(container.innerHTML).not.toContain("greenpet");
+  });
+
+  it("deixa claro que é loja online: horário, dados da empresa e nada de visita ou mapa", () => {
+    const { container } = renderLoja();
+    expect(screen.getByText("Atendimento das 8h às 17h")).toBeInTheDocument();
+    expect(screen.getByText("Dados da empresa")).toBeInTheDocument();
+    expect(screen.getByText("L C DO N AMORIM NETA")).toBeInTheDocument();
+    expect(container.innerHTML).not.toMatch(/maps|Ver no mapa|Passa aqui|Tudo pro seu pet/i);
   });
 
 });
