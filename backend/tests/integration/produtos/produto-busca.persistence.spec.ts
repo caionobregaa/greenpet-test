@@ -8,7 +8,7 @@ import { DeleteProdutoUseCase } from '@/modules/produtos/application/use-cases/d
 // posição, sem acento/caixa, em nome, marca, subCategoria, SKU (hífen opcional) e
 // código de barras.
 describe('Produto — busca por SKU e por palavras em qualquer ordem', () => {
-  const FRANGO = 'FN Fresh Meat Cão Adulto PORTE Mini e Pequeno SABOR Frango 10.1kg'
+  const FRANGO = 'Fórmula Natural Fresh Meat Cão Adulto PORTE Mini e Pequeno SABOR Frango 10.1kg'
   let repo: PrismaProdutoRepository
   let skuFrango: string
 
@@ -26,7 +26,7 @@ describe('Produto — busca por SKU e por palavras em qualquer ordem', () => {
       codigoBarras: '7896183312345',
     })
     skuFrango = frango.sku
-    await createUC.execute({ nome: 'FN Fresh Meat Cão Adulto SABOR Salmão 10.1kg', categoria: 'Ração', valorVenda: 366 })
+    await createUC.execute({ nome: 'Fórmula Natural Fresh Meat Cão Adulto SABOR Salmão 10.1kg', categoria: 'Ração', valorVenda: 366 })
     await createUC.execute({ nome: 'Tapete Higiênico 100% absorvente', categoria: 'Higiene', valorVenda: 50 })
     await createUC.execute({ nome: 'Tapete Higiênico 1000 unidades', categoria: 'Higiene', valorVenda: 80 })
   })

@@ -1,8 +1,10 @@
 import { z } from 'zod'
+import { CATEGORIAS_VALIDAS } from '../../domain/entities/produto.entity.js'
 
 export const CreateProdutoSchema = z.object({
   nome: z.string().min(1),
-  categoria: z.enum(['Ração', 'Petisco', 'Suplemento', 'Medicamento', 'Acessório', 'Higiene', 'Serviço']),
+  categoria: z.enum(CATEGORIAS_VALIDAS),
+  categoriasAdicionais: z.array(z.enum(CATEGORIAS_VALIDAS)).max(10).optional(),
   especie: z.enum(['Cão', 'Gato', 'Cão e Gato']).optional(),
   subCategoria: z.string().optional(),
   faseDaVida: z.string().optional(),
@@ -43,6 +45,7 @@ export const ListProdutosQuerySchema = z.object({
   especie: z.string().optional(),
   fornecedor: z.string().optional(),
   marca: z.string().optional(),
+  ocultos: z.enum(['true', 'false']).optional().transform((v) => (v === undefined ? undefined : v === 'true')),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 })

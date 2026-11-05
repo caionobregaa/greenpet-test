@@ -2,6 +2,7 @@ import Link from "next/link";
 import { IconeWhatsApp, Manchas } from "@/components/icones";
 import { LojaShell, ProdutosIndisponiveis } from "@/components/loja-shell";
 import { ProdutoCard } from "@/components/produto-card";
+import { FaixaProdutos } from "@/components/faixa-produtos";
 import { buscarProdutos } from "@/lib/api";
 import { emPromocao, montarVitrine } from "@/lib/catalogo";
 import { LOJA } from "@/lib/loja";
@@ -184,11 +185,7 @@ export default async function HomePage() {
                     Ver todos
                   </Link>
                 </div>
-                <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
-                  {grupo.produtos.map((p) => (
-                    <ProdutoCard key={p.id} produto={p} />
-                  ))}
-                </div>
+                <FaixaProdutos categoria={grupo.categoria} produtos={grupo.produtos} />
               </div>
             ))
           )}

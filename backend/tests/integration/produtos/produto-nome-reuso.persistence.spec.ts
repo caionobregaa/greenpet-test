@@ -9,7 +9,7 @@ import { DeleteProdutoUseCase } from '@/modules/produtos/application/use-cases/d
 // único global antigo contava excluídos e o banco rejeitava (P2002) um nome que a
 // checagem do use case — que já ignora excluídos — tinha deixado passar.
 describe('Produto — reuso do nome de produto excluído', () => {
-  const NOME = 'FN Fresh Meat Cão Adulto PORTE Mini e Pequeno SABOR Frango 10.1kg'
+  const NOME = 'Fórmula Natural Fresh Meat Cão Adulto PORTE Mini e Pequeno SABOR Frango 10.1kg'
 
   beforeEach(async () => {
     await truncateAll()
@@ -26,7 +26,7 @@ describe('Produto — reuso do nome de produto excluído', () => {
     const excluido = await createUC.execute({ nome: NOME, categoria: 'Ração', valorVenda: 366 })
     await new DeleteProdutoUseCase(repo).execute({ id: excluido.id })
 
-    const outro = await createUC.execute({ nome: 'FN Fresh Meat Cão Adulto 10.1kg', categoria: 'Ração', valorVenda: 366 })
+    const outro = await createUC.execute({ nome: 'Fórmula Natural Fresh Meat Cão Adulto 10.1kg', categoria: 'Ração', valorVenda: 366 })
     await new UpdateProdutoUseCase(repo).execute({ id: outro.id, nome: NOME })
 
     const row = await prismaTest.produto.findUnique({ where: { id: outro.id } })

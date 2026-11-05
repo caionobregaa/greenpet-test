@@ -1,4 +1,9 @@
-export const CATEGORIAS_PRODUTO = ["Ração", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"];
+export const CATEGORIAS_PRODUTO = ["Ração", "Ração Úmida", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"];
+
+/** Ração Úmida se comporta como Ração: composição do nome e duração por peso (specs/produtos/spec-v9.md). */
+export function ehRacao(categoria: string | undefined | null): boolean {
+  return categoria === "Ração" || categoria === "Ração Úmida";
+}
 export const ESPECIES_PRODUTO = ["Cão", "Gato", "Cão e Gato"];
 
 function normalizarBusca(texto: string): string {

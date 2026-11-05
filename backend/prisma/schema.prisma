@@ -114,6 +114,8 @@ model Produto {
   descricao      String?
   imagemUrl      String?
   ocultarCatalogo Boolean      @default(false)
+  // Categorias extras para o site e os filtros; relatórios usam só a principal (specs/produtos/spec-v9.md)
+  categoriasAdicionais String[] @default([])
   deletedAt      DateTime?
   compraItens    CompraItem[]
   vendaItens     VendaItem[]

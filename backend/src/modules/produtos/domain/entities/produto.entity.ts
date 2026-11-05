@@ -3,7 +3,7 @@ import { AggregateRoot } from '@/shared/domain/aggregate-root.base.js'
 import { Money } from '@/shared/domain/value-objects/money.vo.js'
 import { ValidationError } from '@/shared/errors/validation.error.js'
 
-const CATEGORIAS_VALIDAS = ['Ração', 'Petisco', 'Suplemento', 'Medicamento', 'Acessório', 'Higiene', 'Serviço'] as const
+export const CATEGORIAS_VALIDAS = ['Ração', 'Ração Úmida', 'Petisco', 'Suplemento', 'Medicamento', 'Acessório', 'Higiene', 'Serviço'] as const
 type Categoria = (typeof CATEGORIAS_VALIDAS)[number]
 
 // Prefixo de 3 letras usado para montar o SKU ("PREFIXO-0001") de cada categoria.
@@ -11,6 +11,7 @@ type Categoria = (typeof CATEGORIAS_VALIDAS)[number]
 // a sequence (produto_sku_<prefixo>_seq) que gera o próximo número.
 export const SKU_PREFIXES: Record<Categoria, string> = {
   'Ração': 'RAC',
+  'Ração Úmida': 'RUM',
   'Petisco': 'PET',
   'Suplemento': 'SUP',
   'Medicamento': 'MED',
@@ -45,7 +46,15 @@ interface ProdutoProps {
   descricao?: string
   imagemUrl?: string
   ocultarCatalogo: boolean
+  categoriasAdicionais: string[]
   deletedAt?: Date
+}
+
+/** Sem repetição, sem a principal e só categorias válidas (specs/produtos/spec-v9.md). */
+export function normalizarCategoriasAdicionais(lista: string[] | undefined, principal: string): string[] {
+  return [...new Set(lista ?? [])].filter(
+    (c) => c !== principal && (CATEGORIAS_VALIDAS as readonly string[]).includes(c),
+  )
 }
 
 export class Produto extends AggregateRoot<ProdutoProps> {
@@ -76,6 +85,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     descricao?: string
     imagemUrl?: string
     ocultarCatalogo?: boolean
+    categoriasAdicionais?: string[]
     deletedAt?: Date
   }): Produto {
     if (!CATEGORIAS_VALIDAS.includes(data.categoria as Categoria)) {
@@ -111,6 +121,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
         descricao: data.descricao,
         imagemUrl: data.imagemUrl,
         ocultarCatalogo: data.ocultarCatalogo ?? false,
+        categoriasAdicionais: normalizarCategoriasAdicionais(data.categoriasAdicionais, data.categoria),
         deletedAt: data.deletedAt,
       },
       data.id,
@@ -142,6 +153,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
   get descricao(): string | undefined { return this.props.descricao }
   get imagemUrl(): string | undefined { return this.props.imagemUrl }
   get ocultarCatalogo(): boolean { return this.props.ocultarCatalogo }
+  get categoriasAdicionais(): string[] { return this.props.categoriasAdicionais }
   get deletedAt(): Date | undefined { return this.props.deletedAt }
   get isActive(): boolean { return !this.props.deletedAt }
 
@@ -182,6 +194,7 @@ export class Produto extends AggregateRoot<ProdutoProps> {
     descricao: string
     imagemUrl: string | null
     ocultarCatalogo: boolean
+    categoriasAdicionais: string[]
   }>): void {
     if (fields.nome !== undefined) this.props.nome = fields.nome
     if (fields.categoria !== undefined) {
@@ -189,6 +202,12 @@ export class Produto extends AggregateRoot<ProdutoProps> {
         throw new ValidationError('VALIDATION_ERROR', `Categoria inválida: ${fields.categoria}`)
       }
       this.props.categoria = fields.categoria as Categoria
+    }
+    if (fields.categoriasAdicionais !== undefined || fields.categoria !== undefined) {
+      this.props.categoriasAdicionais = normalizarCategoriasAdicionais(
+        fields.categoriasAdicionais ?? this.props.categoriasAdicionais,
+        this.props.categoria,
+      )
     }
     if (fields.valorCusto !== undefined) this.props.valorCusto = Money.create(fields.valorCusto)
     if (fields.valorVenda !== undefined) this.props.valorVenda = Money.create(fields.valorVenda)

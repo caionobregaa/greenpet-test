@@ -14,7 +14,7 @@ import { formatBRL } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 import type { CurvaVendaSortField, SortOrder } from "@/lib/types/curva-venda";
 
-const CATEGORIAS = ["Ração", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"];
+import { CATEGORIAS_PRODUTO as CATEGORIAS } from "@/lib/utils/produtos";
 
 function FilterSelect({
   label,

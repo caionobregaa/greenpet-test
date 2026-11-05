@@ -26,6 +26,7 @@ import { formatBRL } from "@/lib/utils/format";
 import { apiProdutos } from "@/lib/api/produtos";
 import { apiAnimais } from "@/lib/api/animais";
 import type { Produto } from "@/lib/types/produto";
+import { ehRacao } from "@/lib/utils/produtos";
 
 interface ProdutoSelect {
   id: string | null;
@@ -78,7 +79,7 @@ interface ItensTableProps {
 
 function calcDuracao(consumoDiario: number | null | undefined, extra: ItemExtra): { dias: number; semanas: number } | null {
   if (!consumoDiario || consumoDiario <= 0) return null;
-  if (extra.categoria === "Ração") {
+  if (ehRacao(extra.categoria)) {
     if (!extra.pesoEmbalagem) return null;
     const dias = Math.round((extra.pesoEmbalagem * 1000) / consumoDiario);
     return { dias, semanas: Math.round(dias / 7) };
@@ -279,7 +280,7 @@ function SortableItemRow({
     isDragging,
   } = useSortable({ id: fieldId });
 
-  const isRacao = extra.categoria === "Ração";
+  const isRacao = ehRacao(extra.categoria);
   const isMedSupl = extra.categoria === "Medicamento" || extra.categoria === "Suplemento";
   const consumoDiarioVal = Number(item.consumoDiario) > 0 ? Number(item.consumoDiario) : undefined;
   const duracao = calcDuracao(consumoDiarioVal, extra);

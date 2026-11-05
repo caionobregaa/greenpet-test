@@ -13,7 +13,7 @@ const JPEG = `data:image/jpeg;base64,${Buffer.from('foto').toString('base64')}`
 const CAMPOS_INTERNOS = [
   'valorCusto', 'margemCalculada', 'margemCartao', 'margemImposto', 'margemOperacao', 'margemLucro',
   'fornecedor', 'estoque', 'estoqueMinimo', 'sku', 'codigoBarras', 'semCodigoBarras', 'diasRecompra',
-  'descricao', 'ocultarCatalogo', 'deletedAt', 'temImagem', 'atualizadoEm',
+  'descricao', 'ocultarCatalogo', 'deletedAt', 'temImagem', 'atualizadoEm', 'categoriasAdicionais',
 ]
 
 describe('interpretarImagem', () => {
@@ -71,12 +71,14 @@ describe('Rotas públicas do catálogo', () => {
   it('lista expõe só os campos públicos, mesmo se a consulta trouxer campos internos', async () => {
     queryRaw.mockResolvedValue([{
       id: 'p1', nome: 'Ração X', categoria: 'Ração', especie: 'Cão', valorVenda: '189.90',
+      marca: 'Golden', categoriasAdicionais: ['Ração Úmida', 'Serviço', 'Ração'],
       temImagem: true, atualizadoEm: ATUALIZADO, valorCusto: 100, fornecedor: 'MARKET', estoque: 3, sku: 'RAC-0001',
     }])
     const res = await app.inject({ url: '/api/v1/catalogo/produtos' })
     const [produto] = res.json().data
     expect(produto).toEqual({
       id: 'p1', nome: 'Ração X', categoria: 'Ração', especie: 'Cão', valorVenda: 189.9,
+      marca: 'Golden', categorias: ['Ração', 'Ração Úmida'],
       valorOriginal: null, promocaoFim: null,
       imagemUrl: `/api/v1/catalogo/produtos/p1/imagem?v=${ATUALIZADO.getTime()}`,
     })

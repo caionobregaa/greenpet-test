@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Eye, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, X } from "lucide-react";
 import { useProdutos, useDeleteProduto } from "@/lib/hooks/use-produtos";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,6 +23,7 @@ export default function ProdutosPage() {
   const [categoria, setCategoria]   = useState("");
   const [especie, setEspecie]       = useState("");
   const [fornecedor, setFornecedor] = useState("");
+  const [ocultos, setOcultos]       = useState(false);
   const [page, setPage]             = useState(1);
   const [fornecedoresLista, setFornecedoresLista] = useState<string[]>(DISTRIBUIDORAS_PADRAO);
 
@@ -36,16 +37,17 @@ export default function ProdutosPage() {
   const [infoProduto, setInfoProduto] = useState<Produto | null>(null);
 
   function resetFilters() {
-    setSearch(""); setCategoria(""); setEspecie(""); setFornecedor(""); setPage(1);
+    setSearch(""); setCategoria(""); setEspecie(""); setFornecedor(""); setOcultos(false); setPage(1);
   }
 
-  const hasFilters = !!(search || categoria || especie || fornecedor);
+  const hasFilters = !!(search || categoria || especie || fornecedor || ocultos);
 
   const { data, isLoading, isError } = useProdutos({
     q: search || undefined,
     categoria: categoria || undefined,
     especie: especie || undefined,
     fornecedor: fornecedor || undefined,
+    ocultos: ocultos || undefined,
     page,
     limit: 20,
   });
@@ -102,6 +104,16 @@ export default function ProdutosPage() {
           onChange={(v) => { setEspecie(v); setPage(1); }}
           options={ESPECIES_PRODUTO}
         />
+        <Button
+          variant={ocultos ? "default" : "outline"}
+          size="sm"
+          aria-pressed={ocultos}
+          onClick={() => { setOcultos(!ocultos); setPage(1); }}
+          className="gap-1"
+        >
+          <EyeOff className="w-3.5 h-3.5" />
+          Ocultos no site
+        </Button>
         {hasFilters && (
           <Button variant="ghost" size="sm" onClick={resetFilters} className="text-muted-foreground gap-1">
             <X className="w-3.5 h-3.5" />
@@ -167,6 +179,9 @@ export default function ProdutosPage() {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
                       <div>{p.categoria}</div>
+                      {(p.categoriasAdicionais?.length ?? 0) > 0 && (
+                        <div className="text-xs text-muted-foreground/70">+ {p.categoriasAdicionais!.join(", ")}</div>
+                      )}
                       {p.especie && <div className="text-xs text-muted-foreground/70">{p.especie}</div>}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{p.fornecedor ?? "—"}</td>

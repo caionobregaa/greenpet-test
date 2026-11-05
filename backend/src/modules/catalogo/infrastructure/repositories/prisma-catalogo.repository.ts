@@ -11,7 +11,7 @@ export class PrismaCatalogoRepository implements ICatalogoRepository {
   async listar(): Promise<ProdutoCatalogoRow[]> {
     // SQL direto: o Prisma não calcula "tem foto" sem trazer o base64 de todos os produtos.
     const rows = await this.prisma.$queryRaw<Array<Omit<ProdutoCatalogoRow, 'valorVenda'> & { valorVenda: unknown }>>`
-      SELECT id, nome, categoria, especie, "valorVenda",
+      SELECT id, nome, categoria, especie, marca, "categoriasAdicionais", "valorVenda",
              COALESCE("imagemUrl", '') <> '' AS "temImagem",
              "updatedAt" AS "atualizadoEm"
       FROM produtos

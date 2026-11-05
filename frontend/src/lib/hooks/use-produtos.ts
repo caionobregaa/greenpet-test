@@ -8,6 +8,8 @@ interface ListParams {
   especie?: string;
   fornecedor?: string;
   marca?: string;
+  /** Só os ocultos no catálogo oficial (specs/produtos/spec-v9.md). */
+  ocultos?: boolean;
   page?: number;
   limit?: number;
 }

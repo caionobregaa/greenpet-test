@@ -3,6 +3,8 @@ export interface ProdutoCatalogoRow {
   nome: string
   categoria: string
   especie: string | null
+  marca: string | null
+  categoriasAdicionais: string[]
   valorVenda: number
   temImagem: boolean
   atualizadoEm: Date

@@ -5,6 +5,9 @@ export interface ProdutoCatalogo {
   nome: string
   categoria: string
   especie: string | null
+  marca: string | null
+  /** Principal primeiro, depois as adicionais publicadas (specs/catalogo/spec-v2.md). */
+  categorias: string[]
   /** Preço a pagar: o promocional, durante uma campanha ativa. */
   valorVenda: number
   /** Preço normal riscado; null fora de promoção. */
@@ -26,6 +29,8 @@ export class ListarCatalogoUseCase {
         nome: r.nome,
         categoria: r.categoria,
         especie: r.especie,
+        marca: r.marca ?? null,
+        categorias: [r.categoria, ...(r.categoriasAdicionais ?? []).filter((c) => c !== 'Serviço' && c !== r.categoria)],
         valorVenda: promocao ? promocao.valorPromocional : r.valorVenda,
         valorOriginal: promocao ? r.valorVenda : null,
         promocaoFim: promocao ? promocao.fim.toISOString() : null,

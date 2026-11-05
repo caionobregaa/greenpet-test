@@ -57,12 +57,78 @@ describe("agruparPorCategoria", () => {
 });
 
 describe("montarVitrine", () => {
-  it("limita a 8 por categoria e prioriza produtos com foto", () => {
+  // Sorteio previsível para o teste (gerador linear congruente)
+  function semente(n: number) {
+    let x = n;
+    return () => ((x = (x * 1103515245 + 12345) % 2147483648) / 2147483648);
+  }
+  const marcas = ["Golden", "Premier", "Royal", "Fórmula Natural", "Guabi", "Biofresh", "Farmina", "Quatree", "Magnus", "Special Dog"];
+  const racoes = Array.from({ length: 20 }, (_, i) =>
+    produto({ id: `r${i}`, valorVenda: 10 + i * 10, imagemUrl: "/x", marca: marcas[i % 10] }),
+  );
+
+  it("traz no máximo 7 por categoria, metade barata e metade cara", () => {
+    for (let n = 1; n <= 20; n++) {
+      const [grupo] = montarVitrine(racoes, semente(n));
+      expect(grupo.produtos).toHaveLength(7);
+      const baratos = grupo.produtos.filter((p) => p.valorVenda <= 100).length;
+      expect(Math.abs(baratos - (7 - baratos))).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it("não repete marca enquanto houver outra disponível", () => {
+    for (let n = 1; n <= 20; n++) {
+      const [grupo] = montarVitrine(racoes, semente(n));
+      const vistas = grupo.produtos.map((p) => p.marca);
+      expect(new Set(vistas).size).toBe(7);
+    }
+  });
+
+  it("repete marca só quando não há outra", () => {
+    const mesmaMarca = Array.from({ length: 9 }, (_, i) => produto({ id: `m${i}`, valorVenda: i + 1, marca: "Golden" }));
+    expect(montarVitrine(mesmaMarca, semente(3))[0].produtos).toHaveLength(7);
+  });
+
+  it("muda a seleção entre visitas", () => {
+    const seleções = new Set(Array.from({ length: 10 }, (_, n) => montarVitrine(racoes, semente(n + 1))[0].produtos.map((p) => p.id).sort().join()));
+    expect(seleções.size).toBeGreaterThan(1);
+  });
+
+  it("prioriza produtos com foto quando há o bastante, e usa todos quando não há", () => {
     const semFoto = Array.from({ length: 8 }, (_, i) => produto({ id: `s${i}` }));
-    const comFoto = produto({ id: "foto", imagemUrl: "/x" });
-    const [grupo] = montarVitrine([...semFoto, comFoto]);
-    expect(grupo.produtos).toHaveLength(8);
-    expect(grupo.produtos[0].id).toBe("foto");
+    const comFoto = Array.from({ length: 7 }, (_, i) => produto({ id: `f${i}`, imagemUrl: "/x" }));
+    expect(montarVitrine([...semFoto, ...comFoto], semente(1))[0].produtos.every((p) => p.imagemUrl)).toBe(true);
+    const poucasFotos = montarVitrine([...semFoto, comFoto[0]], semente(1))[0].produtos;
+    expect(poucasFotos).toHaveLength(7);
+  });
+
+  it("categoria pequena mostra todos, sem repetir", () => {
+    const [grupo] = montarVitrine([produto({ id: "a" }), produto({ id: "b", valorVenda: 99 })], semente(2));
+    expect(grupo.produtos.map((p) => p.id).sort()).toEqual(["a", "b"]);
+  });
+
+  it("usa o sorteio padrão quando nenhum é informado", () => {
+    expect(montarVitrine(racoes)[0].produtos).toHaveLength(7);
+  });
+});
+
+describe("categorias adicionais e Ração Úmida", () => {
+  it("o produto entra em cada categoria e Ração Úmida vem logo depois de Ração", () => {
+    const grupos = agruparPorCategoria([
+      produto({ id: "m", categoria: "Ração", categorias: ["Ração", "Ração Úmida"] }),
+      produto({ id: "p", categoria: "Petisco" }),
+      produto({ id: "u", categoria: "Ração Úmida" }),
+    ]);
+    expect(grupos.map((g) => [g.categoria, g.produtos.map((p) => p.id)])).toEqual([
+      ["Ração", ["m"]],
+      ["Ração Úmida", ["m", "u"]],
+      ["Petisco", ["p"]],
+    ]);
+  });
+
+  it("o filtro de categoria considera as adicionais", () => {
+    const lista = [produto({ id: "m", categoria: "Ração", categorias: ["Ração", "Ração Úmida"] }), produto({ id: "s", categoria: "Ração" })];
+    expect(filtrarProdutos(lista, { categoria: "Ração Úmida" }).map((p) => p.id)).toEqual(["m"]);
   });
 });
 

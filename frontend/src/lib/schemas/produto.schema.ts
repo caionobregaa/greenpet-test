@@ -3,6 +3,7 @@ import { z } from "zod";
 export const CreateProdutoSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   categoria: z.string().min(1, "Categoria é obrigatória"),
+  categoriasAdicionais: z.array(z.string()).optional(),
   especie: z.string().optional().or(z.literal("")),
   subCategoria: z.string().optional().or(z.literal("")),
   faseDaVida: z.string().optional().or(z.literal("")),

@@ -40,7 +40,10 @@ export function CatalogoCliente({
   const temPromocao = useMemo(() => produtos.some(emPromocao), [produtos]);
 
   const grupos = useMemo(
-    () => agruparPorCategoria(filtrarProdutos(produtos, { busca, categoria, especie, promocao: promocao && temPromocao })),
+    () =>
+      agruparPorCategoria(filtrarProdutos(produtos, { busca, categoria, especie, promocao: promocao && temPromocao }))
+        // Com categoria escolhida, só a seção dela: o produto não abre a seção das outras categorias que tem.
+        .filter((g) => !categoria || g.categoria === categoria),
     [produtos, busca, categoria, especie, promocao, temPromocao],
   );
 

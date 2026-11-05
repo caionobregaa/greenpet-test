@@ -280,6 +280,19 @@ describe("Catálogo", () => {
   });
 });
 
+describe("Catálogo com categorias adicionais", () => {
+  it("o produto aparece nas duas seções e, com filtro, só na seção escolhida", async () => {
+    const user = userEvent.setup();
+    const MISTO: ProdutoCatalogo = { ...RACAO, id: "x1", nome: "Ração Mista", categorias: ["Ração", "Ração Úmida"] };
+    render(<LojaShell produtos={[MISTO, PETISCO]}><CatalogoCliente produtos={[MISTO, PETISCO]} /></LojaShell>);
+    expect(screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent)).toEqual(["Ração", "Ração Úmida", "Petisco"]);
+    expect(screen.getAllByRole("heading", { name: "Ração Mista" })).toHaveLength(2);
+    await user.click(screen.getByRole("button", { name: "Ração Úmida" }));
+    expect(screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent)).toEqual(["Ração Úmida"]);
+    expect(screen.getAllByRole("heading", { name: "Ração Mista" })).toHaveLength(1);
+  });
+});
+
 describe("Topo e rodapé", () => {
   it("traz contatos oficiais e nenhum link para o sistema interno", () => {
     const { container } = renderLoja();

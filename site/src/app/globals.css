@@ -73,6 +73,16 @@ body {
   clip-path: polygon(0 0, 100% 0, 98.5% 50%, 100% 100%, 0 100%, 1.5% 50%);
 }
 
+/* Faixa de produtos: rola para o lado sem barra aparente (specs/site/spec-v5.md) */
+.faixa {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.faixa::-webkit-scrollbar {
+  display: none;
+}
+
 /* Cartão como etiqueta de caixa: borda firme e sombra dura */
 .adesivo {
   border: 2px solid var(--color-vinho);

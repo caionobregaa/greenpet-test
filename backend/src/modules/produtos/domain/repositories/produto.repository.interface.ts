@@ -12,6 +12,7 @@ export interface IProdutoRepository {
     especie?: string
     fornecedor?: string
     marca?: string
+    ocultos?: boolean
     page: number
     limit: number
   }): Promise<{ produtos: Produto[]; total: number }>

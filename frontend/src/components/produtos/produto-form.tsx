@@ -19,7 +19,7 @@ import {
 import { Loader2, Plus, Check, X } from "lucide-react";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { formatBRL } from "@/lib/utils/format";
-import { composeNomeRacao } from "@/lib/utils/produtos";
+import { CATEGORIAS_PRODUTO, composeNomeRacao, ehRacao } from "@/lib/utils/produtos";
 import type { Produto } from "@/lib/types/produto";
 import {
   DISTRIBUIDORAS_PADRAO,
@@ -28,11 +28,12 @@ import {
   salvarDistribuidorasCustomizadas,
 } from "@/lib/utils/distribuidoras";
 
-const CATEGORIAS = ["Ração", "Petisco", "Suplemento", "Medicamento", "Acessório", "Higiene", "Serviço"];
+const CATEGORIAS = CATEGORIAS_PRODUTO;
 const ESPECIES = ["Cão", "Gato", "Cão e Gato"];
 
 const SUBCATEGORIAS: Record<string, string[]> = {
   "Ração":       ["Seca", "Úmida", "Úmida Sachê", "Úmida Lata", "Natural"],
+  "Ração Úmida": ["Sachê", "Lata", "Patê", "Mousse"],
   "Petisco":     ["Snack", "Ossinho", "Mordedor", "Brinquedo Comestível", "Funcional"],
   "Suplemento":  ["Comprimidos", "Cápsula", "Líquido", "Pó", "Pasta", "Sachê"],
   "Medicamento": ["Comprimidos", "Líquido", "Injetável", "Tópico", "Spray", "Cápsula"],
@@ -205,6 +206,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
       descricao:         produto?.descricao ?? "",
       imagemUrl:         produto?.imagemUrl ?? null,
       ocultarCatalogo:   produto?.ocultarCatalogo ?? false,
+      categoriasAdicionais: produto?.categoriasAdicionais ?? [],
     },
   });
 
@@ -239,7 +241,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
     setValue("valorVenda", Math.round(novaVenda * 100) / 100, { shouldValidate: true, shouldDirty: true });
   }
 
-  const nomeComposto = categoria === "Ração" && nomeRacao.trim()
+  const nomeComposto = ehRacao(categoria) && nomeRacao.trim()
     ? composeNomeRacao({ nomeRacao, especie, faseDaVida, porte, sabor, pesoEmbalagem: pesoEmbalagemWatch ?? undefined, unidadeEmbalagem })
     : null;
 
@@ -299,6 +301,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
     const qtd = typeof estoqueInicial === "number" && estoqueInicial > 0 ? estoqueInicial : undefined;
     onSubmit({
       ...data,
+      categoriasAdicionais: (data.categoriasAdicionais ?? []).filter((c) => c !== data.categoria),
       estoqueInicial: qtd,
       estoqueValidade: qtd ? (estoqueValidade || null) : undefined,
       estoqueLote: qtd ? (estoqueLote || undefined) : undefined,
@@ -353,6 +356,34 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
             {errors.categoria && <p className="text-xs text-destructive">{errors.categoria.message}</p>}
           </div>
 
+          {/* Categorias adicionais (specs/produtos/spec-v9.md) */}
+          <div className="space-y-1.5 col-span-1 sm:col-span-2">
+            <Label>Também aparece em</Label>
+            <Controller
+              control={control}
+              name="categoriasAdicionais"
+              render={({ field }) => {
+                const marcadas = (field.value ?? []).filter((c) => c !== categoria);
+                return (
+                  <div className="flex flex-wrap gap-x-4 gap-y-2">
+                    {CATEGORIAS.filter((c) => c !== categoria).map((c) => (
+                      <label key={c} className="flex items-center gap-2 text-sm cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={marcadas.includes(c)}
+                          onChange={(e) => field.onChange(e.target.checked ? [...marcadas, c] : marcadas.filter((x) => x !== c))}
+                          className="h-4 w-4 rounded border-input"
+                        />
+                        {c}
+                      </label>
+                    ))}
+                  </div>
+                );
+              }}
+            />
+            <p className="text-xs text-muted-foreground/70">A categoria principal continua valendo para SKU e relatórios.</p>
+          </div>
+
           <div className="space-y-1.5">
             <Label>Espécie</Label>
             <Controller
@@ -374,7 +405,7 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
       </div>
 
       {/* Composição do Nome — só para Ração */}
-      {categoria === "Ração" && (
+      {ehRacao(categoria) && (
         <div className="space-y-4 pt-2 border-t border-border/60">
           <span className="text-[10px] font-bold uppercase tracking-[0.07em] text-muted-foreground">
             Composição do Nome (Ração)

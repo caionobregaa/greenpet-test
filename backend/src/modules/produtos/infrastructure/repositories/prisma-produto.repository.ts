@@ -36,7 +36,7 @@ export class PrismaProdutoRepository implements IProdutoRepository {
     return `${prefix}-${String(numero).padStart(4, '0')}`
   }
 
-  async findMany(params: { q?: string; categoria?: string; especie?: string; fornecedor?: string; marca?: string; page: number; limit: number }) {
+  async findMany(params: { q?: string; categoria?: string; especie?: string; fornecedor?: string; marca?: string; ocultos?: boolean; page: number; limit: number }) {
     const skip = (params.page - 1) * params.limit
     const take = params.limit
 
@@ -45,7 +45,9 @@ export class PrismaProdutoRepository implements IProdutoRepository {
       // Cada palavra precisa aparecer (sem acento/caixa, em qualquer posição) em algum
       // campo pesquisável — palavras em qualquer ordem. No SKU o hífen é opcional.
       const conditions: Prisma.Sql[] = [Prisma.sql`"deletedAt" IS NULL`]
-      if (params.categoria)  conditions.push(Prisma.sql`categoria  = ${params.categoria}`)
+      // Categoria principal ou adicional (specs/produtos/spec-v9.md)
+      if (params.categoria)  conditions.push(Prisma.sql`(categoria = ${params.categoria} OR ${params.categoria} = ANY("categoriasAdicionais"))`)
+      if (params.ocultos !== undefined) conditions.push(Prisma.sql`"ocultarCatalogo" = ${params.ocultos}`)
       if (params.especie)    conditions.push(Prisma.sql`especie    = ${params.especie}`)
       if (params.fornecedor) conditions.push(Prisma.sql`fornecedor = ${params.fornecedor}`)
       if (params.marca)      conditions.push(Prisma.sql`marca      = ${params.marca}`)
@@ -72,7 +74,8 @@ export class PrismaProdutoRepository implements IProdutoRepository {
 
     const where = {
       deletedAt: null,
-      ...(params.categoria  ? { categoria:  params.categoria }  : {}),
+      ...(params.categoria  ? { OR: [{ categoria: params.categoria }, { categoriasAdicionais: { has: params.categoria } }] } : {}),
+      ...(params.ocultos !== undefined ? { ocultarCatalogo: params.ocultos } : {}),
       ...(params.especie    ? { especie:    params.especie }    : {}),
       ...(params.fornecedor ? { fornecedor: params.fornecedor } : {}),
       ...(params.marca      ? { marca:      params.marca }      : {}),
@@ -111,6 +114,7 @@ export class PrismaProdutoRepository implements IProdutoRepository {
       descricao: produto.descricao ?? null,
       imagemUrl: produto.imagemUrl ?? null,
       ocultarCatalogo: produto.ocultarCatalogo,
+      categoriasAdicionais: produto.categoriasAdicionais,
       deletedAt: produto.deletedAt ?? null,
     }
     await this.prisma.produto.upsert({
@@ -148,6 +152,7 @@ export class PrismaProdutoRepository implements IProdutoRepository {
       descricao: (row.descricao as string | null) ?? undefined,
       imagemUrl: (row.imagemUrl as string | null) ?? undefined,
       ocultarCatalogo: (row.ocultarCatalogo as boolean | null) ?? false,
+      categoriasAdicionais: (row.categoriasAdicionais as string[] | null) ?? [],
       deletedAt: (row.deletedAt as Date | null) ?? undefined,
     })
   }

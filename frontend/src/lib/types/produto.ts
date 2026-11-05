@@ -5,6 +5,8 @@ export interface Produto {
   nome: string;
   sku: string;
   categoria: string;
+  /** Também aparece nessas categorias no site e nos filtros. */
+  categoriasAdicionais?: string[];
   especie: string | null;
   subCategoria: string | null;
   faseDaVida: string | null;

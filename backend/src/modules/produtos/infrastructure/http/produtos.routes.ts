@@ -22,6 +22,7 @@ function toResponse(p: Produto, estoque = 0, promocao: PromocaoAtiva | null = nu
     nome: p.nome,
     sku: p.sku,
     categoria: p.categoria,
+    categoriasAdicionais: p.categoriasAdicionais,
     especie: p.especie,
     subCategoria: p.subCategoria,
     faseDaVida: p.faseDaVida,
