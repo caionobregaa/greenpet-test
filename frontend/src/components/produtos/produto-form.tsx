@@ -19,7 +19,7 @@ import {
 import { Loader2, Plus, Check, X } from "lucide-react";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { formatBRL } from "@/lib/utils/format";
-import { CATEGORIAS_PRODUTO, composeNomeRacao, ehRacao } from "@/lib/utils/produtos";
+import { CATEGORIAS_PRODUTO, composeNomeRacao, ehRacao, extrairNomeBaseRacao } from "@/lib/utils/produtos";
 import type { Produto } from "@/lib/types/produto";
 import {
   DISTRIBUIDORAS_PADRAO,
@@ -149,7 +149,10 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
   const [estoqueInicial, setEstoqueInicial] = useState<number | "">("");
   const [estoqueValidade, setEstoqueValidade] = useState("");
   const [estoqueLote, setEstoqueLote] = useState("");
-  const [nomeRacao, setNomeRacao] = useState("");
+  // Na edição, a parte fixa do nome atual (specs/produtos/spec-v10.md)
+  const [nomeRacao, setNomeRacao] = useState(() =>
+    produto && ehRacao(produto.categoria) ? extrairNomeBaseRacao(produto.nome) : "",
+  );
 
   // Load distributors from localStorage + defaults on mount
   const [distribuidoras, setDistribuidoras] = useState<string[]>(() => {
@@ -245,8 +248,14 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
     ? composeNomeRacao({ nomeRacao, especie, faseDaVida, porte, sabor, pesoEmbalagem: pesoEmbalagemWatch ?? undefined, unidadeEmbalagem })
     : null;
 
+  // Na edição, o nome só é remontado depois que a composição muda: abrir e salvar não altera o nome.
+  const composicaoInicial = useRef(nomeComposto);
+  const composicaoAlterada = useRef(!produto);
+  if (nomeComposto !== composicaoInicial.current) composicaoAlterada.current = true;
+  const nomeAtual = useWatch({ control, name: "nome" }) ?? "";
+
   useEffect(() => {
-    if (nomeComposto !== null) {
+    if (nomeComposto !== null && composicaoAlterada.current) {
       setValue("nome", nomeComposto, { shouldValidate: true, shouldDirty: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -422,6 +431,20 @@ export function ProdutoForm({ produto, onSubmit, onCancel, isLoading }: ProdutoF
               <p className="text-xs text-muted-foreground/70">
                 Usado para montar o campo Nome acima automaticamente. Deixe em branco para editar o Nome manualmente.
               </p>
+              {nomeComposto && nomeComposto !== nomeAtual && (
+                <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900" role="status">
+                  <span>Nome montado: <strong>{nomeComposto}</strong></span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setValue("nome", nomeComposto, { shouldValidate: true, shouldDirty: true })}
+                  >
+                    Usar nome montado
+                  </Button>
+                </div>
+              )}
             </div>
 
             <Controller

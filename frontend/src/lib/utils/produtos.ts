@@ -26,6 +26,29 @@ export function produtoCorrespondeBusca(
   return termos.every((t) => textos.includes(t) || sku.includes(t.replace(/-/g, "")));
 }
 
+const ESPECIES_E_FASES = ["Cão e Gato", "Cão", "Gato", "Filhote", "Adulto", "Sênior"];
+
+/**
+ * Parte fixa do nome de uma ração composta (specs/produtos/spec-v10.md): tira o peso do fim, corta em
+ * " PORTE " ou " SABOR " e remove espécie e fase que sobrarem no fim.
+ */
+export function extrairNomeBaseRacao(nome: string): string {
+  let base = nome.trim().replace(/\s*\d+(?:[.,]\d+)?\s*(?:kg|g|mL|L|Comprimidos|unidade)\s*$/i, "");
+  const corte = [" PORTE ", " SABOR "].map((m) => base.indexOf(m)).filter((i) => i > 0);
+  if (corte.length) base = base.slice(0, Math.min(...corte));
+  let mudou = true;
+  while (mudou) {
+    mudou = false;
+    for (const termo of ESPECIES_E_FASES) {
+      if (base.endsWith(` ${termo}`)) {
+        base = base.slice(0, -termo.length - 1);
+        mudou = true;
+      }
+    }
+  }
+  return base.trim();
+}
+
 export function composeNomeRacao(parts: {
   nomeRacao: string;
   especie?: string;
