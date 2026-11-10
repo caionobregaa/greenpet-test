@@ -17,7 +17,8 @@ export function FotoProduto({ produto, className }: { produto: ProdutoCatalogo; 
     );
   }
   return (
-    <div className={`bg-white ${className ?? ""}`}>
+    // A foto fica presa na caixa: uma imagem muito alta não pode esticar o quadrado do cartão.
+    <div className={`relative overflow-hidden bg-white ${className ?? ""}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={foto}
@@ -25,7 +26,7 @@ export function FotoProduto({ produto, className }: { produto: ProdutoCatalogo; 
         loading="lazy"
         decoding="async"
         onError={() => setFalhou(true)}
-        className="h-full w-full object-contain"
+        className="absolute inset-0 h-full w-full object-contain p-2"
       />
     </div>
   );
