@@ -72,7 +72,8 @@ export function ProdutoCard({ produto }: { produto: ProdutoCatalogo }) {
       )}
       <FotoProduto produto={produto} className="aspect-square w-full border-b-2 border-vinho" />
       <div className="flex flex-1 flex-col gap-3 p-3 sm:p-4">
-        <h3 className="line-clamp-3 min-h-[3.75rem] text-[0.8rem] font-semibold leading-5 sm:text-sm sm:leading-5">{produto.nome}</h3>
+        {/* Nome completo, com quebra de linha: o fim do nome traz o peso ou a gramatura. */}
+        <h3 className="min-h-[3.75rem] break-words text-[0.8rem] font-semibold leading-5 sm:text-sm sm:leading-5">{produto.nome}</h3>
         <div className="mt-auto">
           {emPromocao(produto) && (
             <p className="text-xs text-tinta-suave">

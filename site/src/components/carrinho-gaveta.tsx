@@ -165,7 +165,7 @@ export function CarrinhoGaveta() {
                   <li key={linha.produto.id} className="flex gap-3 rounded-2xl bg-creme p-2.5 ring-1 ring-vinho/15">
                     <FotoProduto produto={linha.produto} className="h-16 w-16 shrink-0 overflow-hidden rounded-xl" />
                     <div className="min-w-0 flex-1">
-                      <p className="line-clamp-2 text-xs font-semibold leading-4">{linha.produto.nome}</p>
+                      <p className="break-words text-xs font-semibold leading-4">{linha.produto.nome}</p>
                       <div className="mt-2 flex items-center justify-between gap-2">
                         <div className="w-28">
                           <SeletorQuantidade produto={linha.produto} compacto />
